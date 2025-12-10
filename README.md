@@ -1,16 +1,21 @@
 # Expense Manager App
 
-A modern, responsive expense tracking application built with React, TypeScript, Vite, TailwindCSS, and shadcn/ui.
+A modern, fully responsive expense tracking application built with React, TypeScript, Vite, TailwindCSS, and shadcn/ui. Features a clean black and white design with comprehensive expense management capabilities.
 
 ## Features
 
-- 🔐 **Authentication** - Secure login and registration
-- 📊 **Dashboard** - Visual analytics with charts and graphs
-- 💰 **Expense Management** - Full CRUD operations for expenses
-- 🎨 **Beautiful UI** - Clean white theme with shadcn/ui components
-- 📱 **Responsive Design** - Works seamlessly on all devices
+- 🔐 **Authentication** - Secure login, registration, and profile management
+- 👤 **User Profile** - Update personal information and password
+- 📊 **Dashboard** - Visual analytics with interactive charts and graphs
+- 💰 **Expense Management** - Full CRUD operations with advanced filtering
+- 🏷️ **Category Management** - Create and customize expense categories with colors and emojis
+- 🎨 **Clean Design** - Simple black and white theme (no gradients) with shadcn/ui
+- 📱 **100% Mobile Responsive** - Optimized for all screen sizes and devices
+- 🔍 **Advanced Filtering** - Search, sort, and filter expenses by multiple criteria
+- 📈 **Bulk Operations** - Select and delete multiple expenses at once
+- 📤 **Export Data** - Export expenses to CSV format
 - 🚀 **Fast Performance** - Built with Vite for lightning-fast development
-- 🐳 **Docker Support** - Easy deployment with Docker
+- 🐳 **Docker Support** - Easy deployment with Docker and Docker Compose
 
 ## Tech Stack
 
@@ -18,11 +23,13 @@ A modern, responsive expense tracking application built with React, TypeScript, 
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
 - **TailwindCSS** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful UI components
+- **shadcn/ui** - Beautiful, accessible UI components
+- **Radix UI** - Headless UI primitives (dropdown menus, dialogs)
 - **React Router** - Client-side routing
 - **Axios** - HTTP client
-- **Recharts** - Data visualization
-- **Lucide Icons** - Beautiful icons
+- **Recharts** - Interactive data visualization
+- **Lucide Icons** - Modern icon library
+- **date-fns** - Date utility library
 
 ## Getting Started
 
@@ -96,7 +103,7 @@ expense-manager-app/
 ├── src/
 │   ├── components/
 │   │   ├── ui/              # shadcn/ui components
-│   │   ├── Layout.tsx       # App layout with navigation
+│   │   ├── Layout.tsx       # App layout with navigation and footer
 │   │   └── ProtectedRoute.tsx # Route protection
 │   ├── context/
 │   │   └── AuthContext.tsx  # Authentication context
@@ -105,19 +112,21 @@ expense-manager-app/
 │   │   ├── services.ts      # API service functions
 │   │   └── utils.ts         # Utility functions
 │   ├── pages/
-│   │   ├── LoginPage.tsx
-│   │   ├── RegisterPage.tsx
-│   │   ├── DashboardPage.tsx
-│   │   └── ExpensesPage.tsx
-│   ├── App.tsx              # Main app component
+│   │   ├── LoginPage.tsx      # User login
+│   │   ├── RegisterPage.tsx   # User registration
+│   │   ├── ProfilePage.tsx    # User profile management
+│   │   ├── DashboardPage.tsx  # Analytics and insights
+│   │   ├── ExpensesPage.tsx   # Expense CRUD with filters
+│   │   └── CategoriesPage.tsx # Category management
+│   ├── App.tsx              # Main app component with routing
 │   ├── main.tsx             # Entry point
-│   └── index.css            # Global styles
+│   └── index.css            # Global styles and Tailwind
 ├── public/
 ├── Dockerfile               # Production Docker image
 ├── Dockerfile.dev           # Development Docker image
 ├── docker-compose.yml       # Production compose
 ├── docker-compose.dev.yml   # Development compose
-├── nginx.conf               # Nginx configuration
+├── nginx.conf               # Nginx configuration for production
 ├── vite.config.ts           # Vite configuration
 ├── tailwind.config.js       # Tailwind configuration
 └── package.json
@@ -125,39 +134,78 @@ expense-manager-app/
 
 ## Features Overview
 
-### Authentication
+### Authentication & Profile
 
-- User registration with validation
+- User registration with email validation
 - Secure login with JWT tokens
-- Protected routes
+- Profile management (update name, email, password)
+- Profile dropdown menu with user info and logout
+- Protected routes with automatic redirect
 - Automatic token refresh
 
 ### Dashboard
 
-- Total expenses summary
-- Expense count and average
-- Category breakdown (Pie chart)
+- Total expenses summary with stats cards
+- Expense count and average calculations
+- Category breakdown (Interactive pie chart)
 - Monthly trends (Bar chart)
+- Category analytics table with detailed metrics
 - Recent expenses list
+- Date range filtering
+- Responsive charts for all screen sizes
 
 ### Expense Management
 
-- Create new expenses
+- Create new expenses with title, amount, description, date
 - Edit existing expenses
-- Delete expenses
-- Filter by category
-- View all expenses with pagination
+- Delete single or multiple expenses (bulk delete)
+- Advanced filtering:
+  - Search by title or description
+  - Filter by category
+  - Filter by date range
+  - Sort by date or amount (ascending/descending)
+- Quick date filters (Today, Week, Month, Last Month, Year)
+- Pagination with page navigation
+- Export expenses to CSV format
+- Responsive list view optimized for mobile
+
+### Category Management
+
+- Create custom categories
+- Edit category details
+- Delete categories
+- Color picker for category colors
+- Emoji selector for category icons
+- Search categories
+- Pagination for large category lists
+- Responsive grid layout
+
+### Mobile Optimization
+
+- 100% mobile responsive design
+- Touch-optimized buttons and controls
+- Stacked layouts on mobile devices
+- Responsive text sizing (sm: breakpoints)
+- Horizontal scroll for tables
+- Compact navigation with backdrop blur
+- Optimized for all screen sizes (320px+)
 
 ## UI Components
 
-The app uses shadcn/ui components for a consistent, beautiful design:
+The app uses shadcn/ui components for a consistent, accessible design:
 
-- **Button** - Various button styles and sizes
-- **Card** - Content containers
-- **Input** - Form inputs
-- **Label** - Form labels
-- **Select** - Dropdown selections
-- **Dialog** - Modal dialogs
+- **Button** - Various button styles and sizes with responsive design
+- **Card** - Content containers with headers and footers
+- **Input** - Form inputs with validation
+- **Label** - Accessible form labels
+- **Select** - Dropdown selections with search
+- **Dialog** - Modal dialogs for forms and confirmations
+- **Dropdown Menu** - Profile menu and action menus
+- **Toast** - Success and error notifications
+- **Checkbox** - Multi-select functionality
+- **Calendar** - Date picker for expense dates
+
+All components are fully responsive and optimized for mobile devices.
 
 ## API Integration
 
@@ -169,18 +217,46 @@ VITE_API_URL=http://localhost:3000/api/v1
 
 ### API Endpoints Used
 
-- `POST /v1/auth/register` - User registration
-- `POST /v1/auth/login` - User login
-- `GET /v1/auth/profile` - Get user profile
-- `GET /v1/expenses` - Get all expenses
-- `POST /expenses` - Create expense
-- `PUT /expenses/:id` - Update expense
-- `DELETE /expenses/:id` - Delete expense
-- `GET /dashboard/summary` - Get dashboard summary
-- `GET /dashboard/monthly-trends` - Get monthly trends
-- `GET /dashboard/recent-expenses` - Get recent expenses
+- **Authentication**
+
+  - `POST /auth/register` - User registration
+  - `POST /auth/login` - User login
+  - `GET /auth/profile` - Get user profile
+  - `PUT /auth/profile` - Update user profile
+
+- **Expenses**
+
+  - `GET /expenses` - Get all expenses with pagination and filters
+  - `GET /expenses/:id` - Get single expense
+  - `POST /expenses` - Create expense
+  - `PUT /expenses/:id` - Update expense
+  - `PATCH /expenses/:id` - Partial update expense
+  - `DELETE /expenses/:id` - Delete expense
+
+- **Categories**
+
+  - `GET /categories` - Get all categories
+  - `GET /categories/:id` - Get single category
+  - `POST /categories` - Create category
+  - `PUT /categories/:id` - Update category
+  - `DELETE /categories/:id` - Delete category
+
+- **Dashboard**
+  - `GET /dashboard/summary` - Get dashboard summary with stats
+  - `GET /dashboard/monthly-trends` - Get monthly trends data
+  - `GET /dashboard/recent-expenses` - Get recent expenses (limit: 5)
+  - `GET /dashboard/category-analytics` - Get category analytics with filters
 
 ## Customization
+
+### Design System
+
+The app uses a clean black and white design system with no gradients. Key colors:
+
+- **Primary Accent**: `bg-gray-900` (black)
+- **Hover States**: `hover:bg-gray-50`, `hover:bg-gray-100`
+- **Text**: `text-gray-900` (headings), `text-gray-600` (body)
+- **Borders**: `border-gray-200`, `border-gray-300`
 
 ### Theme Colors
 
@@ -194,21 +270,25 @@ Edit `src/index.css` to customize the color scheme:
 }
 ```
 
-### Categories
+### Footer Links
 
-Edit the `CATEGORIES` array in `src/pages/ExpensesPage.tsx`:
+Update social media links in `src/components/Layout.tsx`:
 
 ```typescript
-const CATEGORIES = [
-	'Food',
-	'Transportation',
-	'Shopping',
-	'Entertainment',
-	'Bills',
-	'Healthcare',
-	'Other',
+const socialLinks = [
+	{ name: 'GitHub', url: 'https://github.com/yourusername', icon: Github },
+	{ name: 'LinkedIn', url: 'https://linkedin.com/in/yourusername', icon: Linkedin },
+	{ name: 'Facebook', url: 'https://facebook.com/yourusername', icon: Facebook },
 ];
 ```
+
+### Responsive Breakpoints
+
+The app uses Tailwind's default breakpoints with sm: prefix for mobile-first design:
+
+- **Mobile**: < 640px (default styles)
+- **Tablet**: >= 640px (sm:)
+- **Desktop**: >= 768px (md:), >= 1024px (lg:), >= 1280px (xl:)
 
 ## Building for Production
 
@@ -247,6 +327,38 @@ Deploy the `dist/` folder to any static hosting service:
 - GitHub Pages
 - Firebase Hosting
 
+## Recent Improvements
+
+### Design Updates
+
+- ✅ Removed all gradient colors for cleaner design
+- ✅ Implemented simple black and white color scheme
+- ✅ Added profile dropdown menu with user info
+- ✅ Created beautiful footer with social media links
+- ✅ Optimized mobile navigation with backdrop blur
+
+### Features Added
+
+- ✅ Profile page with update functionality
+- ✅ Profile API integration (name, email, password updates)
+- ✅ Category management system with colors and emojis
+- ✅ Bulk delete for expenses
+- ✅ Export to CSV functionality
+- ✅ Advanced filtering and sorting
+- ✅ Quick date filter buttons
+
+### Mobile Responsiveness Improvements
+
+- ✅ 100% mobile responsive design across all pages
+- ✅ Dashboard: Responsive stats cards, charts, and tables
+- ✅ Expenses: Stacked list items, responsive filters, pagination
+- ✅ Categories: Responsive grid layout, always-visible actions on mobile
+- ✅ Profile: Stacked form layout, responsive inputs
+- ✅ Touch-optimized button sizes (44px+ touch targets)
+- ✅ Responsive text sizing with sm: breakpoints
+- ✅ Horizontal scroll for wide tables
+- ✅ Compact mobile navigation
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -254,3 +366,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 MIT
+
+## Links
+
+- **GitHub**: [https://github.com/sakilahmmad71](https://github.com/sakilahmmad71)
+- **LinkedIn**: [https://linkedin.com/in/sakilahmmad71](https://linkedin.com/in/sakilahmmad71)
+
+## Acknowledgments
+
+Built with ❤️ as an open-source project for the community.
