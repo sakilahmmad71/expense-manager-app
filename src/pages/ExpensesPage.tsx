@@ -509,7 +509,7 @@ export const ExpensesPage = () => {
 											/>
 											<div
 												className='w-1 h-12 sm:h-14 rounded-full flex-shrink-0'
-												style={{ backgroundColor: expense.category.color || '#3b82f6' }}
+												// style={{ backgroundColor: expense.category.color || '#3b82f6' }}
 											/>
 											<div className='flex-1 min-w-0'>
 												<h3 className='font-semibold text-base sm:text-lg truncate'>

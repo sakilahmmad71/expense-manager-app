@@ -4,13 +4,18 @@
 # Robust makefile for development and production environments
 # ==============================================================================
 
-.PHONY: help dev dev-build dev-up dev-down dev-logs dev-restart dev-rebuild dev-shell prod prod-build prod-up prod-down prod-logs prod-restart prod-shell install lint lint-fix format format-check test build clean clean-all health
+.PHONY: help dev dev-build dev-up dev-down dev-logs dev-restart dev-rebuild dev-shell prod prod-build prod-up prod-down prod-logs prod-restart prod-shell install lint lint-fix format format-check test build clean clean-all health check-docker check-docker-compose check-env-dev check-env-prod check-prerequisites-dev check-prerequisites-prod
 
 # Variables
 DOCKER_COMPOSE_DEV = docker compose -f docker-compose.development.yml
 DOCKER_COMPOSE_PROD = docker compose -f docker-compose.production.yml
 CONTAINER_DEV = expense-manager-app-development
 CONTAINER_PROD = expense-manager-app-production
+
+# Environment files
+ENV_DEV := .env
+ENV_PROD := .env.production
+ENV_EXAMPLE := .env.example
 
 # Colors for output
 GREEN := \033[0;32m
@@ -55,13 +60,69 @@ help:
 	@echo "  make clean-all        - Remove everything including images"
 	@echo "  make health           - Check container health"
 	@echo ""
+	@echo "$(YELLOW)Prerequisite Check Commands:$(NC)"
+	@echo "  make check-docker             - Check if Docker is installed and running"
+	@echo "  make check-docker-compose     - Check if Docker Compose is available"
+	@echo "  make check-env-dev            - Check development environment file"
+	@echo "  make check-env-prod           - Check production environment file"
+	@echo "  make check-prerequisites-dev  - Check all development prerequisites"
+	@echo "  make check-prerequisites-prod - Check all production prerequisites"
+	@echo ""
+
+# ============================================================================
+# Prerequisite Checks
+# ============================================================================
+
+## check-docker: Check if Docker is installed and running
+check-docker:
+	@which docker >/dev/null 2>&1 || { echo "$(RED)❌ Error: Docker is not installed!$(NC)"; echo "$(YELLOW)Install Docker from: https://docs.docker.com/get-docker/$(NC)"; exit 1; }
+	@docker info >/dev/null 2>&1 || { echo "$(RED)❌ Error: Docker daemon is not running!$(NC)"; echo "$(YELLOW)Please start Docker Desktop or Docker daemon$(NC)"; exit 1; }
+	@echo "$(GREEN)✅ Docker is installed and running$(NC)"
+
+## check-docker-compose: Check if Docker Compose is available
+check-docker-compose:
+	@docker compose version >/dev/null 2>&1 || { echo "$(RED)❌ Error: Docker Compose is not available!$(NC)"; echo "$(YELLOW)Docker Compose is required (comes with Docker Desktop)$(NC)"; exit 1; }
+	@echo "$(GREEN)✅ Docker Compose is available$(NC)"
+
+## check-env-dev: Check if development environment file exists
+check-env-dev:
+	@if [ ! -f $(ENV_DEV) ]; then \
+		echo "$(RED)❌ Error: $(ENV_DEV) not found!$(NC)"; \
+		echo "$(YELLOW)Creating $(ENV_DEV) from $(ENV_EXAMPLE)...$(NC)"; \
+		cp $(ENV_EXAMPLE) $(ENV_DEV); \
+		echo "$(GREEN)✅ Created $(ENV_DEV)$(NC)"; \
+		echo "$(YELLOW)⚠️  Please update the values in $(ENV_DEV) before starting!$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ $(ENV_DEV) exists$(NC)"
+
+## check-env-prod: Check if production environment file exists
+check-env-prod:
+	@if [ ! -f $(ENV_PROD) ]; then \
+		echo "$(RED)❌ Error: $(ENV_PROD) not found!$(NC)"; \
+		echo "$(YELLOW)⚠️  Production environment file is required!$(NC)"; \
+		echo "$(YELLOW)Creating $(ENV_PROD) template...$(NC)"; \
+		cp $(ENV_EXAMPLE) $(ENV_PROD); \
+		echo "$(GREEN)✅ Created $(ENV_PROD) template$(NC)"; \
+		echo "$(RED)⚠️  IMPORTANT: Update all values in $(ENV_PROD) with production settings!$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ $(ENV_PROD) exists$(NC)"
+
+## check-prerequisites-dev: Check all prerequisites for development
+check-prerequisites-dev: check-docker check-docker-compose check-env-dev
+	@echo "$(GREEN)✅ All development prerequisites are met!$(NC)"
+
+## check-prerequisites-prod: Check all prerequisites for production
+check-prerequisites-prod: check-docker check-docker-compose check-env-prod
+	@echo "$(GREEN)✅ All production prerequisites are met!$(NC)"
 
 # ============================================================================
 # Development Environment
 # ============================================================================
 
 ## dev: Start development environment
-dev: dev-build dev-up
+dev: check-prerequisites-dev dev-build dev-up
 
 ## dev-build: Build development Docker image
 dev-build:
@@ -107,7 +168,7 @@ dev-shell:
 # ============================================================================
 
 ## prod: Start production environment
-prod: prod-build prod-up
+prod: check-prerequisites-prod prod-build prod-up
 
 ## prod-build: Build production Docker image
 prod-build:
