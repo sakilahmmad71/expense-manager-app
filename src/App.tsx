@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { Layout } from './components/Layout';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { ExpensesPage } from './pages/ExpensesPage';
-import { CategoriesPage } from './pages/CategoriesPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { Toaster } from './components/ui/toaster';
+import { AuthProvider } from '@context/AuthContext';
+import { ProtectedRoute } from '@components/ProtectedRoute';
+import { Layout } from '@components/Layout';
+import { LoginPage } from '@pages/LoginPage';
+import { RegisterPage } from '@pages/RegisterPage';
+import { DashboardPage } from '@pages/DashboardPage';
+import { ExpensesPage } from '@pages/ExpensesPage';
+import { CategoriesPage } from '@pages/CategoriesPage';
+import { ProfilePage } from '@pages/ProfilePage';
+import { Toaster } from '@components/ui/toaster';
 
 function App() {
 	return (

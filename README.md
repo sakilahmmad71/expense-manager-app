@@ -36,7 +36,7 @@ A modern, fully responsive expense tracking application built with React, TypeSc
 ### Prerequisites
 
 - Node.js 20+
-- npm or yarn
+- pnpm (or npm/yarn)
 - Docker & Docker Compose (optional)
 
 ### Installation
@@ -50,7 +50,7 @@ cd expense-manager-app
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Set up environment variables:
@@ -68,7 +68,7 @@ VITE_API_URL=http://localhost:3000/api/v1
 4. Start the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The app will be available at `http://localhost:5173`
@@ -78,23 +78,78 @@ The app will be available at `http://localhost:5173`
 ### Development
 
 ```bash
-docker-compose -f docker-compose.dev.yml up
+# Using docker compose
+docker compose -f docker-compose.development.yml up
+
+# Or using Make
+make dev-docker
 ```
 
-### Production
+### Local Testing (Production Build)
 
 ```bash
+# Build and start
 docker-compose up -d
+
+# Or using Make
+make start
+
+# View logs
+make logs
 ```
 
-The production build uses Nginx to serve the static files.
+### Production Deployment
+
+For production deployment, use the production-ready configuration:
+
+```bash
+# Build production image
+make build-prod
+
+# Deploy to production
+make deploy-prod
+
+# Or manually
+docker compose -f docker-compose.production.yml up -d
+```
+
+**Important**: See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive production deployment guide including:
+
+- Environment configuration
+- Reverse proxy setup (Nginx/Cloudflare)
+- SSL/TLS configuration
+- Security best practices
+- Monitoring and maintenance
+- Troubleshooting guide
+
+The production build:
+
+- Uses multi-stage Docker build for optimized image size
+- Includes security hardening (limited capabilities, non-root user)
+- Configures Nginx with performance optimizations
+- Implements health checks and logging
+- Sets resource limits (256MB RAM, 0.3 CPU)
+- Should NOT be directly exposed - use reverse proxy
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint
+### pnpm Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm preview` - Preview production build locally
+- `pnpm lint` - Run ESLint
+
+### Make Commands
+
+- `make help` - Show all available commands
+- `make install` - Install dependencies
+- `make dev` - Start Vite dev server
+- `make build` - Build production bundle
+- `make deploy-prod` - Build and deploy production
+- `make logs-prod` - View production logs
+- `make health` - Check container health
+- See `make help` for more commands
 
 ## Project Structure
 
@@ -121,12 +176,19 @@ expense-manager-app/
 │   ├── App.tsx              # Main app component with routing
 │   ├── main.tsx             # Entry point
 │   └── index.css            # Global styles and Tailwind
+├── nginx/                   # Nginx configurations
+│   ├── nginx.conf           # Main nginx config
+│   ├── default.conf         # Development config
+│   ├── production.conf      # Production config
+│   └── docker-entrypoint.sh # Startup script
 ├── public/
-├── Dockerfile               # Production Docker image
-├── Dockerfile.dev           # Development Docker image
-├── docker-compose.yml       # Production compose
-├── docker-compose.dev.yml   # Development compose
-├── nginx.conf               # Nginx configuration for production
+├── Dockerfile.production    # Production Docker image
+├── Dockerfile.development   # Development Docker image
+├── docker-compose.production.yml   # Production compose
+├── docker-compose.development.yml   # Development compose
+├── Makefile                 # Common commands
+├── DEPLOYMENT.md            # Production deployment guide
+├── DEPLOYMENT.md            # Production deployment guide
 ├── vite.config.ts           # Vite configuration
 ├── tailwind.config.js       # Tailwind configuration
 └── package.json
@@ -295,7 +357,7 @@ The app uses Tailwind's default breakpoints with sm: prefix for mobile-first des
 1. Build the application:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 2. The built files will be in the `dist/` directory
@@ -303,7 +365,7 @@ npm run build
 3. Preview the build:
 
 ```bash
-npm run preview
+pnpm preview
 ```
 
 ## Deployment

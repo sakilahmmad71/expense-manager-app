@@ -170,7 +170,7 @@ export const Layout = () => {
 									target='_blank'
 									rel='noopener noreferrer'
 									className='font-semibold text-gray-900 hover:underline'>
-									Sakil Ahmad
+									Shakil Ahmed
 								</a>
 							</p>
 							<p className='text-xs text-gray-500 flex items-center gap-1'>

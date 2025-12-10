@@ -1,0 +1,78 @@
+services:
+  # Frontend Application - Production
+  app:
+    container_name: expense-manager-app-production
+    env_file:
+      - .env.production
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.yourdomain.com/api/v1}
+        VITE_APP_NAME: ${VITE_APP_NAME:-Expense Manager}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
+        VITE_ENABLE_DEBUG: ${VITE_ENABLE_DEBUG:-false}
+        VITE_ENABLE_ANALYTICS: ${VITE_ENABLE_ANALYTICS:-false}
+    image: expense-manager-app:production
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-https://api.yourdomain.com/api/v1}
+      VITE_APP_NAME: ${VITE_APP_NAME:-Expense Manager}
+      VITE_APP_ENV: ${VITE_APP_ENV:-production}
+      VITE_ENABLE_DEBUG: ${VITE_ENABLE_DEBUG:-false}
+      VITE_ENABLE_ANALYTICS: ${VITE_ENABLE_ANALYTICS:-false}
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx
+    # SECURITY: App should ONLY be accessible via reverse proxy, not directly exposed
+    # For local testing only, uncomment and bind to localhost:
+    # ports:
+    #   - "127.0.0.1:5173:80"
+    networks:
+      - expense-manager-network-production
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+    # Note: Commented read_only due to potential sed operations in docker-entrypoint.sh
+    # If not using runtime env injection, can enable read_only: true
+    # read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "--timeout=5",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    mem_limit: 256M
+    cpus: 0.3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    stop_grace_period: 10s
+
+# Networks
+networks:
+  expense-manager-network-production:
+    driver: bridge
+    name: expense-manager-network-production

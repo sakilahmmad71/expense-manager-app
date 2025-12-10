@@ -1,0 +1,75 @@
+# ==============================================================================
+# Production Dockerfile for Expense Manager App
+# ==============================================================================
+# Multi-stage build for optimized production image
+#
+# Environment Variables:
+# - Vite environment variables (VITE_*) are passed as build args from docker-compose
+# - Build args are automatically available as environment variables during build
+# - No need to declare ARG/ENV in Dockerfile - docker-compose handles this
+# ==============================================================================
+
+# Build stage
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy application code
+COPY . .
+
+# Accept build arguments for Vite environment variables
+# These will be baked into the JavaScript bundle at build time
+ARG VITE_API_URL
+ARG VITE_APP_NAME
+ARG VITE_APP_ENV
+ARG VITE_ENABLE_DEBUG
+ARG VITE_ENABLE_ANALYTICS
+
+# Set as environment variables so Vite can access them during build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_ENV=${VITE_APP_ENV}
+ENV VITE_ENABLE_DEBUG=${VITE_ENABLE_DEBUG}
+ENV VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS}
+
+# Build the application
+RUN pnpm build
+
+# Production stage
+FROM nginx:1.25-alpine AS production
+
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
+# Copy nginx configuration
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom entrypoint script for environment variable injection
+COPY nginx/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+
+# Start nginx
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
+

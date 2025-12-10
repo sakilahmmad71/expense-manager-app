@@ -1,11 +1,11 @@
-version: "3.8"
-
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: expense-manager-app-dev
+      dockerfile: Dockerfile.development
+    container_name: expense-manager-app-development
+    env_file:
+      - .env
     restart: unless-stopped
     ports:
       - "${PORT:-5173}:5173"
@@ -17,8 +17,9 @@ services:
       - ./public:/app/public
       - /app/node_modules
     networks:
-      - expense-network-dev
+      - expense-manager-network-development
 
 networks:
-  expense-network-dev:
+  expense-manager-network-development:
     driver: bridge
+    name: expense-manager-network-development
