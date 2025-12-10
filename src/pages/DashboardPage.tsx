@@ -48,6 +48,8 @@ export const DashboardPage = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
 	const [isFiltered, setIsFiltered] = useState(false);
+	const [hasMixedCurrencies, setHasMixedCurrencies] = useState(false);
+	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
 
 	const fetchData = async (filters?: { startDate?: string; endDate?: string }) => {
 		setIsLoading(true);
@@ -63,6 +65,19 @@ export const DashboardPage = () => {
 			setRecentExpenses(recentRes.data.expenses);
 			setMonthlyTrends(trendsRes.data.trends);
 			setCategoryAnalytics(analyticsRes.data.categoryAnalytics);
+
+			// Detect mixed currencies and primary currency
+			const currencies = new Set(recentRes.data.expenses.map((e: Expense) => e.currency));
+			setHasMixedCurrencies(currencies.size > 1);
+			if (currencies.size > 0) {
+				// Use the most common currency or the first one
+				const currencyCount = recentRes.data.expenses.reduce((acc: any, e: Expense) => {
+					acc[e.currency] = (acc[e.currency] || 0) + 1;
+					return acc;
+				}, {});
+				const mostCommon = Object.entries(currencyCount).sort((a: any, b: any) => b[1] - a[1])[0];
+				setPrimaryCurrency(mostCommon ? String(mostCommon[0]) : 'USD');
+			}
 		} catch (error) {
 			console.error('Failed to fetch dashboard data:', error);
 		} finally {
@@ -114,7 +129,9 @@ export const DashboardPage = () => {
 	const stats = [
 		{
 			title: 'Total Expenses',
-			value: formatCurrency(summary?.totalAmount || 0),
+			value: hasMixedCurrencies
+				? `${formatCurrency(summary?.totalAmount || 0, primaryCurrency)} *`
+				: formatCurrency(summary?.totalAmount || 0, primaryCurrency),
 			icon: PiggyBank,
 			iconBg: 'bg-blue-100',
 			iconColor: 'text-blue-600',
@@ -128,7 +145,9 @@ export const DashboardPage = () => {
 		},
 		{
 			title: 'Average Expense',
-			value: formatCurrency(summary?.averageExpense || 0),
+			value: hasMixedCurrencies
+				? `${formatCurrency(summary?.averageExpense || 0, primaryCurrency)} *`
+				: formatCurrency(summary?.averageExpense || 0, primaryCurrency),
 			icon: TrendingUp,
 			iconBg: 'bg-orange-100',
 			iconColor: 'text-orange-600',
@@ -151,6 +170,19 @@ export const DashboardPage = () => {
 					<p className='text-sm sm:text-base text-gray-600'>Overview of your expenses</p>
 				</div>
 			</div>
+
+			{/* Mixed Currency Warning */}
+			{hasMixedCurrencies && (
+				<Card className='border-orange-200 bg-orange-50'>
+					<CardContent className='pt-4'>
+						<p className='text-sm text-orange-800'>
+							<span className='font-semibold'>* Note:</span> Your expenses use multiple currencies.
+							Summary totals are displayed in {primaryCurrency} but may not accurately reflect
+							converted values. Individual expenses show their actual currency.
+						</p>
+					</CardContent>
+				</Card>
+			)}
 
 			{/* Date Filter */}
 			<Card>
@@ -242,7 +274,7 @@ export const DashboardPage = () => {
 								<CartesianGrid strokeDasharray='3 3' />
 								<XAxis dataKey='monthName' tick={{ fontSize: 12 }} />
 								<YAxis tick={{ fontSize: 12 }} />
-								<Tooltip formatter={(value) => formatCurrency(Number(value))} />
+								<Tooltip formatter={(value) => formatCurrency(Number(value), primaryCurrency)} />
 								<Bar dataKey='totalAmount' fill='#3b82f6' animationDuration={800} />
 							</BarChart>
 						</ResponsiveContainer>
@@ -272,7 +304,7 @@ export const DashboardPage = () => {
 										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
 									))}
 								</Pie>
-								<Tooltip formatter={(value) => formatCurrency(Number(value))} />
+								<Tooltip formatter={(value) => formatCurrency(Number(value), primaryCurrency)} />
 							</PieChart>
 						</ResponsiveContainer>
 					</CardContent>
@@ -311,13 +343,13 @@ export const DashboardPage = () => {
 												{item.categoryName}
 											</td>
 											<td className='text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm'>
-												{formatCurrency(item.totalAmount)}
+												{formatCurrency(item.totalAmount, primaryCurrency)}
 											</td>
 											<td className='text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm'>
 												{item.count}
 											</td>
 											<td className='text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm'>
-												{formatCurrency(item.averageAmount)}
+												{formatCurrency(item.averageAmount, primaryCurrency)}
 											</td>
 										</tr>
 									))}
@@ -351,7 +383,7 @@ export const DashboardPage = () => {
 									</div>
 									<div className='text-left sm:text-right flex-shrink-0'>
 										<p className='font-semibold text-base sm:text-lg'>
-											{formatCurrency(expense.amount)}
+											{formatCurrency(expense.amount, expense.currency)}
 										</p>
 									</div>
 								</div>

@@ -64,15 +64,24 @@ export const ExpensesPage = () => {
 
 	useEffect(() => {
 		fetchExpenses();
-		fetchCategories();
 	}, [filters]);
+
+	useEffect(() => {
+		fetchCategories();
+	}, []);
 
 	const fetchCategories = async () => {
 		try {
-			const response = await categoryAPI.getAll();
+			// Fetch all categories without pagination for the dropdown
+			const response = await categoryAPI.getAll({ page: 1, limit: 100 });
 			setCategories(response.data.categories);
 		} catch (error) {
 			console.error('Failed to fetch categories:', error);
+			toast({
+				variant: 'destructive',
+				title: 'Error',
+				description: 'Failed to load categories. Please refresh the page.',
+			});
 		}
 	};
 
@@ -535,7 +544,7 @@ export const ExpensesPage = () => {
 										<div className='flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pl-8 sm:pl-0'>
 											<div className='text-left sm:text-right'>
 												<p className='text-lg sm:text-xl font-bold whitespace-nowrap'>
-													{formatCurrency(expense.amount)}
+													{formatCurrency(expense.amount, expense.currency)}
 												</p>
 											</div>
 											<div className='flex gap-1 sm:gap-2 flex-shrink-0'>
@@ -679,9 +688,13 @@ interface ExpenseModalProps {
 
 const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalProps) => {
 	const { toast } = useToast();
+	const [selectedCurrency, setSelectedCurrency] = useState(() => {
+		return expense?.currency || localStorage.getItem('preferredCurrency') || 'USD';
+	});
 	const [formData, setFormData] = useState<ExpenseInput>({
 		title: expense?.title || '',
 		amount: expense?.amount || 0,
+		currency: expense?.currency || selectedCurrency,
 		categoryId: expense?.category
 			? typeof expense.category === 'string'
 				? expense.category
@@ -692,6 +705,25 @@ const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalP
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
+
+	const currencies = [
+		{ code: 'USD', symbol: '$', name: 'US Dollar' },
+		{ code: 'EUR', symbol: '€', name: 'Euro' },
+		{ code: 'GBP', symbol: '£', name: 'British Pound' },
+		{ code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+		{ code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+		{ code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+		{ code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+		{ code: 'CHF', symbol: 'Fr', name: 'Swiss Franc' },
+		{ code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+		{ code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+	];
+
+	const handleCurrencyChange = (currency: string) => {
+		setSelectedCurrency(currency);
+		setFormData({ ...formData, currency });
+		localStorage.setItem('preferredCurrency', currency);
+	};
 
 	// Prevent background scroll when modal is open
 	useEffect(() => {
@@ -775,7 +807,6 @@ const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalP
 								{error}
 							</div>
 						)}
-
 						<div className='space-y-2'>
 							<Label htmlFor='title'>Title</Label>
 							<Input
@@ -785,37 +816,60 @@ const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalP
 								required
 							/>
 						</div>
-
 						<div className='space-y-2'>
 							<Label htmlFor='amount'>Amount</Label>
-							<Input
-								id='amount'
-								type='number'
-								step='0.01'
-								value={formData.amount}
-								onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-								required
-							/>
-						</div>
-
+							<div className='flex gap-2'>
+								<div className='flex-1'>
+									<Input
+										id='amount'
+										type='number'
+										step='0.01'
+										value={formData.amount}
+										onChange={(e) =>
+											setFormData({ ...formData, amount: parseFloat(e.target.value) })
+										}
+										required
+									/>
+								</div>
+								<Select value={selectedCurrency} onValueChange={handleCurrencyChange}>
+									<SelectTrigger className='w-[110px]'>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent className='z-[70]'>
+										{currencies.map((curr) => (
+											<SelectItem key={curr.code} value={curr.code}>
+												{curr.symbol} {curr.code}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						</div>{' '}
 						<div className='space-y-2'>
 							<Label htmlFor='category'>Category</Label>
 							<Select
 								value={formData.categoryId}
-								onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
+								onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
+								required>
 								<SelectTrigger>
 									<SelectValue placeholder='Select category' />
 								</SelectTrigger>
-								<SelectContent>
-									{categories.map((cat) => (
-										<SelectItem key={cat.id} value={cat.id}>
-											{cat.name}
-										</SelectItem>
-									))}
+								<SelectContent className='z-[70]'>
+									{categories.length === 0 ? (
+										<div className='p-2 text-sm text-gray-500 text-center'>
+											No categories available
+										</div>
+									) : (
+										categories.map((cat) => (
+											<SelectItem key={cat.id} value={cat.id}>
+												{cat.icon && `${cat.icon} `}
+												{cat.name}
+											</SelectItem>
+										))
+									)}
 								</SelectContent>
 							</Select>
 						</div>
-
 						<div className='space-y-2'>
 							<Label htmlFor='date'>Date</Label>
 							<Input
@@ -826,7 +880,6 @@ const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalP
 								required
 							/>
 						</div>
-
 						<div className='space-y-2'>
 							<Label htmlFor='description'>Description (Optional)</Label>
 							<Input
@@ -835,7 +888,6 @@ const ExpenseModal = ({ expense, categories, onClose, onSuccess }: ExpenseModalP
 								onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 							/>
 						</div>
-
 						<div className='flex gap-2 pt-4'>
 							<Button
 								type='button'

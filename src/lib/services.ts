@@ -29,6 +29,7 @@ export interface Expense {
 	id: string;
 	title: string;
 	amount: number;
+	currency: string;
 	category: Category;
 	description?: string;
 	date: string;
@@ -40,6 +41,7 @@ export interface Expense {
 export interface ExpenseInput {
 	title: string;
 	amount: number;
+	currency?: string;
 	categoryId: string;
 	description?: string;
 	date?: string;

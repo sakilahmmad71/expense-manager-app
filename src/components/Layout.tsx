@@ -43,7 +43,7 @@ export const Layout = () => {
 	];
 
 	return (
-		<div className='min-h-screen bg-gray-50'>
+		<div className='min-h-screen bg-gray-50 flex flex-col'>
 			{/* Header */}
 			<header className='bg-white border-b border-gray-200 sticky top-0 z-50'>
 				<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -123,11 +123,11 @@ export const Layout = () => {
 				</div>
 			</header>{' '}
 			{/* Main Content */}
-			<main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-32'>
+			<main className='flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8'>
 				<Outlet />
 			</main>
 			{/* Footer - Hidden on mobile (bottom nav takes precedence) */}
-			<footer className='hidden md:block bg-white border-t border-gray-200 mt-auto'>
+			<footer className='hidden md:block bg-white border-t border-gray-200'>
 				<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
 					<div className='flex flex-col items-center justify-center space-y-6'>
 						{/* Social Links */}
