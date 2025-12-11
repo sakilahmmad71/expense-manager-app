@@ -12,7 +12,7 @@
 
 set -e
 
-echo "=== Expense Manager App - Starting ==="
+echo "=== Expenser App - Starting ==="
 echo "Environment: ${NODE_ENV:-production}"
 
 # Optional: Log environment variables (sanitize sensitive data)

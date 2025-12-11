@@ -1,4 +1,4 @@
-# Expense Manager App - Production Deployment Guide
+# Expenser App - Production Deployment Guide
 
 ## File Organization
 
@@ -33,7 +33,7 @@ VITE_API_URL=http://localhost:3000/api/v1
 
 ```env
 NODE_ENV=production
-VITE_APP_NAME=Expense Manager
+VITE_APP_NAME=Expenser
 VITE_APP_ENV=production
 VITE_API_URL=https://api.yourdomain.com/api/v1
 VITE_ENABLE_DEBUG=false

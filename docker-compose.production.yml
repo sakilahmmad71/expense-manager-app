@@ -10,7 +10,7 @@ services:
       target: production
       args:
         VITE_API_URL: ${VITE_API_URL:-https://api.yourdomain.com/api/v1}
-        VITE_APP_NAME: ${VITE_APP_NAME:-Expense Manager}
+        VITE_APP_NAME: ${VITE_APP_NAME:-Expenser}
         VITE_APP_ENV: ${VITE_APP_ENV:-production}
         VITE_ENABLE_DEBUG: ${VITE_ENABLE_DEBUG:-false}
         VITE_ENABLE_ANALYTICS: ${VITE_ENABLE_ANALYTICS:-false}

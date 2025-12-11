@@ -1,5 +1,5 @@
 # ==============================================================================
-# Production Dockerfile for Expense Manager App
+# Production Dockerfile for Expenser App
 # ==============================================================================
 # Multi-stage build for optimized production image
 #

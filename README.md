@@ -1,4 +1,4 @@
-# Expense Manager App
+# Expenser App
 
 A modern, fully responsive expense tracking application built with React, TypeScript, Vite, TailwindCSS, and shadcn/ui. Features a clean black and white design with comprehensive expense management capabilities.
 
@@ -271,7 +271,7 @@ All components are fully responsive and optimized for mobile devices.
 
 ## API Integration
 
-The app connects to the Expense Manager API backend. Configure the API URL in `.env`:
+The app connects to the Expenser API backend. Configure the API URL in `.env`:
 
 ```env
 VITE_API_URL=http://localhost:3000/api/v1

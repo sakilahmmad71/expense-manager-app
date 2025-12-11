@@ -1,5 +1,5 @@
 # ==============================================================================
-# Makefile - Expense Manager App
+# Makefile - Expenser App
 # ==============================================================================
 # Robust makefile for development and production environments
 # ==============================================================================
@@ -25,7 +25,7 @@ NC := \033[0m # No Color
 
 ## help: Display this help message
 help:
-	@echo "$(GREEN)Expense Manager App - Makefile Commands$(NC)"
+	@echo "$(GREEN)Expenser App - Makefile Commands$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Development Commands:$(NC)"
 	@echo "  make dev              - Start development environment (build + up)"

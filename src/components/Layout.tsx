@@ -52,7 +52,7 @@ export const Layout = () => {
 							<div className='h-10 w-10 bg-gray-900 rounded-lg flex items-center justify-center'>
 								<Wallet className='h-6 w-6 text-white' />
 							</div>
-							<h1 className='text-2xl font-bold text-gray-900'>Expense Manager</h1>
+							<h1 className='text-2xl font-bold text-gray-900'>Expenser</h1>
 						</div>
 
 						{/* Desktop Navigation */}
@@ -178,7 +178,7 @@ export const Layout = () => {
 								Open source and free for everyone to use
 							</p>
 							<p className='text-xs text-gray-400'>
-								© {new Date().getFullYear()} Expense Manager. All rights reserved.
+								© {new Date().getFullYear()} Expenser. All rights reserved.
 							</p>
 						</div>
 					</div>
