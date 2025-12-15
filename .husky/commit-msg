@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Validate commit message format
+# Format: type(scope): subject
+# Example: feat(expenses): add bulk delete functionality
+
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Regular expression for conventional commits
+conventional_commit_regex='^(feat|fix|docs|style|refactor|perf|test|chore|build|ci)(\(.+\))?: .{1,100}'
+
+if ! echo "$commit_msg" | grep -qE "$conventional_commit_regex"; then
+    echo "❌ Invalid commit message format!"
+    echo ""
+    echo "Commit message must follow the Conventional Commits format:"
+    echo "  type(scope): subject"
+    echo ""
+    echo "Types: feat, fix, docs, style, refactor, perf, test, chore, build, ci"
+    echo ""
+    echo "Examples:"
+    echo "  feat(expenses): add bulk delete functionality"
+    echo "  fix(auth): resolve token expiration issue"
+    echo "  docs: update installation instructions"
+    echo ""
+    exit 1
+fi

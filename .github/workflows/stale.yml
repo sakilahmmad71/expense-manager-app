@@ -1,0 +1,56 @@
+name: Stale Issues and PRs
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Run daily at midnight
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Issues
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 7 days if no further activity occurs.
+
+            If this issue is still relevant, please:
+            - Add a comment to keep it open
+            - Add the "keep-open" label
+            - Close the issue if it's resolved
+
+            Thank you for your contributions!
+          close-issue-message: |
+            This issue was automatically closed because it has been stale for 7 days
+            with no activity. Feel free to reopen if this is still relevant.
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          stale-issue-label: "stale"
+          exempt-issue-labels: "keep-open,enhancement,good first issue,help wanted,in progress"
+
+          # Pull Requests
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 7 days if no further activity occurs.
+
+            If you're still working on this, please:
+            - Add a comment with an update
+            - Add the "keep-open" label
+            - Rebase on the latest main branch
+
+            Thank you for your contribution!
+          close-pr-message: |
+            This pull request was automatically closed because it has been stale for 7 days
+            with no activity. Feel free to reopen when you're ready to continue.
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          exempt-pr-labels: "keep-open,in progress,awaiting review"

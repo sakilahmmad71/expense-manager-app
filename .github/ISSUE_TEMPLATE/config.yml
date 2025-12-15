@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/sakilahmmad71/expense-manager-app/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🐛 Security Issue
+    url: mailto:sakilahmmad71@gmail.com
+    about: Please email security issues privately instead of creating public issues

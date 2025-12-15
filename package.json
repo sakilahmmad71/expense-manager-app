@@ -1,13 +1,48 @@
 {
 	"name": "expense-manager-app",
-	"private": true,
 	"version": "1.0.0",
+	"description": "A modern, fully responsive expense tracking application built with React, TypeScript, and TailwindCSS",
 	"type": "module",
+	"keywords": [
+		"expense-tracker",
+		"budget-manager",
+		"finance-app",
+		"react",
+		"typescript",
+		"tailwindcss",
+		"vite",
+		"shadcn-ui"
+	],
+	"author": {
+		"name": "Shakil Ahmed",
+		"email": "sakilahmmad71@gmail.com",
+		"url": "https://github.com/sakilahmmad71"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/sakilahmmad71/expense-manager-app.git"
+	},
+	"bugs": {
+		"url": "https://github.com/sakilahmmad71/expense-manager-app/issues"
+	},
+	"homepage": "https://github.com/sakilahmmad71/expense-manager-app#readme",
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=8.0.0"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-		"preview": "vite preview"
+		"lint:fix": "eslint . --ext ts,tsx --fix",
+		"type-check": "tsc --noEmit",
+		"preview": "vite preview",
+		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+		"clean": "rm -rf dist node_modules/.cache",
+		"test": "echo \"No tests specified\" && exit 0",
+		"prepare": "husky install"
 	},
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.1.2",
@@ -31,6 +66,7 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.16.0",
 		"@types/node": "^22.10.2",
 		"@types/react": "^18.3.12",
 		"@types/react-dom": "^18.3.1",
@@ -41,10 +77,14 @@
 		"eslint": "^9.16.0",
 		"eslint-plugin-react-hooks": "^5.0.0",
 		"eslint-plugin-react-refresh": "^0.4.16",
+		"globals": "^15.12.0",
+		"husky": "^9.1.7",
 		"postcss": "^8.4.49",
+		"prettier": "^3.4.2",
 		"tailwindcss": "^3.4.17",
 		"terser": "^5.44.1",
 		"typescript": "^5.7.2",
+		"typescript-eslint": "^8.18.1",
 		"vite": "^6.0.3"
 	}
 }

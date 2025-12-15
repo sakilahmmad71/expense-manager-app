@@ -1,5 +1,31 @@
 # Expenser App
 
+<div align="center">
+  <h3>A modern, fully responsive expense tracking application</h3>
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+  [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+  
+  [Features](#features) •
+  [Tech Stack](#tech-stack) •
+  [Getting Started](#getting-started) •
+  [Documentation](#-documentation) •
+  [Contributing](CONTRIBUTING.md) •
+  [License](#-license)
+</div>
+
+---
+
+## 🏗️ Related Repositories
+
+This frontend application is part of the Expenser ecosystem:
+
+- **[expense-manager-apis](https://github.com/sakilahmmad71/expense-manager-apis)** - Backend REST API
+- **[expense-manager-loadbalancer](https://github.com/sakilahmmad71/expense-manager-loadbalancer)** - Nginx load balancer
+- **[expense-manager-landing](https://github.com/sakilahmmad71/expense-manager-landing)** - Marketing landing page
+
 A modern, fully responsive expense tracking application built with React, TypeScript, Vite, TailwindCSS, and shadcn/ui. Features a clean black and white design with comprehensive expense management capabilities.
 
 ## Features
@@ -72,6 +98,301 @@ pnpm dev
 ```
 
 The app will be available at `http://localhost:5173`
+
+### 🐳 Docker Development
+
+For containerized development:
+
+```bash
+# Start development environment
+make dev-up
+
+# View logs
+make dev-logs
+
+# Stop environment
+make dev-down
+```
+
+## 🚀 Development
+
+### 📋 Available Scripts
+
+```bash
+# Development
+pnpm dev              # Start dev server
+pnpm build            # Build for production
+pnpm preview          # Preview production build
+
+# Code Quality
+pnpm lint             # Run ESLint
+pnpm lint:fix         # Fix ESLint issues
+pnpm type-check       # TypeScript type checking
+pnpm format           # Format code with Prettier
+pnpm format:check     # Check formatting
+
+# Utilities
+pnpm clean            # Clean build artifacts
+```
+
+### 🏗️ Project Structure
+
+```
+src/
+├── components/       # Reusable UI components
+│   ├── ui/          # shadcn/ui components
+│   ├── Layout.tsx   # Main layout component
+│   └── ProtectedRoute.tsx
+├── context/         # React context providers
+├── lib/            # Utility functions and configurations
+├── pages/          # Page components (routes)
+└── App.tsx         # Main app component
+```
+
+### 🛠️ Development Guidelines
+
+- **TypeScript**: Strict type checking enabled
+- **ESLint**: Code linting with React and TypeScript rules
+- **Prettier**: Code formatting (run `pnpm format`)
+- **Component Structure**: Use functional components with hooks
+- **Styling**: TailwindCSS with shadcn/ui components
+- **State Management**: React Context API
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+### 🎯 Good First Issues
+
+Look for issues labeled [`good first issue`](https://github.com/sakilahmmad71/expense-manager-app/labels/good%20first%20issue) - these are perfect for new contributors.
+
+### 📋 How to Contribute
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes** following our [coding standards](CONTRIBUTING.md#coding-standards)
+4. **Test your changes** thoroughly
+5. **Commit your changes**: `git commit -m 'Add amazing feature'`
+6. **Push to the branch**: `git push origin feature/amazing-feature`
+7. **Open a Pull Request**
+
+### 📖 Contribution Guidelines
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for detailed information about:
+
+- Development setup
+- Coding standards
+- Commit message format
+- Pull request process
+
+## 📸 Screenshots
+
+### 🖥️ Desktop Views
+
+<details>
+<summary>Click to view desktop screenshots</summary>
+
+| Dashboard                                            | Expenses                                           | Categories                                             |
+| ---------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| ![Dashboard](docs/screenshots/dashboard-desktop.png) | ![Expenses](docs/screenshots/expenses-desktop.png) | ![Categories](docs/screenshots/categories-desktop.png) |
+
+</details>
+
+### 📱 Mobile Views
+
+<details>
+<summary>Click to view mobile screenshots</summary>
+
+| Dashboard                                                  | Expenses                                                 | Categories                                                   |
+| ---------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| ![Dashboard Mobile](docs/screenshots/dashboard-mobile.png) | ![Expenses Mobile](docs/screenshots/expenses-mobile.png) | ![Categories Mobile](docs/screenshots/categories-mobile.png) |
+
+</details>
+
+## 🎯 API Integration
+
+This frontend connects to the [expense-manager-apis](https://github.com/sakilahmmad71/expense-manager-apis) backend. Make sure to:
+
+1. **Start the backend server** first
+2. **Configure the API URL** in your `.env` file
+3. **Ensure CORS is configured** on the backend
+
+### 🔗 API Endpoints Used
+
+- `POST /auth/login` - User authentication
+- `POST /auth/register` - User registration
+- `GET /expenses` - Fetch expenses
+- `POST /expenses` - Create new expense
+- `GET /categories` - Fetch categories
+- And more...
+
+## 📦 Deployment
+
+### 🐳 Production Deployment
+
+```bash
+# Build production Docker image
+make prod-build
+
+# Start production environment
+make prod-up
+
+# View production logs
+make prod-logs
+```
+
+### 🌐 Environment Variables
+
+#### Development (`.env`)
+
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+#### Production (`.env.production`)
+
+```env
+VITE_API_URL=https://your-api-domain.com/api/v1
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## 📚 Documentation
+
+Comprehensive documentation to help you understand and contribute to the project:
+
+### For Users
+
+- **[README](README.md)** - Project overview and quick start (you are here)
+- **[DEPLOYMENT](DEPLOYMENT.md)** - Production deployment guide
+- **[SUPPORT](SUPPORT.md)** - Getting help and support
+- **[CHANGELOG](CHANGELOG.md)** - Version history and changes
+
+### For Contributors
+
+- **[CONTRIBUTING](CONTRIBUTING.md)** - How to contribute
+- **[CODE_OF_CONDUCT](CODE_OF_CONDUCT.md)** - Community guidelines
+- **[STYLE_GUIDE](docs/STYLE_GUIDE.md)** - Coding standards and conventions
+- **[DEVELOPMENT](docs/DEVELOPMENT.md)** - Development environment setup
+- **[ARCHITECTURE](docs/ARCHITECTURE.md)** - System architecture and design
+- **[API](docs/API.md)** - API documentation
+- **[TESTING](docs/TESTING.md)** - Testing guide and practices
+
+### Legal & Licensing
+
+- **[LICENSE](LICENSE)** - MIT License
+- **[CLA](CLA.md)** - Contributor License Agreement
+- **[SECURITY](SECURITY.md)** - Security policy
+- **[CONTRIBUTORS](CONTRIBUTORS.md)** - List of contributors
+
+#### Production (`.env.production`)
+
+```env
+VITE_API_URL=https://your-api-domain.com/api/v1
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+<details>
+<summary>Development server won't start</summary>
+
+```bash
+# Clear cache and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+pnpm dev
+```
+
+</details>
+
+<details>
+<summary>Build fails with TypeScript errors</summary>
+
+```bash
+# Run type checking
+pnpm type-check
+
+# Fix any type issues and try again
+pnpm build
+```
+
+</details>
+
+<details>
+<summary>Docker container issues</summary>
+
+```bash
+# Rebuild containers
+make dev-rebuild
+
+# Check logs for errors
+make dev-logs
+```
+
+</details>
+
+For more help, see our [Support Guide](SUPPORT.md) or [create an issue](https://github.com/sakilahmmad71/expense-manager-app/issues/new).
+
+## 📈 Roadmap
+
+### 🔮 Upcoming Features
+
+- [ ] **Multi-currency support**
+- [ ] **Recurring expenses**
+- [ ] **Budget planning and alerts**
+- [ ] **Data import from bank statements**
+- [ ] **Mobile app (React Native)**
+- [ ] **Advanced reporting and analytics**
+- [ ] **Team/family expense sharing**
+- [ ] **Receipt photo upload**
+
+### 🎯 Technical Improvements
+
+- [ ] **Unit and integration tests**
+- [ ] **E2E testing with Playwright**
+- [ ] **Performance optimization**
+- [ ] **Accessibility improvements**
+- [ ] **PWA support**
+- [ ] **Offline functionality**
+
+Vote on features or suggest new ones in our [Discussions](https://github.com/sakilahmmad71/expense-manager-app/discussions)!
+
+## 🤝 Community
+
+- **🐛 Report bugs**: [Create an issue](https://github.com/sakilahmmad71/expense-manager-app/issues/new?template=bug_report.yml)
+- **💡 Request features**: [Submit ideas](https://github.com/sakilahmmad71/expense-manager-app/issues/new?template=feature_request.yml)
+- **💬 Discussions**: [Join the conversation](https://github.com/sakilahmmad71/expense-manager-app/discussions)
+- **📧 Email**: [sakilahmmad71@gmail.com](mailto:sakilahmmad71@gmail.com)
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **[shadcn/ui](https://ui.shadcn.com/)** - For the beautiful component library
+- **[Radix UI](https://www.radix-ui.com/)** - For accessible UI primitives
+- **[Lucide](https://lucide.dev/)** - For the awesome icon library
+- **[Recharts](https://recharts.org/)** - For data visualization components
+- **All contributors** who help make this project better
+
+## 📊 Stats
+
+![GitHub stars](https://img.shields.io/github/stars/sakilahmmad71/expense-manager-app?style=social)
+![GitHub forks](https://img.shields.io/github/forks/sakilahmmad71/expense-manager-app?style=social)
+![GitHub issues](https://img.shields.io/github/issues/sakilahmmad71/expense-manager-app)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/sakilahmmad71/expense-manager-app)
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by <a href="https://github.com/sakilahmmad71">Shakil Ahmed</a></p>
+  <p>If this project helped you, consider giving it a ⭐️!</p>
+</div>
 
 ## Docker Deployment
 
@@ -280,14 +601,12 @@ VITE_API_URL=http://localhost:3000/api/v1
 ### API Endpoints Used
 
 - **Authentication**
-
   - `POST /auth/register` - User registration
   - `POST /auth/login` - User login
   - `GET /auth/profile` - Get user profile
   - `PUT /auth/profile` - Update user profile
 
 - **Expenses**
-
   - `GET /expenses` - Get all expenses with pagination and filters
   - `GET /expenses/:id` - Get single expense
   - `POST /expenses` - Create expense
@@ -296,7 +615,6 @@ VITE_API_URL=http://localhost:3000/api/v1
   - `DELETE /expenses/:id` - Delete expense
 
 - **Categories**
-
   - `GET /categories` - Get all categories
   - `GET /categories/:id` - Get single category
   - `POST /categories` - Create category
@@ -339,8 +657,16 @@ Update social media links in `src/components/Layout.tsx`:
 ```typescript
 const socialLinks = [
 	{ name: 'GitHub', url: 'https://github.com/yourusername', icon: Github },
-	{ name: 'LinkedIn', url: 'https://linkedin.com/in/yourusername', icon: Linkedin },
-	{ name: 'Facebook', url: 'https://facebook.com/yourusername', icon: Facebook },
+	{
+		name: 'LinkedIn',
+		url: 'https://linkedin.com/in/yourusername',
+		icon: Linkedin,
+	},
+	{
+		name: 'Facebook',
+		url: 'https://facebook.com/yourusername',
+		icon: Facebook,
+	},
 ];
 ```
 
@@ -412,6 +738,46 @@ Deploy the `dist/` folder to any static hosting service:
 ### Mobile Responsiveness Improvements
 
 - ✅ 100% mobile responsive design across all pages
+- ✅ Touch-optimized navigation and controls
+- ✅ Optimized table layouts for small screens
+- ✅ Mobile-first form designs
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👤 Author
+
+**Shakil Ahmed**
+
+- GitHub: [@sakilahmmad71](https://github.com/sakilahmmad71)
+- Email: sakilahmmad71@gmail.com
+
+## 🙏 Acknowledgments
+
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Icons from [Lucide React](https://lucide.dev/)
+- Built with [Vite](https://vitejs.dev/) for optimal performance
+
+## 📧 Support
+
+For support, email sakilahmmad71@gmail.com or open an issue in the [GitHub repository](https://github.com/sakilahmmad71/expense-manager-app/issues).
+
+---
+
+<div align="center">
+  Made with ❤️ by <a href="https://github.com/sakilahmmad71">Shakil Ahmed</a>
+</div>
 - ✅ Dashboard: Responsive stats cards, charts, and tables
 - ✅ Expenses: Stacked list items, responsive filters, pagination
 - ✅ Categories: Responsive grid layout, always-visible actions on mobile

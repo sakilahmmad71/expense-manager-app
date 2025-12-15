@@ -74,17 +74,22 @@ export const expenseAPI = {
 	}) => api.get('/expenses', { params }),
 	getById: (id: string) => api.get(`/expenses/${id}`),
 	create: (data: ExpenseInput) => api.post('/expenses', data),
-	update: (id: string, data: Partial<ExpenseInput>) => api.put(`/expenses/${id}`, data),
+	update: (id: string, data: Partial<ExpenseInput>) =>
+		api.put(`/expenses/${id}`, data),
 	delete: (id: string) => api.delete(`/expenses/${id}`),
 };
 
 // Category API
 export const categoryAPI = {
-	getAll: (params?: { page?: number; limit?: number }) => api.get('/categories', { params }),
+	getAll: (params?: { page?: number; limit?: number }) =>
+		api.get('/categories', { params }),
 	getById: (id: string) => api.get(`/categories/${id}`),
-	create: (data: { name: string; color?: string; icon?: string }) => api.post('/categories', data),
-	update: (id: string, data: { name?: string; color?: string; icon?: string }) =>
-		api.put(`/categories/${id}`, data),
+	create: (data: { name: string; color?: string; icon?: string }) =>
+		api.post('/categories', data),
+	update: (
+		id: string,
+		data: { name?: string; color?: string; icon?: string }
+	) => api.put(`/categories/${id}`, data),
 	delete: (id: string) => api.delete(`/categories/${id}`),
 };
 

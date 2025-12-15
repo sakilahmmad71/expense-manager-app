@@ -6,14 +6,14 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 	if (isLoading) {
 		return (
-			<div className='flex h-screen items-center justify-center'>
-				<div className='text-lg'>Loading...</div>
+			<div className="flex h-screen items-center justify-center">
+				<div className="text-lg">Loading...</div>
 			</div>
 		);
 	}
 
 	if (!token) {
-		return <Navigate to='/login' replace />;
+		return <Navigate to="/login" replace />;
 	}
 
 	return <>{children}</>;

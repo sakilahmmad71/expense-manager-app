@@ -1,0 +1,39 @@
+# Automatically label PRs based on file patterns
+
+'area: components':
+  - 'src/components/**/*'
+
+'area: pages':
+  - 'src/pages/**/*'
+
+'area: api':
+  - 'src/lib/api.ts'
+  - 'src/lib/services.ts'
+
+'area: styles':
+  - 'src/**/*.css'
+  - 'tailwind.config.js'
+  - 'postcss.config.js'
+
+'area: config':
+  - '*.config.*'
+  - '.github/**/*'
+  - 'Dockerfile*'
+  - 'docker-compose*.yml'
+  - 'Makefile'
+  - 'nginx/**/*'
+
+'area: docs':
+  - '*.md'
+  - 'docs/**/*'
+
+'area: ci/cd':
+  - '.github/workflows/**/*'
+
+'area: dependencies':
+  - 'package.json'
+  - 'pnpm-lock.yaml'
+
+'area: types':
+  - '**/*.d.ts'
+  - 'tsconfig*.json'

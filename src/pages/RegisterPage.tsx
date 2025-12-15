@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const RegisterPage = () => {
 	const { toast } = useToast();
@@ -54,8 +60,19 @@ export const RegisterPage = () => {
 				description: 'Welcome! Redirecting to dashboard...',
 			});
 			setTimeout(() => navigate('/dashboard'), 500);
-		} catch (err: any) {
-			const errorMessage = err.response?.data?.error || 'Failed to register. Please try again.';
+		} catch (err: unknown) {
+			const errorMessage =
+				typeof err === 'object' &&
+				err !== null &&
+				'response' in err &&
+				typeof err.response === 'object' &&
+				err.response !== null &&
+				'data' in err.response &&
+				typeof err.response.data === 'object' &&
+				err.response.data !== null &&
+				'error' in err.response.data
+					? String(err.response.data.error)
+					: 'Failed to register. Please try again.';
 			setError(errorMessage);
 			toast({
 				variant: 'destructive',
@@ -68,81 +85,86 @@ export const RegisterPage = () => {
 	};
 
 	return (
-		<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4'>
-			<Card className='w-full max-w-md'>
-				<CardHeader className='space-y-1'>
-					<CardTitle className='text-3xl font-bold text-center'>Create Account</CardTitle>
-					<CardDescription className='text-center'>
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+			<Card className="w-full max-w-md">
+				<CardHeader className="space-y-1">
+					<CardTitle className="text-3xl font-bold text-center">
+						Create Account
+					</CardTitle>
+					<CardDescription className="text-center">
 						Enter your details to get started
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form onSubmit={handleSubmit} className='space-y-4'>
+					<form onSubmit={handleSubmit} className="space-y-4">
 						{error && (
-							<div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm'>
+							<div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
 								{error}
 							</div>
 						)}
 
-						<div className='space-y-2'>
-							<Label htmlFor='name'>Name</Label>
+						<div className="space-y-2">
+							<Label htmlFor="name">Name</Label>
 							<Input
-								id='name'
-								type='text'
-								placeholder='John Doe'
+								id="name"
+								type="text"
+								placeholder="John Doe"
 								value={name}
-								onChange={(e) => setName(e.target.value)}
+								onChange={e => setName(e.target.value)}
 								required
 								disabled={isLoading}
 							/>
 						</div>
 
-						<div className='space-y-2'>
-							<Label htmlFor='email'>Email</Label>
+						<div className="space-y-2">
+							<Label htmlFor="email">Email</Label>
 							<Input
-								id='email'
-								type='email'
-								placeholder='you@example.com'
+								id="email"
+								type="email"
+								placeholder="you@example.com"
 								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								onChange={e => setEmail(e.target.value)}
 								required
 								disabled={isLoading}
 							/>
 						</div>
 
-						<div className='space-y-2'>
-							<Label htmlFor='password'>Password</Label>
+						<div className="space-y-2">
+							<Label htmlFor="password">Password</Label>
 							<Input
-								id='password'
-								type='password'
-								placeholder='••••••••'
+								id="password"
+								type="password"
+								placeholder="••••••••"
 								value={password}
-								onChange={(e) => setPassword(e.target.value)}
+								onChange={e => setPassword(e.target.value)}
 								required
 								disabled={isLoading}
 							/>
 						</div>
 
-						<div className='space-y-2'>
-							<Label htmlFor='confirmPassword'>Confirm Password</Label>
+						<div className="space-y-2">
+							<Label htmlFor="confirmPassword">Confirm Password</Label>
 							<Input
-								id='confirmPassword'
-								type='password'
-								placeholder='••••••••'
+								id="confirmPassword"
+								type="password"
+								placeholder="••••••••"
 								value={confirmPassword}
-								onChange={(e) => setConfirmPassword(e.target.value)}
+								onChange={e => setConfirmPassword(e.target.value)}
 								required
 								disabled={isLoading}
 							/>
 						</div>
 
-						<Button type='submit' className='w-full' disabled={isLoading}>
+						<Button type="submit" className="w-full" disabled={isLoading}>
 							{isLoading ? 'Creating account...' : 'Sign Up'}
 						</Button>
 
-						<p className='text-center text-sm text-gray-600'>
+						<p className="text-center text-sm text-gray-600">
 							Already have an account?{' '}
-							<Link to='/login' className='text-primary font-medium hover:underline'>
+							<Link
+								to="/login"
+								className="text-primary font-medium hover:underline"
+							>
 								Log in
 							</Link>
 						</p>
