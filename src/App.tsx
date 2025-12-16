@@ -8,6 +8,7 @@ import { ExpensesPage } from '@pages/ExpensesPage';
 import { LoginPage } from '@pages/LoginPage';
 import { ProfilePage } from '@pages/ProfilePage';
 import { RegisterPage } from '@pages/RegisterPage';
+import AuthCallback from '@pages/AuthCallback';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
 				<Routes>
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/register" element={<RegisterPage />} />
+					<Route path="/auth/callback" element={<AuthCallback />} />
 
 					<Route
 						path="/"

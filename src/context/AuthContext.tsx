@@ -4,10 +4,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 interface AuthContextType {
 	user: User | null;
 	token: string | null;
+	isAuthenticated: boolean;
 	login: (email: string, password: string) => Promise<void>;
 	register: (name: string, email: string, password: string) => Promise<void>;
 	logout: () => void;
 	updateUser: (user: User) => void;
+	setToken: (token: string) => void;
+	setUser: (user: User) => void;
+	setIsAuthenticated: (isAuthenticated: boolean) => void;
 	isLoading: boolean;
 }
 
@@ -18,6 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [token, setToken] = useState<string | null>(null);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -28,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (storedToken && storedUser) {
 			setToken(storedToken);
 			setUser(JSON.parse(storedUser));
+			setIsAuthenticated(true);
 		}
 		setIsLoading(false);
 	}, []);
@@ -41,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		setToken(token);
 		setUser(user);
+		setIsAuthenticated(true);
 	};
 
 	const register = async (name: string, email: string, password: string) => {
@@ -52,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		setToken(token);
 		setUser(user);
+		setIsAuthenticated(true);
 	};
 
 	const logout = () => {
@@ -59,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		localStorage.removeItem('user');
 		setToken(null);
 		setUser(null);
+		setIsAuthenticated(false);
 	};
 
 	const updateUser = (updatedUser: User) => {
@@ -68,7 +77,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	return (
 		<AuthContext.Provider
-			value={{ user, token, login, register, logout, updateUser, isLoading }}
+			value={{
+				user,
+				token,
+				isAuthenticated,
+				login,
+				register,
+				logout,
+				updateUser,
+				setToken,
+				setUser,
+				setIsAuthenticated,
+				isLoading,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>
