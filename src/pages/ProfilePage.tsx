@@ -139,7 +139,7 @@ export const ProfilePage = () => {
 								value={formData.name}
 								onChange={handleInputChange}
 								placeholder="Enter your name"
-								className="text-sm sm:text-base"
+								className="h-10"
 								required
 							/>
 						</div>
@@ -158,7 +158,7 @@ export const ProfilePage = () => {
 								value={formData.email}
 								onChange={handleInputChange}
 								placeholder="Enter your email"
-								className="text-sm sm:text-base"
+								className="h-10"
 								required
 							/>
 						</div>
@@ -184,7 +184,7 @@ export const ProfilePage = () => {
 									value={formData.password}
 									onChange={handleInputChange}
 									placeholder="Enter new password (leave blank to keep current)"
-									className="text-sm sm:text-base"
+									className="h-10"
 								/>
 							</div>
 
@@ -202,7 +202,7 @@ export const ProfilePage = () => {
 									value={formData.confirmPassword}
 									onChange={handleInputChange}
 									placeholder="Confirm new password"
-									className="text-sm sm:text-base"
+									className="h-10"
 								/>
 							</div>
 						</div>
@@ -230,12 +230,6 @@ export const ProfilePage = () => {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-2 text-xs sm:text-sm">
-						<div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-							<span className="text-gray-600">User ID:</span>
-							<span className="font-mono text-gray-900 break-all">
-								{user?.id}
-							</span>
-						</div>
 						<div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
 							<span className="text-gray-600">Account Created:</span>
 							<span className="text-gray-900">

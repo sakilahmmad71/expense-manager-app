@@ -23,6 +23,9 @@ export interface Category {
 	name: string;
 	color?: string;
 	icon?: string;
+	_count?: {
+		expenses: number;
+	};
 }
 
 export interface Expense {

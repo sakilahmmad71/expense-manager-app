@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
+	Area,
+	AreaChart,
 	Bar,
 	BarChart,
 	CartesianGrid,
@@ -150,6 +152,23 @@ export const DashboardPage = () => {
 			}))
 		: [];
 
+	// Calculate trend percentage
+	const calculateTrend = () => {
+		if (monthlyTrends.length < 2) return { percentage: 0, isIncrease: true };
+		const current = monthlyTrends[monthlyTrends.length - 1]?.total || 0;
+		const previous = monthlyTrends[monthlyTrends.length - 2]?.total || 0;
+		if (previous === 0) return { percentage: 0, isIncrease: current > 0 };
+		const percentage = ((current - previous) / previous) * 100;
+		return { percentage: Math.abs(percentage), isIncrease: percentage >= 0 };
+	};
+
+	const trend = calculateTrend();
+
+	// Top 5 categories for bar chart
+	const topCategories = categoryAnalytics
+		.sort((a, b) => b.totalAmount - a.totalAmount)
+		.slice(0, 5);
+
 	const stats = [
 		{
 			title: 'Total Expenses',
@@ -159,6 +178,11 @@ export const DashboardPage = () => {
 			icon: PiggyBank,
 			iconBg: 'bg-blue-100',
 			iconColor: 'text-blue-600',
+			trend:
+				trend.percentage > 0
+					? `${trend.isIncrease ? '↑' : '↓'} ${trend.percentage.toFixed(1)}%`
+					: undefined,
+			trendColor: trend.isIncrease ? 'text-red-600' : 'text-green-600',
 		},
 		{
 			title: 'Total Count',
@@ -224,7 +248,7 @@ export const DashboardPage = () => {
 				<CardContent>
 					<div className="flex flex-col sm:flex-row gap-4">
 						<div className="flex-1 space-y-2">
-							<Label htmlFor="startDate" className="text-xs sm:text-sm">
+							<Label htmlFor="startDate" className="text-sm">
 								Start Date
 							</Label>
 							<Input
@@ -234,10 +258,11 @@ export const DashboardPage = () => {
 								onChange={e =>
 									setDateFilter({ ...dateFilter, startDate: e.target.value })
 								}
+								className="h-10"
 							/>
 						</div>
 						<div className="flex-1 space-y-2">
-							<Label htmlFor="endDate" className="text-xs sm:text-sm">
+							<Label htmlFor="endDate" className="text-sm">
 								End Date
 							</Label>
 							<Input
@@ -247,6 +272,7 @@ export const DashboardPage = () => {
 								onChange={e =>
 									setDateFilter({ ...dateFilter, endDate: e.target.value })
 								}
+								className="h-10"
 							/>
 						</div>
 						<div className="flex items-end gap-2">
@@ -298,7 +324,14 @@ export const DashboardPage = () => {
 						<CardContent>
 							<div className="text-xl sm:text-2xl font-bold text-gray-900">
 								{stat.value}
-							</div>
+							</div>{' '}
+							{stat.trend && (
+								<p
+									className={`text-xs sm:text-sm font-medium mt-1 ${stat.trendColor}`}
+								>
+									{stat.trend} vs last month
+								</p>
+							)}{' '}
 						</CardContent>
 					</Card>
 				))}
@@ -326,6 +359,7 @@ export const DashboardPage = () => {
 								/>
 								<Bar
 									dataKey="totalAmount"
+									name="Total Amount"
 									fill="#3b82f6"
 									animationDuration={800}
 								/>
@@ -348,8 +382,37 @@ export const DashboardPage = () => {
 									data={categoryData}
 									cx="50%"
 									cy="50%"
-									labelLine={false}
-									label={entry => entry.name}
+									labelLine={true}
+									label={({
+										cx,
+										cy,
+										midAngle,
+										innerRadius,
+										outerRadius,
+										percent,
+										name,
+									}) => {
+										const RADIAN = Math.PI / 180;
+										const radius =
+											innerRadius + (outerRadius - innerRadius) * 1.3;
+										const x = cx + radius * Math.cos(-midAngle * RADIAN);
+										const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+										if (percent < 0.05) return null; // Hide labels for small slices
+
+										return (
+											<text
+												x={x}
+												y={y}
+												fill="#374151"
+												textAnchor={x > cx ? 'start' : 'end'}
+												dominantBaseline="central"
+												className="text-xs sm:text-sm font-medium"
+											>
+												{`${name} (${(percent * 100).toFixed(0)}%)`}
+											</text>
+										);
+									}}
 									outerRadius={80}
 									fill="#8884d8"
 									dataKey="value"
@@ -374,6 +437,88 @@ export const DashboardPage = () => {
 				</Card>
 			</div>
 
+			{/* Additional Charts */}
+			<div className="grid gap-4 md:grid-cols-2">
+				{/* Expense Trend Line Chart */}
+				<Card className="transition-shadow duration-300 hover:shadow-lg">
+					<CardHeader>
+						<CardTitle className="text-base sm:text-lg">
+							Expense Trend
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={300}>
+							<AreaChart data={monthlyTrends}>
+								<defs>
+									<linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+										<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+										<stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+									</linearGradient>
+								</defs>
+								<CartesianGrid strokeDasharray="3 3" />
+								<XAxis dataKey="monthName" tick={{ fontSize: 12 }} />
+								<YAxis tick={{ fontSize: 12 }} />
+								<Tooltip
+									formatter={value =>
+										formatCurrency(Number(value), primaryCurrency)
+									}
+								/>
+								<Area
+									type="monotone"
+									dataKey="totalAmount"
+									name="Total Amount"
+									stroke="#3b82f6"
+									fillOpacity={1}
+									fill="url(#colorTotal)"
+									animationDuration={800}
+								/>
+							</AreaChart>
+						</ResponsiveContainer>
+					</CardContent>
+				</Card>
+
+				{/* Top 5 Categories */}
+				<Card className="transition-shadow duration-300 hover:shadow-lg">
+					<CardHeader>
+						<CardTitle className="text-base sm:text-lg">
+							Top 5 Spending Categories
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<ResponsiveContainer width="100%" height={300}>
+							<BarChart data={topCategories} layout="vertical">
+								<CartesianGrid strokeDasharray="3 3" />
+								<XAxis type="number" tick={{ fontSize: 12 }} />
+								<YAxis
+									dataKey="category"
+									type="category"
+									tick={{ fontSize: 12 }}
+									width={100}
+								/>
+								<Tooltip
+									formatter={value =>
+										formatCurrency(Number(value), primaryCurrency)
+									}
+								/>
+								<Bar
+									dataKey="totalAmount"
+									name="Total Amount"
+									fill="#10b981"
+									animationDuration={800}
+								>
+									{topCategories.map((_entry, index) => (
+										<Cell
+											key={`cell-${index}`}
+											fill={COLORS[index % COLORS.length]}
+										/>
+									))}
+								</Bar>
+							</BarChart>
+						</ResponsiveContainer>
+					</CardContent>
+				</Card>
+			</div>
+
 			{/* Category Analytics Table */}
 			{categoryAnalytics.length > 0 && (
 				<Card>
@@ -391,13 +536,13 @@ export const DashboardPage = () => {
 											Category
 										</th>
 										<th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-											Total
+											Total Amount
 										</th>
 										<th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
 											Count
 										</th>
 										<th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-											Avg
+											Average
 										</th>
 									</tr>
 								</thead>
@@ -436,7 +581,7 @@ export const DashboardPage = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="space-y-3 sm:space-y-4">
+					<div className="space-y-3">
 						{recentExpenses.length === 0 ? (
 							<p className="text-center text-gray-500 py-8 text-sm sm:text-base">
 								No expenses yet
@@ -445,22 +590,55 @@ export const DashboardPage = () => {
 							recentExpenses.map((expense, index) => (
 								<div
 									key={expense.id}
-									className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-3 sm:pb-4 last:border-0 hover:bg-gray-50 transition-colors duration-200 rounded-lg p-2 sm:px-2 animate-in fade-in slide-in-from-left-2"
+									className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-bottom-2"
 									style={{
-										animationDelay: `${index * 100}ms`,
+										animationDelay: `${index * 50}ms`,
 										animationFillMode: 'backwards',
 									}}
 								>
-									<div className="min-w-0">
-										<p className="font-medium text-sm sm:text-base truncate">
-											{expense.title}
-										</p>
-										<p className="text-xs sm:text-sm text-gray-500">
-											{expense.category.name} • {formatDate(expense.date)}
-										</p>
+									{/* Mobile & Desktop Layout */}
+									<div className="flex items-start gap-3 flex-1 w-full">
+										<div
+											className="w-1 h-12 sm:h-14 rounded-full flex-shrink-0"
+											style={{}}
+										/>
+										<div className="flex-1 min-w-0">
+											<h3 className="font-semibold text-base sm:text-lg truncate">
+												{expense.title}
+											</h3>
+											<div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-1">
+												<span
+													className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+													style={{
+														backgroundColor: expense.category.color
+															? `${expense.category.color}20`
+															: '#dbeafe',
+														color: expense.category.color || '#1e40af',
+													}}
+												>
+													{expense.category.icon && (
+														<span className="mr-1">
+															{expense.category.icon}
+														</span>
+													)}
+													{expense.category.name}
+												</span>
+												<span className="hidden sm:inline">•</span>
+												<span className="text-xs">
+													{formatDate(expense.date)}
+												</span>
+											</div>
+											{expense.description && (
+												<p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
+													{expense.description}
+												</p>
+											)}
+										</div>
 									</div>
-									<div className="text-left sm:text-right flex-shrink-0">
-										<p className="font-semibold text-base sm:text-lg">
+
+									{/* Amount Display */}
+									<div className="text-left sm:text-right pl-4 sm:pl-0">
+										<p className="text-lg sm:text-xl font-bold whitespace-nowrap">
 											{formatCurrency(expense.amount, expense.currency)}
 										</p>
 									</div>
