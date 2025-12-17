@@ -10,9 +10,25 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Category, categoryAPI } from '@/lib/services';
-import { AlertTriangle, Edit, Plus, Tag, Trash2, X } from 'lucide-react';
+import {
+	AlertTriangle,
+	Edit,
+	Filter,
+	Plus,
+	Search,
+	Tag,
+	Trash2,
+	X,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const CategoriesPage = () => {
@@ -24,7 +40,10 @@ export const CategoriesPage = () => {
 		pages: 0,
 	});
 	const [categorySearch, setCategorySearch] = useState('');
-	const [categoriesPerPage] = useState(12);
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+	const [categoriesPerPage, setCategoriesPerPage] = useState(
+		parseInt(localStorage.getItem('categoriesPerPage') || '20')
+	);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 	const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -54,11 +73,27 @@ export const CategoriesPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const filteredCategories = categories.filter(category =>
-		categorySearch
-			? category.name.toLowerCase().includes(categorySearch.toLowerCase())
-			: true
-	);
+	const filteredCategories = categories
+		.filter(category =>
+			categorySearch
+				? category.name.toLowerCase().includes(categorySearch.toLowerCase())
+				: true
+		)
+		.sort((a, b) => {
+			const multiplier = sortOrder === 'asc' ? 1 : -1;
+			return a.name.localeCompare(b.name) * multiplier;
+		});
+
+	const handleClearFilters = () => {
+		setCategorySearch('');
+		setSortOrder('asc');
+	};
+
+	const handleLimitChange = (newLimit: number) => {
+		localStorage.setItem('categoriesPerPage', newLimit.toString());
+		setCategoriesPerPage(newLimit);
+		fetchCategories(1); // Reset to page 1 when limit changes
+	};
 
 	if (isLoading) {
 		return (
@@ -101,16 +136,66 @@ export const CategoriesPage = () => {
 				</Button>
 			</div>
 
-			{/* Search */}
+			{/* Search and Filters */}
 			<Card>
-				<CardContent className="p-4">
-					<Input
-						type="text"
-						placeholder="Search categories..."
-						value={categorySearch}
-						onChange={e => setCategorySearch(e.target.value)}
-						className="max-w-md"
-					/>
+				<CardHeader className="pb-3">
+					<div className="flex items-center justify-between">
+						<CardTitle className="flex items-center gap-2 text-base">
+							<Filter className="h-4 w-4" />
+							Search & Filter
+						</CardTitle>
+						{(categorySearch || sortOrder !== 'asc') && (
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={handleClearFilters}
+								className="h-8 text-xs"
+							>
+								Clear
+							</Button>
+						)}
+					</div>
+				</CardHeader>
+				<CardContent className="space-y-3 pt-0">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						{/* Search Input */}
+						<div className="space-y-1.5">
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								Search
+							</Label>
+							<div className="relative">
+								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+								<Input
+									type="text"
+									placeholder="Search categories..."
+									value={categorySearch}
+									onChange={e => setCategorySearch(e.target.value)}
+									className="h-10 pl-10"
+								/>
+							</div>
+						</div>
+
+						{/* Sort By Filter */}
+						<div className="space-y-1.5">
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								Sort By
+							</Label>
+							<Select
+								value={sortOrder}
+								onValueChange={value => {
+									setSortOrder(value as 'asc' | 'desc');
+								}}
+							>
+								<SelectTrigger className="h-10 text-sm">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="asc">Name A-Z</SelectItem>
+									<SelectItem value="desc">Name Z-A</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
 				</CardContent>
 			</Card>
 
@@ -172,17 +257,23 @@ export const CategoriesPage = () => {
 														{category.name}
 													</h3>
 												</div>
-												{category.color && (
-													<div className="flex items-center gap-2 text-xs text-gray-500">
-														<div
-															className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border"
-															style={{ backgroundColor: category.color }}
-														/>
-														<span className="font-mono text-[10px] sm:text-xs">
-															{category.color}
-														</span>
-													</div>
-												)}
+												<div className="space-y-1">
+													{category.color && (
+														<div className="flex items-center gap-2 text-xs text-gray-500">
+															<div
+																className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border"
+																style={{ backgroundColor: category.color }}
+															/>
+															<span className="font-mono text-[10px] sm:text-xs">
+																{category.color}
+															</span>
+														</div>
+													)}
+													<p className="text-xs text-gray-500">
+														Used in {category._count?.expenses ?? 0} expense
+														{category._count?.expenses !== 1 ? 's' : ''}
+													</p>
+												</div>
 											</div>
 											<div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
 												<Button
@@ -216,14 +307,33 @@ export const CategoriesPage = () => {
 							{/* Pagination */}
 							{categoryPagination.pages > 1 && (
 								<div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t">
-									<div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
-										Showing{' '}
-										{(categoryPagination.page - 1) * categoriesPerPage + 1} to{' '}
-										{Math.min(
-											categoryPagination.page * categoriesPerPage,
-											categoryPagination.total
-										)}{' '}
-										of {categoryPagination.total} categories
+									<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+										<span>Items per page:</span>
+										<Select
+											value={categoriesPerPage.toString()}
+											onValueChange={value =>
+												handleLimitChange(parseInt(value))
+											}
+										>
+											<SelectTrigger className="h-8 w-[70px]">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="10">10</SelectItem>
+												<SelectItem value="20">20</SelectItem>
+												<SelectItem value="50">50</SelectItem>
+												<SelectItem value="100">100</SelectItem>
+											</SelectContent>
+										</Select>
+										<span className="hidden sm:inline">
+											| Showing{' '}
+											{(categoryPagination.page - 1) * categoriesPerPage + 1} to{' '}
+											{Math.min(
+												categoryPagination.page * categoriesPerPage,
+												categoryPagination.total
+											)}{' '}
+											of {categoryPagination.total}
+										</span>
 									</div>
 									<div className="flex gap-1 sm:gap-2">
 										<Button
@@ -469,18 +579,66 @@ const CategoryModal = ({
 	};
 
 	const commonEmojis = [
-		'🍔',
-		'🚗',
-		'🛒',
-		'🎬',
-		'💡',
-		'🏥',
-		'📱',
-		'✈️',
-		'🏠',
-		'📚',
-		'💼',
-		'🎮',
+		'🍔', // Food & Dining
+		'🚗', // Transportation
+		'🛒', // Groceries/Shopping
+		'🎬', // Entertainment
+		'💡', // Bills & Utilities
+		'🏥', // Healthcare
+		'📱', // Electronics/Phone
+		'✈️', // Travel
+		'🏠', // Home/Rent
+		'📚', // Education
+		'💼', // Business/Work
+		'🎮', // Gaming
+		'☕', // Coffee/Cafe
+		'🍕', // Fast Food
+		'🥗', // Healthy Food
+		'🚕', // Taxi/Ride
+		'⛽', // Gas/Fuel
+		'🚌', // Public Transport
+		'🛍️', // Shopping
+		'👕', // Clothing
+		'👟', // Shoes
+		'💄', // Beauty/Cosmetics
+		'💆', // Personal Care
+		'🏋️', // Fitness/Gym
+		'🎵', // Music
+		'📺', // TV/Streaming
+		'🎨', // Art/Hobbies
+		'🐕', // Pet Care
+		'🌳', // Nature/Outdoor
+		'🔧', // Maintenance/Repair
+		'🧹', // Cleaning
+		'💳', // Credit Card/Payment
+		'💰', // Money/Finance
+		'🎁', // Gifts
+		'🎉', // Party/Events
+		'🏨', // Hotel
+		'🍷', // Wine/Bar
+		'🌮', // Restaurant
+		'🚰', // Water/Utilities
+		'⚡', // Electricity
+		'📡', // Internet
+		'📞', // Phone Bill
+		'💊', // Medicine
+		'🩺', // Doctor
+		'🦷', // Dental
+		'👓', // Optical
+		'📖', // Books
+		'✏️', // Stationery
+		'🎓', // School/Course
+		'🖥️', // Computer
+		'⌚', // Watch/Accessories
+		'🎧', // Audio
+		'📷', // Photography
+		'🎯', // Goals/Target
+		'📌', // Other/Misc
+		'🔖', // Subscription
+		'💼', // Office
+		'🏦', // Banking
+		'🚲', // Bicycle
+		'🏃', // Sports
 	];
 
 	return (

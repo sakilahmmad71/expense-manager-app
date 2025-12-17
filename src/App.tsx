@@ -8,6 +8,9 @@ import { ExpensesPage } from '@pages/ExpensesPage';
 import { LoginPage } from '@pages/LoginPage';
 import { ProfilePage } from '@pages/ProfilePage';
 import { RegisterPage } from '@pages/RegisterPage';
+import { PrivacyPage } from '@pages/PrivacyPage';
+import { TermsPage } from '@pages/TermsPage';
+import { SecurityPage } from '@pages/SecurityPage';
 import AuthCallback from '@pages/AuthCallback';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
@@ -33,6 +36,9 @@ function App() {
 						<Route path="expenses" element={<ExpensesPage />} />
 						<Route path="categories" element={<CategoriesPage />} />
 						<Route path="profile" element={<ProfilePage />} />
+						<Route path="privacy" element={<PrivacyPage />} />
+						<Route path="terms" element={<TermsPage />} />
+						<Route path="security" element={<SecurityPage />} />
 					</Route>
 
 					<Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -135,6 +135,33 @@ export const Layout = () => {
 			<footer className="hidden md:block bg-white border-t border-gray-200">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 					<div className="flex flex-col items-center justify-center space-y-6">
+						{/* Page Links */}
+						<div className="flex items-center gap-6 text-sm">
+							<Link
+								to="/privacy"
+								className="text-gray-600 hover:text-gray-900 transition-colors"
+							>
+								Privacy Policy
+							</Link>
+							<span className="text-gray-300">•</span>
+							<Link
+								to="/terms"
+								className="text-gray-600 hover:text-gray-900 transition-colors"
+							>
+								Terms & Conditions
+							</Link>
+							<span className="text-gray-300">•</span>
+							<Link
+								to="/security"
+								className="text-gray-600 hover:text-gray-900 transition-colors"
+							>
+								Security
+							</Link>
+						</div>
+
+						{/* Divider */}
+						<div className="w-full max-w-md border-t border-gray-200"></div>
+
 						{/* Social Links */}
 						<div className="flex items-center gap-6">
 							<a
