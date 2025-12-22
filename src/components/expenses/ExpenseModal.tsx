@@ -9,8 +9,8 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
-import { Category, Expense, expenseAPI, ExpenseInput } from '@/lib/services';
+import { Category, Expense, ExpenseInput } from '@/lib/services';
+import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +28,9 @@ export const ExpenseModal = ({
 	onClose,
 	onSuccess,
 }: ExpenseModalProps) => {
-	const { toast } = useToast();
 	const navigate = useNavigate();
+	const createExpense = useCreateExpense();
+	const updateExpense = useUpdateExpense();
 	const [selectedCurrency, setSelectedCurrency] = useState(() => {
 		return (
 			expense?.currency || localStorage.getItem('preferredCurrency') || 'USD'
@@ -73,7 +74,16 @@ export const ExpenseModal = ({
 
 	// Prevent background scroll when modal is open
 	useEffect(() => {
-		document.body.style.overflow = 'hidden';
+		// Calculate scrollbar width before hiding
+		const scrollbarWidth =
+			window.innerWidth - document.documentElement.clientWidth;
+		document.documentElement.style.setProperty(
+			'--scrollbar-width',
+			`${scrollbarWidth}px`
+		);
+
+		// Add modal-open class instead of inline style
+		document.body.classList.add('modal-open');
 
 		// Close modal on Escape key
 		const handleEscape = (e: KeyboardEvent) => {
@@ -85,7 +95,8 @@ export const ExpenseModal = ({
 		window.addEventListener('keydown', handleEscape);
 
 		return () => {
-			document.body.style.overflow = 'unset';
+			document.body.classList.remove('modal-open');
+			document.documentElement.style.removeProperty('--scrollbar-width');
 			window.removeEventListener('keydown', handleEscape);
 		};
 	}, [onClose]);
@@ -97,40 +108,25 @@ export const ExpenseModal = ({
 
 		try {
 			if (expense) {
-				await expenseAPI.update(expense.id, formData);
-				toast({
-					variant: 'success',
-					title: '✓ Expense updated',
-					description: `"${formData.title}" has been updated successfully.`,
-				});
+				await updateExpense.mutateAsync({ id: expense.id, data: formData });
 			} else {
-				await expenseAPI.create(formData);
-				toast({
-					variant: 'success',
-					title: '✓ Expense created',
-					description: `"${formData.title}" has been added successfully.`,
-				});
+				await createExpense.mutateAsync(formData);
 			}
+			// Close modal after successful mutation
+			onClose();
 			onSuccess();
 		} catch (err: unknown) {
+			// Error handling is done in the mutation hooks
+			// Only set local error for display purposes
 			if (err && typeof err === 'object' && 'response' in err) {
 				const axiosError = err as {
 					response?: { data?: { message?: string } };
 				};
-				if (axiosError.response?.data?.message === 'Unauthorized') {
-					toast({
-						variant: 'destructive',
-						title: '✗ Session expired',
-						description: 'Please log in again.',
-					});
-					navigate('/login');
-				} else {
+				if (axiosError.response?.data?.message !== 'Unauthorized') {
 					setError(
 						axiosError.response?.data?.message || 'Failed to save expense'
 					);
 				}
-			} else {
-				setError('Failed to save expense');
 			}
 		} finally {
 			setIsSubmitting(false);
@@ -145,14 +141,10 @@ export const ExpenseModal = ({
 
 	return (
 		<div
-			className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center p-4 z-[60] !m-0"
+			className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200"
 			onClick={handleBackdropClick}
-			style={{ animation: 'fadeIn 0.15s ease-out' }}
 		>
-			<div
-				className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-				style={{ animation: 'slideUp 0.2s ease-out' }}
-			>
+			<div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
 				<div className="p-6 border-b sticky top-0 bg-white z-10">
 					<h2 className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}

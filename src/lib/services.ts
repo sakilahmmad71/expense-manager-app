@@ -23,6 +23,8 @@ export interface Category {
 	name: string;
 	color?: string;
 	icon?: string;
+	createdAt: string;
+	updatedAt: string;
 	_count?: {
 		expenses: number;
 	};
@@ -50,6 +52,12 @@ export interface ExpenseInput {
 	date?: string;
 }
 
+export interface CategoryInput {
+	name: string;
+	color?: string;
+	icon?: string;
+}
+
 export interface DashboardSummary {
 	totalAmount: number;
 	totalCount: number;
@@ -74,6 +82,7 @@ export const expenseAPI = {
 		category?: string;
 		startDate?: string;
 		endDate?: string;
+		search?: string;
 	}) => api.get('/expenses', { params }),
 	getById: (id: string) => api.get(`/expenses/${id}`),
 	create: (data: ExpenseInput) => api.post('/expenses', data),
