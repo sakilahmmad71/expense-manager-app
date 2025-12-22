@@ -170,88 +170,119 @@ export const DashboardPage = () => {
 	];
 
 	return (
-		<div className="space-y-6">
-			{/* Header */}
-			<div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
-				<div>
-					<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-						Dashboard
-					</h1>
-					<p className="text-sm sm:text-base text-gray-600">
-						Overview of your expenses
-					</p>
+		<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+			<div className="space-y-6">
+				{/* Header */}
+				<div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300">
+					<div>
+						<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+							Dashboard
+						</h1>
+						<p className="text-sm sm:text-base text-gray-600">
+							Overview of your expenses
+						</p>
+					</div>
+				</div>
+
+				{/* Mixed Currency Warning */}
+				{hasMixedCurrencies && (
+					<div
+						className="animate-in fade-in slide-in-from-top-4 duration-300"
+						style={{ animationDelay: '50ms' }}
+					>
+						<MixedCurrencyWarning primaryCurrency={primaryCurrency} />
+					</div>
+				)}
+
+				{/* Date Filter */}
+				<div
+					className="animate-in fade-in slide-in-from-top-4 duration-300"
+					style={{ animationDelay: '100ms' }}
+				>
+					<DateRangeFilter
+						startDate={dateFilter.startDate}
+						endDate={dateFilter.endDate}
+						isFiltered={isFiltered}
+						isLoading={isLoading}
+						onStartDateChange={value =>
+							setDateFilter({ ...dateFilter, startDate: value })
+						}
+						onEndDateChange={value =>
+							setDateFilter({ ...dateFilter, endDate: value })
+						}
+						onApplyFilter={handleApplyFilter}
+						onClearFilter={handleClearFilter}
+					/>
+				</div>
+
+				{/* Stats Grid */}
+				<div
+					className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '150ms' }}
+				>
+					{stats.map((stat, index) => (
+						<StatCard key={stat.title} {...stat} index={index} />
+					))}
+				</div>
+
+				{/* Charts */}
+				<div
+					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '200ms' }}
+				>
+					<MonthlyTrendsChart
+						data={monthlyTrends}
+						primaryCurrency={primaryCurrency}
+						formatCurrency={formatCurrency}
+					/>
+					<CategoryBreakdownChart
+						data={categoryData}
+						primaryCurrency={primaryCurrency}
+						formatCurrency={formatCurrency}
+					/>
+				</div>
+
+				{/* Additional Charts */}
+				<div
+					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '250ms' }}
+				>
+					<ExpenseTrendChart
+						data={monthlyTrends}
+						primaryCurrency={primaryCurrency}
+						formatCurrency={formatCurrency}
+					/>
+					<TopCategoriesChart
+						data={topCategories}
+						primaryCurrency={primaryCurrency}
+						formatCurrency={formatCurrency}
+					/>
+				</div>
+
+				{/* Category Analytics Table */}
+				<div
+					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '300ms' }}
+				>
+					<CategoryAnalyticsTable
+						data={categoryAnalytics}
+						primaryCurrency={primaryCurrency}
+						formatCurrency={formatCurrency}
+					/>
+				</div>
+
+				{/* Recent Expenses */}
+				<div
+					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '350ms' }}
+				>
+					<RecentExpensesList
+						expenses={recentExpenses}
+						formatCurrency={formatCurrency}
+						formatDate={formatDate}
+					/>
 				</div>
 			</div>
-
-			{/* Mixed Currency Warning */}
-			{hasMixedCurrencies && (
-				<MixedCurrencyWarning primaryCurrency={primaryCurrency} />
-			)}
-
-			{/* Date Filter */}
-			<DateRangeFilter
-				startDate={dateFilter.startDate}
-				endDate={dateFilter.endDate}
-				isFiltered={isFiltered}
-				isLoading={isLoading}
-				onStartDateChange={value =>
-					setDateFilter({ ...dateFilter, startDate: value })
-				}
-				onEndDateChange={value =>
-					setDateFilter({ ...dateFilter, endDate: value })
-				}
-				onApplyFilter={handleApplyFilter}
-				onClearFilter={handleClearFilter}
-			/>
-
-			{/* Stats Grid */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				{stats.map((stat, index) => (
-					<StatCard key={stat.title} {...stat} index={index} />
-				))}
-			</div>
-
-			{/* Charts */}
-			<div className="grid gap-4 md:grid-cols-2">
-				<MonthlyTrendsChart
-					data={monthlyTrends}
-					primaryCurrency={primaryCurrency}
-					formatCurrency={formatCurrency}
-				/>
-				<CategoryBreakdownChart
-					data={categoryData}
-					primaryCurrency={primaryCurrency}
-					formatCurrency={formatCurrency}
-				/>
-			</div>
-
-			{/* Additional Charts */}
-			<div className="grid gap-4 md:grid-cols-2">
-				<ExpenseTrendChart
-					data={monthlyTrends}
-					primaryCurrency={primaryCurrency}
-					formatCurrency={formatCurrency}
-				/>
-				<TopCategoriesChart
-					data={topCategories}
-					primaryCurrency={primaryCurrency}
-					formatCurrency={formatCurrency}
-				/>
-			</div>
-
-			{/* Category Analytics Table */}
-			<CategoryAnalyticsTable
-				data={categoryAnalytics}
-				primaryCurrency={primaryCurrency}
-				formatCurrency={formatCurrency}
-			/>
-
-			{/* Recent Expenses */}
-			<RecentExpensesList
-				expenses={recentExpenses}
-				formatCurrency={formatCurrency}
-				formatDate={formatDate}
-			/>
 		</div>
 	);
 };

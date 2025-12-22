@@ -372,87 +372,115 @@ export const ExpensesPage = () => {
 
 	if (isLoading) {
 		return (
-			<div className="space-y-6 animate-in fade-in duration-500">
-				<div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
-				<div className="h-40 bg-gray-200 rounded-lg animate-pulse" />
-				<div className="h-40 bg-gray-200 rounded-lg animate-pulse" />
-				<div className="h-96 bg-gray-200 rounded-lg animate-pulse" />
+			<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+				<div className="space-y-6 animate-in fade-in duration-300">
+					<div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+					<div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
+					<div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
+					<div className="space-y-3">
+						{[...Array(5)].map((_, i) => (
+							<div
+								key={i}
+								className="h-24 bg-gray-200 rounded-lg animate-pulse"
+							/>
+						))}
+					</div>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-6">
-			<ExpenseHeader
-				selectedCount={selectedExpenses.length}
-				onAddExpense={() => openModal()}
-				onExport={exportToCSV}
-				onBulkDelete={handleBulkDelete}
-			/>
+		<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+			<div className="space-y-6">
+				<div className="animate-in fade-in slide-in-from-top-4 duration-300">
+					<ExpenseHeader
+						selectedCount={selectedExpenses.length}
+						onAddExpense={() => openModal()}
+						onExport={exportToCSV}
+						onBulkDelete={handleBulkDelete}
+					/>
+				</div>
 
-			<ExpenseFilters
-				monthFilter={monthFilter}
-				filters={filters}
-				categories={categories}
-				monthOptions={monthOptions}
-				sortBy={sortBy}
-				sortOrder={sortOrder}
-				isOpen={isFiltersOpen}
-				onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
-				onMonthFilterChange={setMonthFilter}
-				onFiltersChange={setFilters}
-				onSortChange={handleSortChange}
-				onClearFilters={handleClearFilters}
-				onDateRangeSelect={setDateRange}
-			/>
+				<div
+					className="animate-in fade-in slide-in-from-top-4 duration-300"
+					style={{ animationDelay: '100ms' }}
+				>
+					<ExpenseFilters
+						monthFilter={monthFilter}
+						filters={filters}
+						categories={categories}
+						monthOptions={monthOptions}
+						sortBy={sortBy}
+						sortOrder={sortOrder}
+						isOpen={isFiltersOpen}
+						onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
+						onMonthFilterChange={setMonthFilter}
+						onFiltersChange={setFilters}
+						onSortChange={handleSortChange}
+						onClearFilters={handleClearFilters}
+						onDateRangeSelect={setDateRange}
+					/>
+				</div>
 
-			<ExpenseSearch
-				searchQuery={searchQuery}
-				onSearchChange={setSearchQuery}
-			/>
+				<div
+					className="animate-in fade-in slide-in-from-top-4 duration-300"
+					style={{ animationDelay: '200ms' }}
+				>
+					<ExpenseSearch
+						searchQuery={searchQuery}
+						onSearchChange={setSearchQuery}
+					/>
+				</div>
 
-			<ExpenseList
-				expenses={filteredAndSortedExpenses}
-				selectedExpenses={selectedExpenses}
-				pagination={pagination}
-				onSelectExpense={toggleSelectExpense}
-				onSelectAll={toggleSelectAll}
-				onEdit={openModal}
-				onDelete={openDeleteDialog}
-				onPageChange={page => setFilters({ ...filters, page })}
-				onLimitChange={handleLimitChange}
-				onAddExpense={() => openModal()}
-				onExport={exportToCSV}
-				onBulkDelete={handleBulkDelete}
-			/>
+				<div
+					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+					style={{ animationDelay: '300ms' }}
+				>
+					<ExpenseList
+						expenses={filteredAndSortedExpenses}
+						selectedExpenses={selectedExpenses}
+						pagination={pagination}
+						onSelectExpense={toggleSelectExpense}
+						onSelectAll={toggleSelectAll}
+						onEdit={openModal}
+						onDelete={openDeleteDialog}
+						onPageChange={page => setFilters({ ...filters, page })}
+						onLimitChange={handleLimitChange}
+						onAddExpense={() => openModal()}
+						onExport={exportToCSV}
+						onBulkDelete={handleBulkDelete}
+					/>
+				</div>
 
-			{isModalOpen && (
-				<ExpenseModal
-					expense={editingExpense}
-					categories={categories}
-					onClose={closeModal}
-					onSuccess={() => {
-						closeModal();
-						fetchExpenses();
-					}}
+				{isModalOpen && (
+					<ExpenseModal
+						expense={editingExpense}
+						categories={categories}
+						onClose={closeModal}
+						onSuccess={() => {
+							closeModal();
+							fetchExpenses();
+						}}
+					/>
+				)}
+
+				<DeleteDialog
+					open={deleteDialogOpen}
+					expense={expenseToDelete}
+					onOpenChange={setDeleteDialogOpen}
+					onConfirm={handleDelete}
 				/>
-			)}
 
-			<DeleteDialog
-				open={deleteDialogOpen}
-				expense={expenseToDelete}
-				onOpenChange={setDeleteDialogOpen}
-				onConfirm={handleDelete}
-			/>
-
-			{/* Floating Action Button - Mobile Only */}
-			<button
-				onClick={() => openModal()}
-				className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
-				aria-label="Add expense"
-			>
-				<Plus className="h-6 w-6" />
-			</button>
+				{/* Floating Action Button - Mobile Only */}
+				<button
+					onClick={() => openModal()}
+					className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+					aria-label="Add expense"
+				>
+					<Plus className="h-6 w-6" />
+				</button>
+			</div>
 		</div>
 	);
 };

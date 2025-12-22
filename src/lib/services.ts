@@ -23,6 +23,8 @@ export interface Category {
 	name: string;
 	color?: string;
 	icon?: string;
+	createdAt: string;
+	updatedAt: string;
 	_count?: {
 		expenses: number;
 	};
