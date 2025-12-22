@@ -52,6 +52,12 @@ export interface ExpenseInput {
 	date?: string;
 }
 
+export interface CategoryInput {
+	name: string;
+	color?: string;
+	icon?: string;
+}
+
 export interface DashboardSummary {
 	totalAmount: number;
 	totalCount: number;

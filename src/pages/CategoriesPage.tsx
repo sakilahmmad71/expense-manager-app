@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import {
 	Plus,
 	Search,
@@ -24,33 +23,15 @@ import {
 	CategoryDeleteDialog,
 	CategoryDetailModal,
 } from '@/components/categories';
-import axios from 'axios';
 import type { Category } from '@/lib/services';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-interface CategoriesResponse {
-	categories: Category[];
-	pagination: {
-		page: number;
-		pages: number;
-		total: number;
-		limit: number;
-	};
-}
+import { useCategories, CategoriesData } from '@/hooks/useCategories';
 
 export function CategoriesPage() {
-	const navigate = useNavigate();
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
-	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [searchQuery, setSearchQuery] = useState(''); // For debounced server search
 	const [sortBy, setSortBy] = useState<string>('updatedAt');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [currentPage, setCurrentPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(1);
-	const [totalCount, setTotalCount] = useState(0);
 	const [limit, setLimit] = useState(
 		parseInt(localStorage.getItem('categoriesPerPage') || '20')
 	);
@@ -63,46 +44,41 @@ export function CategoriesPage() {
 		null
 	);
 
-	const fetchCategories = useCallback(async () => {
-		setLoading(true);
-		try {
-			const token = localStorage.getItem('token');
-			if (!token) {
-				navigate('/auth');
-				return;
-			}
+	// Fetch categories with React Query
+	const { data: categoriesData, isLoading: loading } = useCategories({
+		page: currentPage,
+		limit,
+		search: searchQuery,
+		sortBy,
+		sortOrder,
+	});
 
-			const params = new URLSearchParams({
-				page: currentPage.toString(),
-				limit: limit.toString(),
-				sortBy,
-				sortOrder,
-			});
+	// Extract data from queries with useMemo to avoid recreating on every render
+	const categories = useMemo(
+		() => (categoriesData as CategoriesData | undefined)?.categories || [],
+		[categoriesData]
+	);
+	const totalPages = useMemo(
+		() =>
+			(categoriesData as CategoriesData | undefined)?.pagination?.pages || 1,
+		[categoriesData]
+	);
+	const totalCount = useMemo(
+		() =>
+			(categoriesData as CategoriesData | undefined)?.pagination?.total || 0,
+		[categoriesData]
+	);
 
-			if (searchQuery) {
-				params.append('search', searchQuery);
-			}
-
-			const response = await axios.get<CategoriesResponse>(
-				`${API_URL}/categories?${params}`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				}
-			);
-
-			setCategories(response.data.categories || []);
-			setTotalPages(response.data.pagination?.pages || 1);
-			setTotalCount(response.data.pagination?.total || 0);
-		} catch (error) {
-			console.error('Error fetching categories:', error);
-			setCategories([]);
-			if (axios.isAxiosError(error) && error.response?.status === 401) {
-				navigate('/auth');
-			}
-		} finally {
-			setLoading(false);
+	// Client-side filtering for immediate feedback
+	const filteredCategories = useMemo(() => {
+		if (!searchTerm) {
+			return categories;
 		}
-	}, [currentPage, searchQuery, sortBy, sortOrder, limit, navigate]);
+
+		return categories.filter((category: Category) =>
+			category.name.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+	}, [categories, searchTerm]);
 
 	// Debounce search query to avoid excessive API calls
 	useEffect(() => {
@@ -115,23 +91,6 @@ export function CategoriesPage() {
 
 		return () => clearTimeout(timer);
 	}, [searchTerm, searchQuery]);
-
-	// Client-side filtering for immediate feedback
-	useEffect(() => {
-		if (!searchTerm) {
-			setFilteredCategories(categories);
-			return;
-		}
-
-		const filtered = categories.filter(category =>
-			category.name.toLowerCase().includes(searchTerm.toLowerCase())
-		);
-		setFilteredCategories(filtered);
-	}, [categories, searchTerm]);
-
-	useEffect(() => {
-		fetchCategories();
-	}, [fetchCategories]);
 
 	const handleCreateCategory = () => {
 		setSelectedCategory(null);
@@ -162,7 +121,7 @@ export function CategoriesPage() {
 	};
 
 	const handleModalSuccess = () => {
-		fetchCategories();
+		// React Query will automatically refetch after mutation
 		handleModalClose();
 	};
 
@@ -172,7 +131,7 @@ export function CategoriesPage() {
 	};
 
 	const handleDeleteSuccess = () => {
-		fetchCategories();
+		// React Query will automatically refetch after mutation
 		handleDeleteDialogClose();
 	};
 
@@ -312,7 +271,7 @@ export function CategoriesPage() {
 			{/* Categories Grid */}
 			{!loading && filteredCategories && filteredCategories.length > 0 && (
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-					{filteredCategories.map((category, index) => (
+					{filteredCategories.map((category: Category, index: number) => (
 						<CategoryCard
 							key={category.id}
 							category={category}

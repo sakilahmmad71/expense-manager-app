@@ -7,20 +7,16 @@ import {
 	ExpenseSearch,
 } from '@/components/expenses';
 import { useToast } from '@/components/ui/use-toast';
-import { Expense } from '@/lib/services';
+import { Category, categoryAPI, Expense, expenseAPI } from '@/lib/services';
 import { formatDate } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import {
-	useExpenses,
-	useDeleteExpense,
-	useBulkDeleteExpenses,
-	ExpensesData,
-} from '@/hooks/useExpenses';
-import { useCategories, CategoriesData } from '@/hooks/useCategories';
+import { useEffect, useState } from 'react';
 
 export const ExpensesPage = () => {
 	const { toast } = useToast();
+	const [expenses, setExpenses] = useState<Expense[]>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -42,40 +38,12 @@ export const ExpensesPage = () => {
 		startMonth: '',
 		endMonth: '',
 	});
-
-	// Fetch expenses with React Query
-	const { data: expensesData, isLoading: isLoadingExpenses } = useExpenses({
-		...filters,
-		sortBy,
-		sortOrder,
+	const [pagination, setPagination] = useState({
+		total: 0,
+		pages: 0,
+		page: 1,
+		limit: parseInt(localStorage.getItem('expensesPerPage') || '20'),
 	});
-
-	// Fetch categories with React Query
-	const { data: categoriesData } = useCategories({ page: 1, limit: 100 });
-
-	// Extract data from queries with useMemo to avoid recreating on every render
-	const expenses = useMemo(
-		() => (expensesData as ExpensesData | undefined)?.expenses || [],
-		[expensesData]
-	);
-	const pagination = useMemo(
-		() =>
-			(expensesData as ExpensesData | undefined)?.pagination || {
-				total: 0,
-				pages: 0,
-				page: 1,
-				limit: parseInt(localStorage.getItem('expensesPerPage') || '20'),
-			},
-		[expensesData]
-	);
-	const categories = useMemo(
-		() => (categoriesData as CategoriesData | undefined)?.categories || [],
-		[categoriesData]
-	);
-
-	// Mutations
-	const deleteExpense = useDeleteExpense();
-	const bulkDeleteExpenses = useBulkDeleteExpenses();
 
 	// Generate month options for the past 12 months and next month
 	const generateMonthOptions = () => {
@@ -111,7 +79,7 @@ export const ExpensesPage = () => {
 
 		return () => clearTimeout(timer);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchQuery]);
+	}, [searchQuery]); // Only re-run when searchQuery changes
 
 	// Apply month filter to date filters when month range changes
 	useEffect(() => {
@@ -151,7 +119,59 @@ export const ExpensesPage = () => {
 				page: 1,
 			}));
 		}
+		// Don't clear date filters when month filter is removed - allow manual date selection
 	}, [monthFilter]);
+
+	useEffect(() => {
+		fetchExpenses();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filters]);
+
+	useEffect(() => {
+		fetchCategories();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	const fetchCategories = async () => {
+		try {
+			// Fetch all categories without pagination for the dropdown
+			const response = await categoryAPI.getAll({ page: 1, limit: 100 });
+			setCategories(response.data.categories);
+		} catch (error) {
+			console.error('Failed to fetch categories:', error);
+			toast({
+				variant: 'destructive',
+				title: 'Error',
+				description: 'Failed to load categories. Please refresh the page.',
+			});
+		}
+	};
+
+	const fetchExpenses = async () => {
+		setIsLoading(true);
+		try {
+			const params: {
+				page: number;
+				limit: number;
+				categoryId?: number;
+				startDate?: string;
+				endDate?: string;
+				search?: string;
+			} = { page: filters.page, limit: filters.limit };
+			if (filters.category) params.categoryId = parseInt(filters.category, 10);
+			if (filters.startDate) params.startDate = filters.startDate;
+			if (filters.endDate) params.endDate = filters.endDate;
+			if (filters.search) params.search = filters.search;
+
+			const response = await expenseAPI.getAll(params);
+			setExpenses(response.data.expenses);
+			setPagination(response.data.pagination);
+		} catch (error) {
+			console.error('Failed to fetch expenses:', error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	const setDateRange = (
 		range: 'today' | 'week' | 'month' | 'lastMonth' | 'year'
@@ -191,8 +211,10 @@ export const ExpensesPage = () => {
 	};
 
 	const exportToCSV = () => {
+		// Function to properly escape CSV fields
 		const escapeCSVField = (field: string | number) => {
 			const str = String(field);
+			// If field contains comma, quote, or newline, wrap in quotes and escape quotes
 			if (
 				str.includes(',') ||
 				str.includes('"') ||
@@ -231,20 +253,18 @@ export const ExpensesPage = () => {
 		});
 	};
 
-	// Memoized sorted expenses
-	const filteredAndSortedExpenses = useMemo(() => {
-		return [...expenses].sort((a, b) => {
-			const multiplier = sortOrder === 'asc' ? 1 : -1;
-			if (sortBy === 'amount') {
-				return (a.amount - b.amount) * multiplier;
-			} else if (sortBy === 'category') {
-				return a.category.name.localeCompare(b.category.name) * multiplier;
-			}
-			return (
-				(new Date(a.date).getTime() - new Date(b.date).getTime()) * multiplier
-			);
-		});
-	}, [expenses, sortBy, sortOrder]);
+	// Server handles search filtering, we only need to sort client-side
+	const filteredAndSortedExpenses = expenses.sort((a, b) => {
+		const multiplier = sortOrder === 'asc' ? 1 : -1;
+		if (sortBy === 'amount') {
+			return (a.amount - b.amount) * multiplier;
+		} else if (sortBy === 'category') {
+			return a.category.name.localeCompare(b.category.name) * multiplier;
+		}
+		return (
+			(new Date(a.date).getTime() - new Date(b.date).getTime()) * multiplier
+		);
+	});
 
 	const toggleSelectExpense = (id: string) => {
 		setSelectedExpenses(prev =>
@@ -266,11 +286,23 @@ export const ExpensesPage = () => {
 		if (!confirm(`Delete ${selectedExpenses.length} selected expenses?`))
 			return;
 
-		bulkDeleteExpenses.mutate(selectedExpenses, {
-			onSuccess: () => {
-				setSelectedExpenses([]);
-			},
-		});
+		try {
+			await Promise.all(selectedExpenses.map(id => expenseAPI.delete(id)));
+			setExpenses(expenses.filter(e => !selectedExpenses.includes(e.id)));
+			setSelectedExpenses([]);
+			toast({
+				variant: 'success',
+				title: '✓ Expenses deleted',
+				description: `${selectedExpenses.length} expenses have been deleted successfully.`,
+			});
+		} catch (error) {
+			console.error('Failed to delete expenses:', error);
+			toast({
+				variant: 'destructive',
+				title: '✗ Failed to delete expenses',
+				description: 'Please try again later.',
+			});
+		}
 	};
 
 	const openDeleteDialog = (expense: Expense) => {
@@ -281,12 +313,24 @@ export const ExpensesPage = () => {
 	const handleDelete = async () => {
 		if (!expenseToDelete) return;
 
-		deleteExpense.mutate(expenseToDelete.id, {
-			onSuccess: () => {
-				setDeleteDialogOpen(false);
-				setExpenseToDelete(null);
-			},
-		});
+		try {
+			await expenseAPI.delete(expenseToDelete.id);
+			setExpenses(expenses.filter(e => e.id !== expenseToDelete.id));
+			toast({
+				variant: 'success',
+				title: '✓ Expense deleted',
+				description: `"${expenseToDelete.title}" has been deleted successfully.`,
+			});
+			setDeleteDialogOpen(false);
+			setExpenseToDelete(null);
+		} catch (error) {
+			console.error('Failed to delete expense:', error);
+			toast({
+				variant: 'destructive',
+				title: '✗ Failed to delete expense',
+				description: 'Please try again later.',
+			});
+		}
 	};
 
 	const openModal = (expense?: Expense) => {
@@ -301,14 +345,14 @@ export const ExpensesPage = () => {
 
 	const handleClearFilters = () => {
 		setMonthFilter({ startMonth: '', endMonth: '' });
-		setSearchQuery('');
+		setSearchQuery(''); // Clear search as well
 		setFilters({
 			category: '',
 			startDate: '',
 			endDate: '',
 			search: '',
 			page: 1,
-			limit: parseInt(localStorage.getItem('expensesPerPage') || '20'),
+			limit: 10,
 		});
 	};
 
@@ -323,9 +367,10 @@ export const ExpensesPage = () => {
 	const handleLimitChange = (newLimit: number) => {
 		localStorage.setItem('expensesPerPage', newLimit.toString());
 		setFilters({ ...filters, limit: newLimit, page: 1 });
+		setPagination({ ...pagination, limit: newLimit, page: 1 });
 	};
 
-	if (isLoadingExpenses) {
+	if (isLoading) {
 		return (
 			<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
 				<div className="space-y-6 animate-in fade-in duration-300">
@@ -362,13 +407,13 @@ export const ExpensesPage = () => {
 					style={{ animationDelay: '100ms' }}
 				>
 					<ExpenseFilters
-						isOpen={isFiltersOpen}
+						monthFilter={monthFilter}
+						filters={filters}
 						categories={categories}
 						monthOptions={monthOptions}
-						filters={filters}
-						monthFilter={monthFilter}
 						sortBy={sortBy}
 						sortOrder={sortOrder}
+						isOpen={isFiltersOpen}
 						onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
 						onMonthFilterChange={setMonthFilter}
 						onFiltersChange={setFilters}
@@ -407,34 +452,35 @@ export const ExpensesPage = () => {
 						onBulkDelete={handleBulkDelete}
 					/>
 				</div>
-			</div>
 
-			{isModalOpen && (
-				<ExpenseModal
-					expense={editingExpense}
-					categories={categories}
-					onClose={closeModal}
-					onSuccess={() => {
-						closeModal();
-					}}
+				{isModalOpen && (
+					<ExpenseModal
+						expense={editingExpense}
+						categories={categories}
+						onClose={closeModal}
+						onSuccess={() => {
+							closeModal();
+							fetchExpenses();
+						}}
+					/>
+				)}
+
+				<DeleteDialog
+					open={deleteDialogOpen}
+					expense={expenseToDelete}
+					onOpenChange={setDeleteDialogOpen}
+					onConfirm={handleDelete}
 				/>
-			)}
 
-			<DeleteDialog
-				open={deleteDialogOpen}
-				expense={expenseToDelete}
-				onOpenChange={setDeleteDialogOpen}
-				onConfirm={handleDelete}
-			/>
-
-			{/* Floating Action Button - Mobile Only */}
-			<button
-				onClick={() => openModal()}
-				className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
-				aria-label="Add expense"
-			>
-				<Plus className="h-6 w-6" />
-			</button>
+				{/* Floating Action Button - Mobile Only */}
+				<button
+					onClick={() => openModal()}
+					className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+					aria-label="Add expense"
+				>
+					<Plus className="h-6 w-6" />
+				</button>
+			</div>
 		</div>
 	);
 };

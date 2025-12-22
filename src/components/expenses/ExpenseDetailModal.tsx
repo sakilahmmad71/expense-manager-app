@@ -34,7 +34,16 @@ export const ExpenseDetailModal = ({
 }: ExpenseDetailModalProps) => {
 	// Prevent background scroll when modal is open
 	useEffect(() => {
-		document.body.style.overflow = 'hidden';
+		// Calculate scrollbar width before hiding
+		const scrollbarWidth =
+			window.innerWidth - document.documentElement.clientWidth;
+		document.documentElement.style.setProperty(
+			'--scrollbar-width',
+			`${scrollbarWidth}px`
+		);
+
+		// Add modal-open class instead of inline style
+		document.body.classList.add('modal-open');
 
 		// Close modal on Escape key
 		const handleEscape = (e: KeyboardEvent) => {
@@ -46,7 +55,8 @@ export const ExpenseDetailModal = ({
 		window.addEventListener('keydown', handleEscape);
 
 		return () => {
-			document.body.style.overflow = 'unset';
+			document.body.classList.remove('modal-open');
+			document.documentElement.style.removeProperty('--scrollbar-width');
 			window.removeEventListener('keydown', handleEscape);
 		};
 	}, [onClose]);

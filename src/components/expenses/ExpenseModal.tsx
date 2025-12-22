@@ -73,7 +73,16 @@ export const ExpenseModal = ({
 
 	// Prevent background scroll when modal is open
 	useEffect(() => {
-		document.body.style.overflow = 'hidden';
+		// Calculate scrollbar width before hiding
+		const scrollbarWidth =
+			window.innerWidth - document.documentElement.clientWidth;
+		document.documentElement.style.setProperty(
+			'--scrollbar-width',
+			`${scrollbarWidth}px`
+		);
+
+		// Add modal-open class instead of inline style
+		document.body.classList.add('modal-open');
 
 		// Close modal on Escape key
 		const handleEscape = (e: KeyboardEvent) => {
@@ -85,7 +94,8 @@ export const ExpenseModal = ({
 		window.addEventListener('keydown', handleEscape);
 
 		return () => {
-			document.body.style.overflow = 'unset';
+			document.body.classList.remove('modal-open');
+			document.documentElement.style.removeProperty('--scrollbar-width');
 			window.removeEventListener('keydown', handleEscape);
 		};
 	}, [onClose]);
@@ -145,14 +155,10 @@ export const ExpenseModal = ({
 
 	return (
 		<div
-			className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center p-4 z-[60] !m-0"
+			className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200"
 			onClick={handleBackdropClick}
-			style={{ animation: 'fadeIn 0.15s ease-out' }}
 		>
-			<div
-				className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-				style={{ animation: 'slideUp 0.2s ease-out' }}
-			>
+			<div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
 				<div className="p-6 border-b sticky top-0 bg-white z-10">
 					<h2 className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}

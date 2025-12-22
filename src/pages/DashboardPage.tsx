@@ -10,10 +10,11 @@ import {
 	StatCard,
 	TopCategoriesChart,
 } from '@/components/dashboard';
-import { dashboardAPI, DashboardSummary, Expense } from '@/lib/services';
+import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { FolderKanban, PiggyBank, Receipt, TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useDashboard } from '@/hooks/useDashboard';
 
 interface CategoryAnalytics {
 	categoryId: string;
@@ -26,71 +27,62 @@ interface CategoryAnalytics {
 }
 
 export const DashboardPage = () => {
-	const [summary, setSummary] = useState<DashboardSummary | null>(null);
-	const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [monthlyTrends, setMonthlyTrends] = useState<any[]>([]);
-	const [categoryAnalytics, setCategoryAnalytics] = useState<
-		CategoryAnalytics[]
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
 	const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
 	const [isFiltered, setIsFiltered] = useState(false);
 	const [hasMixedCurrencies, setHasMixedCurrencies] = useState(false);
 	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
 
-	const fetchData = async (filters?: {
-		startDate?: string;
-		endDate?: string;
-	}) => {
-		setIsLoading(true);
-		try {
-			const [summaryRes, recentRes, trendsRes, analyticsRes] =
-				await Promise.all([
-					dashboardAPI.getSummary(filters),
-					dashboardAPI.getRecentExpenses({ limit: 5 }),
-					dashboardAPI.getMonthlyTrends(),
-					dashboardAPI.getCategoryAnalytics(filters),
-				]);
+	// Fetch all dashboard data with React Query
+	const {
+		summary: summaryData,
+		recentExpenses: recentExpensesData,
+		monthlyTrends: monthlyTrendsData,
+		categoryAnalytics: categoryAnalyticsData,
+		isLoading,
+	} = useDashboard(isFiltered ? dateFilter : {});
 
-			setSummary(summaryRes.data.summary);
-			setRecentExpenses(recentRes.data.expenses);
-			setMonthlyTrends(trendsRes.data.trends);
-			setCategoryAnalytics(analyticsRes.data.categoryAnalytics);
+	// Cast data to proper types with useMemo to avoid recreating on every render
+	const summary = summaryData as DashboardSummary | undefined;
+	const recentExpenses = useMemo(
+		() => (recentExpensesData as Expense[] | undefined) || [],
+		[recentExpensesData]
+	);
+	const monthlyTrends = useMemo(
+		() =>
+			(monthlyTrendsData as
+				| Array<{ month: string; total: number }>
+				| undefined) || [],
+		[monthlyTrendsData]
+	);
+	const categoryAnalytics = useMemo(
+		() => (categoryAnalyticsData as CategoryAnalytics[] | undefined) || [],
+		[categoryAnalyticsData]
+	);
 
-			// Detect mixed currencies and primary currency
-			const currencies = new Set(
-				recentRes.data.expenses.map((e: Expense) => e.currency)
+	// Detect mixed currencies and primary currency
+	useMemo(() => {
+		if (!recentExpenses || recentExpenses.length === 0) return;
+
+		const currencies = new Set(recentExpenses.map((e: Expense) => e.currency));
+		setHasMixedCurrencies(currencies.size > 1);
+		if (currencies.size > 0) {
+			// Use the most common currency or the first one
+			const currencyCount = recentExpenses.reduce(
+				(acc: Record<string, number>, e: Expense) => {
+					acc[e.currency] = (acc[e.currency] || 0) + 1;
+					return acc;
+				},
+				{}
 			);
-			setHasMixedCurrencies(currencies.size > 1);
-			if (currencies.size > 0) {
-				// Use the most common currency or the first one
-				const currencyCount = recentRes.data.expenses.reduce(
-					(acc: Record<string, number>, e: Expense) => {
-						acc[e.currency] = (acc[e.currency] || 0) + 1;
-						return acc;
-					},
-					{}
-				);
-				const mostCommon = (
-					Object.entries(currencyCount) as Array<[string, number]>
-				).sort((a: [string, number], b: [string, number]) => b[1] - a[1])[0];
-				setPrimaryCurrency(mostCommon ? String(mostCommon[0]) : 'USD');
-			}
-		} catch (error) {
-			console.error('Failed to fetch dashboard data:', error);
-		} finally {
-			setIsLoading(false);
+			const mostCommon = (
+				Object.entries(currencyCount) as Array<[string, number]>
+			).sort((a: [string, number], b: [string, number]) => b[1] - a[1])[0];
+			setPrimaryCurrency(mostCommon ? String(mostCommon[0]) : 'USD');
 		}
-	};
-
-	useEffect(() => {
-		fetchData();
-	}, []);
+	}, [recentExpenses]);
 
 	const handleApplyFilter = () => {
 		if (dateFilter.startDate || dateFilter.endDate) {
-			fetchData(dateFilter);
 			setIsFiltered(true);
 		}
 	};
@@ -98,7 +90,6 @@ export const DashboardPage = () => {
 	const handleClearFilter = () => {
 		setDateFilter({ startDate: '', endDate: '' });
 		setIsFiltered(false);
-		fetchData();
 	};
 
 	if (isLoading) {
@@ -108,7 +99,7 @@ export const DashboardPage = () => {
 	const categoryData = summary?.categoryBreakdown
 		? Object.entries(summary.categoryBreakdown).map(([name, value]) => ({
 				name,
-				value,
+				value: value as number,
 			}))
 		: [];
 
@@ -126,7 +117,10 @@ export const DashboardPage = () => {
 
 	// Top 5 categories for bar chart
 	const topCategories = categoryAnalytics
-		.sort((a, b) => b.totalAmount - a.totalAmount)
+		.sort(
+			(a: CategoryAnalytics, b: CategoryAnalytics) =>
+				b.totalAmount - a.totalAmount
+		)
 		.slice(0, 5);
 
 	const stats = [

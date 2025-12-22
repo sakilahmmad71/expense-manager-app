@@ -56,7 +56,16 @@ export const CategoryDetailModal = ({
 	useEffect(() => {
 		if (!isOpen) return;
 
-		document.body.style.overflow = 'hidden';
+		// Calculate scrollbar width before hiding
+		const scrollbarWidth =
+			window.innerWidth - document.documentElement.clientWidth;
+		document.documentElement.style.setProperty(
+			'--scrollbar-width',
+			`${scrollbarWidth}px`
+		);
+
+		// Add modal-open class instead of inline style
+		document.body.classList.add('modal-open');
 
 		// Close modal on Escape key
 		const handleEscape = (e: KeyboardEvent) => {
@@ -68,7 +77,8 @@ export const CategoryDetailModal = ({
 		window.addEventListener('keydown', handleEscape);
 
 		return () => {
-			document.body.style.overflow = 'unset';
+			document.body.classList.remove('modal-open');
+			document.documentElement.style.removeProperty('--scrollbar-width');
 			window.removeEventListener('keydown', handleEscape);
 		};
 	}, [isOpen, onClose]);
@@ -79,13 +89,12 @@ export const CategoryDetailModal = ({
 
 	return (
 		<div
-			className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+			className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
 			onClick={onClose}
 		>
 			<div
-				className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
+				className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
 				onClick={e => e.stopPropagation()}
-				style={{ animation: 'slideUp 0.2s ease-out' }}
 			>
 				{/* Modal Header with Gradient */}
 				<div className="relative overflow-hidden">
