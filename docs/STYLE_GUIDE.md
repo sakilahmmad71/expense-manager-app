@@ -297,7 +297,7 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default: 'bg-black text-white hover:bg-black/90',
-				outline: 'border border-black hover:bg-black/10',
+				outline: 'border border-black hover:bg-black/30',
 			},
 			size: {
 				default: 'h-10 px-4 py-2',

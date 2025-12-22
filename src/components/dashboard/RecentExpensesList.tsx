@@ -1,0 +1,87 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Expense } from '@/lib/services';
+
+interface RecentExpensesListProps {
+	expenses: Expense[];
+	formatCurrency: (value: number, currency: string) => string;
+	formatDate: (date: string) => string;
+}
+
+export const RecentExpensesList = ({
+	expenses,
+	formatCurrency,
+	formatDate,
+}: RecentExpensesListProps) => {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="text-base sm:text-lg">Recent Expenses</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div className="space-y-3">
+					{expenses.length === 0 ? (
+						<p className="text-center text-gray-500 py-8 text-sm sm:text-base">
+							No expenses yet
+						</p>
+					) : (
+						expenses.map((expense, index) => (
+							<div
+								key={expense.id}
+								className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-bottom-2"
+								style={{
+									animationDelay: `${index * 50}ms`,
+									animationFillMode: 'backwards',
+								}}
+							>
+								{/* Mobile & Desktop Layout */}
+								<div className="flex items-start gap-3 flex-1 w-full">
+									<div
+										className="w-1 h-12 sm:h-14 rounded-full flex-shrink-0"
+										style={{}}
+									/>
+									<div className="flex-1 min-w-0">
+										<h3 className="font-semibold text-base sm:text-lg truncate">
+											{expense.title}
+										</h3>
+										<div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-1">
+											<span
+												className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+												style={{
+													backgroundColor: expense.category.color
+														? `${expense.category.color}20`
+														: '#dbeafe',
+													color: expense.category.color || '#1e40af',
+												}}
+											>
+												{expense.category.icon && (
+													<span className="mr-1">{expense.category.icon}</span>
+												)}
+												{expense.category.name}
+											</span>
+											<span className="hidden sm:inline">•</span>
+											<span className="text-xs">
+												{formatDate(expense.date)}
+											</span>
+										</div>
+										{expense.description && (
+											<p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
+												{expense.description}
+											</p>
+										)}
+									</div>
+								</div>
+
+								{/* Amount Display */}
+								<div className="text-left sm:text-right pl-4 sm:pl-0">
+									<p className="text-lg sm:text-xl font-bold whitespace-nowrap">
+										{formatCurrency(expense.amount, expense.currency)}
+									</p>
+								</div>
+							</div>
+						))
+					)}
+				</div>
+			</CardContent>
+		</Card>
+	);
+};

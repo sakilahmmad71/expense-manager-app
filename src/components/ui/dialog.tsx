@@ -4,7 +4,36 @@ import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-const Dialog = DialogPrimitive.Root;
+const Dialog = ({
+	onOpenChange,
+	open,
+	...props
+}: DialogPrimitive.DialogProps) => {
+	// Handle scrollbar width compensation when dialog opens
+	React.useEffect(() => {
+		if (open) {
+			// Calculate scrollbar width before hiding
+			const scrollbarWidth =
+				window.innerWidth - document.documentElement.clientWidth;
+			document.documentElement.style.setProperty(
+				'--scrollbar-width',
+				`${scrollbarWidth}px`
+			);
+
+			// Add modal-open class for scrollbar compensation
+			document.body.classList.add('modal-open');
+
+			return () => {
+				document.body.classList.remove('modal-open');
+				document.documentElement.style.removeProperty('--scrollbar-width');
+			};
+		}
+	}, [open]);
+
+	return (
+		<DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />
+	);
+};
 
 const DialogTrigger = DialogPrimitive.Trigger;
 
@@ -19,7 +48,7 @@ const DialogOverlay = React.forwardRef<
 	<DialogPrimitive.Overlay
 		ref={ref}
 		className={cn(
-			'fixed inset-0 z-50 bg-black/10 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+			'fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 			className
 		)}
 		{...props}
