@@ -74,6 +74,7 @@ export const expenseAPI = {
 		category?: string;
 		startDate?: string;
 		endDate?: string;
+		search?: string;
 	}) => api.get('/expenses', { params }),
 	getById: (id: string) => api.get(`/expenses/${id}`),
 	create: (data: ExpenseInput) => api.post('/expenses', data),

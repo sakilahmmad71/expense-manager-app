@@ -9,6 +9,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { Category, categoryAPI, Expense, expenseAPI } from '@/lib/services';
 import { formatDate } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const ExpensesPage = () => {
@@ -24,10 +25,12 @@ export const ExpensesPage = () => {
 	const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedExpenses, setSelectedExpenses] = useState<string[]>([]);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [filters, setFilters] = useState({
 		category: '',
 		startDate: '',
 		endDate: '',
+		search: '',
 		page: 1,
 		limit: parseInt(localStorage.getItem('expensesPerPage') || '20'),
 	});
@@ -61,6 +64,22 @@ export const ExpensesPage = () => {
 	};
 
 	const monthOptions = generateMonthOptions();
+
+	// Debounce search query to avoid excessive API calls
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (searchQuery !== filters.search) {
+				setFilters(prev => ({
+					...prev,
+					search: searchQuery,
+					page: 1, // Reset to first page on search
+				}));
+			}
+		}, 500); // 500ms debounce
+
+		return () => clearTimeout(timer);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchQuery]); // Only re-run when searchQuery changes
 
 	// Apply month filter to date filters when month range changes
 	useEffect(() => {
@@ -137,10 +156,12 @@ export const ExpensesPage = () => {
 				categoryId?: number;
 				startDate?: string;
 				endDate?: string;
+				search?: string;
 			} = { page: filters.page, limit: filters.limit };
 			if (filters.category) params.categoryId = parseInt(filters.category, 10);
 			if (filters.startDate) params.startDate = filters.startDate;
 			if (filters.endDate) params.endDate = filters.endDate;
+			if (filters.search) params.search = filters.search;
 
 			const response = await expenseAPI.getAll(params);
 			setExpenses(response.data.expenses);
@@ -232,24 +253,18 @@ export const ExpensesPage = () => {
 		});
 	};
 
-	const filteredAndSortedExpenses = expenses
-		.filter(
-			exp =>
-				exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				(exp.description &&
-					exp.description.toLowerCase().includes(searchQuery.toLowerCase()))
-		)
-		.sort((a, b) => {
-			const multiplier = sortOrder === 'asc' ? 1 : -1;
-			if (sortBy === 'amount') {
-				return (a.amount - b.amount) * multiplier;
-			} else if (sortBy === 'category') {
-				return a.category.name.localeCompare(b.category.name) * multiplier;
-			}
-			return (
-				(new Date(a.date).getTime() - new Date(b.date).getTime()) * multiplier
-			);
-		});
+	// Server handles search filtering, we only need to sort client-side
+	const filteredAndSortedExpenses = expenses.sort((a, b) => {
+		const multiplier = sortOrder === 'asc' ? 1 : -1;
+		if (sortBy === 'amount') {
+			return (a.amount - b.amount) * multiplier;
+		} else if (sortBy === 'category') {
+			return a.category.name.localeCompare(b.category.name) * multiplier;
+		}
+		return (
+			(new Date(a.date).getTime() - new Date(b.date).getTime()) * multiplier
+		);
+	});
 
 	const toggleSelectExpense = (id: string) => {
 		setSelectedExpenses(prev =>
@@ -330,10 +345,12 @@ export const ExpensesPage = () => {
 
 	const handleClearFilters = () => {
 		setMonthFilter({ startMonth: '', endMonth: '' });
+		setSearchQuery(''); // Clear search as well
 		setFilters({
 			category: '',
 			startDate: '',
 			endDate: '',
+			search: '',
 			page: 1,
 			limit: 10,
 		});
@@ -380,16 +397,18 @@ export const ExpensesPage = () => {
 				monthOptions={monthOptions}
 				sortBy={sortBy}
 				sortOrder={sortOrder}
+				isOpen={isFiltersOpen}
+				onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
 				onMonthFilterChange={setMonthFilter}
 				onFiltersChange={setFilters}
 				onSortChange={handleSortChange}
 				onClearFilters={handleClearFilters}
+				onDateRangeSelect={setDateRange}
 			/>
 
 			<ExpenseSearch
 				searchQuery={searchQuery}
 				onSearchChange={setSearchQuery}
-				onDateRangeSelect={setDateRange}
 			/>
 
 			<ExpenseList
@@ -425,6 +444,15 @@ export const ExpensesPage = () => {
 				onOpenChange={setDeleteDialogOpen}
 				onConfirm={handleDelete}
 			/>
+
+			{/* Floating Action Button - Mobile Only */}
+			<button
+				onClick={() => openModal()}
+				className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+				aria-label="Add expense"
+			>
+				<Plus className="h-6 w-6" />
+			</button>
 		</div>
 	);
 };

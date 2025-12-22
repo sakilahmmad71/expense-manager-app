@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Category } from '@/lib/services';
-import { Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 interface MonthFilter {
 	startMonth: string;
@@ -21,6 +21,7 @@ interface Filters {
 	category: string;
 	startDate: string;
 	endDate: string;
+	search: string;
 	page: number;
 	limit: number;
 }
@@ -32,6 +33,8 @@ interface ExpenseFiltersProps {
 	monthOptions: { value: string; label: string }[];
 	sortBy: 'date' | 'amount' | 'category';
 	sortOrder: 'asc' | 'desc';
+	isOpen: boolean;
+	onToggle: () => void;
 	onMonthFilterChange: (filter: MonthFilter) => void;
 	onFiltersChange: (filters: Filters) => void;
 	onSortChange: (
@@ -39,6 +42,9 @@ interface ExpenseFiltersProps {
 		order: 'asc' | 'desc'
 	) => void;
 	onClearFilters: () => void;
+	onDateRangeSelect: (
+		range: 'today' | 'week' | 'month' | 'lastMonth' | 'year'
+	) => void;
 }
 
 export const ExpenseFilters = ({
@@ -48,189 +54,274 @@ export const ExpenseFilters = ({
 	monthOptions,
 	sortBy,
 	sortOrder,
+	isOpen,
+	onToggle,
 	onMonthFilterChange,
 	onFiltersChange,
 	onSortChange,
 	onClearFilters,
+	onDateRangeSelect,
 }: ExpenseFiltersProps) => {
+	// Calculate active filter count
+	const activeFilterCount = [
+		filters.category,
+		monthFilter.startMonth,
+		monthFilter.endMonth,
+		filters.startDate,
+		filters.endDate,
+	].filter(Boolean).length;
+
 	return (
 		<Card>
-			<CardHeader className="pb-3">
+			{/* Collapsible Header - visible on all screen sizes */}
+			<CardHeader className="pb-3 md:pb-0">
 				<div className="flex items-center justify-between">
-					<CardTitle className="flex items-center gap-2 text-base">
+					<button
+						onClick={onToggle}
+						className="flex items-center gap-2 text-base font-semibold hover:text-primary transition-colors md:cursor-default md:pointer-events-none"
+					>
 						<Filter className="h-4 w-4" />
-						Filters
-					</CardTitle>
-					{(filters.category ||
-						monthFilter.startMonth ||
-						monthFilter.endMonth) && (
+						<span>Filters</span>
+						{activeFilterCount > 0 && (
+							<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
+								{activeFilterCount}
+							</span>
+						)}
+						<span className="md:hidden">
+							{isOpen ? (
+								<ChevronUp className="h-4 w-4" />
+							) : (
+								<ChevronDown className="h-4 w-4" />
+							)}
+						</span>
+					</button>
+					{activeFilterCount > 0 && (
 						<Button
 							variant="ghost"
 							size="sm"
 							onClick={onClearFilters}
 							className="h-8 text-xs"
 						>
-							Clear
+							Clear All
 						</Button>
 					)}
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-3 pt-0">
-				{/* Compact Filter Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					{/* Month Start */}
-					<div className="space-y-1.5">
-						<Label className="text-xs sm:text-sm text-muted-foreground">
-							Month
-						</Label>
-						<Select
-							value={monthFilter.startMonth || undefined}
-							onValueChange={value => {
-								onMonthFilterChange({ ...monthFilter, startMonth: value });
-							}}
-						>
-							<SelectTrigger className="h-10 text-sm">
-								<SelectValue placeholder="Select month" />
-							</SelectTrigger>
-							<SelectContent>
-								{monthOptions.map(month => (
-									<SelectItem key={month.value} value={month.value}>
-										{month.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
 
-					{/* Month End (Range) */}
-					<div className="space-y-1.5">
-						<Label className="text-xs sm:text-sm text-muted-foreground">
-							To Month
-						</Label>
-						<Select
-							value={monthFilter.endMonth || undefined}
-							onValueChange={value => {
-								onMonthFilterChange({ ...monthFilter, endMonth: value });
-							}}
-						>
-							<SelectTrigger className="h-10 text-sm">
-								<SelectValue placeholder="End (optional)" />
-							</SelectTrigger>
-							<SelectContent>
-								{monthOptions.map(month => (
-									<SelectItem key={month.value} value={month.value}>
-										{month.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-
-					{/* Category Filter */}
-					<div className="space-y-1.5">
-						<Label className="text-xs sm:text-sm text-muted-foreground">
-							Category
-						</Label>
-						<Select
-							value={filters.category || undefined}
-							onValueChange={value =>
-								onFiltersChange({ ...filters, category: value, page: 1 })
-							}
-						>
-							<SelectTrigger className="h-10 text-sm">
-								<SelectValue placeholder="All" />
-							</SelectTrigger>
-							<SelectContent>
-								{categories.map(category => (
-									<SelectItem key={category.id} value={category.id}>
-										<span className="flex items-center gap-2">
-											{category.icon && <span>{category.icon}</span>}
-											{category.name}
-										</span>
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-
-					{/* Sort Filter */}
-					<div className="space-y-1.5">
-						<Label className="text-xs sm:text-sm text-muted-foreground">
-							Sort By
-						</Label>
-						<Select
-							value={`${sortBy}-${sortOrder}`}
-							onValueChange={value => {
-								const [by, order] = value.split('-') as [
-									'date' | 'amount' | 'category',
-									'asc' | 'desc',
-								];
-								onSortChange(by, order);
-							}}
-						>
-							<SelectTrigger className="h-10 text-sm">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="date-desc">Date ↓</SelectItem>
-								<SelectItem value="date-asc">Date ↑</SelectItem>
-								<SelectItem value="amount-desc">Amount ↓</SelectItem>
-								<SelectItem value="amount-asc">Amount ↑</SelectItem>
-								<SelectItem value="category-asc">Category A-Z</SelectItem>
-								<SelectItem value="category-desc">Category Z-A</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-				</div>
-
-				{/* Custom Date Range - Compact */}
-				{(filters.startDate || filters.endDate) && (
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t">
+			{/* Collapsible Content - hidden on mobile by default, always visible on md+ */}
+			<div
+				className={`overflow-hidden transition-all duration-300 ease-in-out md:!block ${
+					isOpen
+						? 'max-h-[2000px] opacity-100'
+						: 'max-h-0 opacity-0 md:opacity-100 md:max-h-full'
+				}`}
+			>
+				<CardContent className="space-y-3 pt-3 md:pt-0">
+					{/* Compact Filter Grid */}
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+						{/* Month Start */}
 						<div className="space-y-1.5">
-							<Label
-								htmlFor="startDate"
-								className="text-xs sm:text-sm text-muted-foreground"
-							>
-								Start Date
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								Month
 							</Label>
-							<Input
-								id="startDate"
-								type="date"
-								value={filters.startDate}
-								onChange={e => {
-									onFiltersChange({
-										...filters,
-										startDate: e.target.value,
-										page: 1,
-									});
+							<Select
+								value={monthFilter.startMonth || undefined}
+								onValueChange={value => {
+									onMonthFilterChange({ ...monthFilter, startMonth: value });
 								}}
-								className="h-10"
-							/>
+							>
+								<SelectTrigger className="h-10 text-sm">
+									<SelectValue placeholder="Select month" />
+								</SelectTrigger>
+								<SelectContent>
+									{monthOptions.map(month => (
+										<SelectItem key={month.value} value={month.value}>
+											{month.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
+
+						{/* Month End (Range) */}
 						<div className="space-y-1.5">
-							<Label
-								htmlFor="endDate"
-								className="text-xs sm:text-sm text-muted-foreground"
-							>
-								End Date
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								To Month
 							</Label>
-							<Input
-								id="endDate"
-								type="date"
-								value={filters.endDate}
-								onChange={e => {
-									onFiltersChange({
-										...filters,
-										endDate: e.target.value,
-										page: 1,
-									});
+							<Select
+								value={monthFilter.endMonth || undefined}
+								onValueChange={value => {
+									onMonthFilterChange({ ...monthFilter, endMonth: value });
 								}}
-								className="h-10"
-							/>
+							>
+								<SelectTrigger className="h-10 text-sm">
+									<SelectValue placeholder="End (optional)" />
+								</SelectTrigger>
+								<SelectContent>
+									{monthOptions.map(month => (
+										<SelectItem key={month.value} value={month.value}>
+											{month.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						{/* Category Filter */}
+						<div className="space-y-1.5">
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								Category
+							</Label>
+							<Select
+								value={filters.category || undefined}
+								onValueChange={value =>
+									onFiltersChange({ ...filters, category: value, page: 1 })
+								}
+							>
+								<SelectTrigger className="h-10 text-sm">
+									<SelectValue placeholder="All" />
+								</SelectTrigger>
+								<SelectContent>
+									{categories.map(category => (
+										<SelectItem key={category.id} value={category.id}>
+											<span className="flex items-center gap-2">
+												{category.icon && <span>{category.icon}</span>}
+												{category.name}
+											</span>
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						{/* Sort Filter */}
+						<div className="space-y-1.5">
+							<Label className="text-xs sm:text-sm text-muted-foreground">
+								Sort By
+							</Label>
+							<Select
+								value={`${sortBy}-${sortOrder}`}
+								onValueChange={value => {
+									const [by, order] = value.split('-') as [
+										'date' | 'amount' | 'category',
+										'asc' | 'desc',
+									];
+									onSortChange(by, order);
+								}}
+							>
+								<SelectTrigger className="h-10 text-sm">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="date-desc">Date ↓</SelectItem>
+									<SelectItem value="date-asc">Date ↑</SelectItem>
+									<SelectItem value="amount-desc">Amount ↓</SelectItem>
+									<SelectItem value="amount-asc">Amount ↑</SelectItem>
+									<SelectItem value="category-asc">Category A-Z</SelectItem>
+									<SelectItem value="category-desc">Category Z-A</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
-				)}
-			</CardContent>
+
+					{/* Quick Date Filters */}
+					<div className="space-y-2 pt-3 border-t">
+						<Label className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+							Quick Filters
+						</Label>
+						<div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onDateRangeSelect('today')}
+								className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
+							>
+								Today
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onDateRangeSelect('week')}
+								className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
+							>
+								This Week
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onDateRangeSelect('month')}
+								className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
+							>
+								This Month
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onDateRangeSelect('lastMonth')}
+								className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
+							>
+								Last Month
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onDateRangeSelect('year')}
+								className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm col-span-2 sm:col-span-1"
+							>
+								This Year
+							</Button>
+						</div>
+					</div>
+
+					{/* Custom Date Range - Compact */}
+					{(filters.startDate || filters.endDate) && (
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t">
+							<div className="space-y-1.5">
+								<Label
+									htmlFor="startDate"
+									className="text-xs sm:text-sm text-muted-foreground"
+								>
+									Start Date
+								</Label>
+								<Input
+									id="startDate"
+									type="date"
+									value={filters.startDate}
+									onChange={e => {
+										onFiltersChange({
+											...filters,
+											startDate: e.target.value,
+											page: 1,
+										});
+									}}
+									className="h-10"
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<Label
+									htmlFor="endDate"
+									className="text-xs sm:text-sm text-muted-foreground"
+								>
+									End Date
+								</Label>
+								<Input
+									id="endDate"
+									type="date"
+									value={filters.endDate}
+									onChange={e => {
+										onFiltersChange({
+											...filters,
+											endDate: e.target.value,
+											page: 1,
+										});
+									}}
+									className="h-10"
+								/>
+							</div>
+						</div>
+					)}
+				</CardContent>
+			</div>
 		</Card>
 	);
 };

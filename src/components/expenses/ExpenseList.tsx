@@ -16,7 +16,6 @@ import {
 	Download,
 	Edit,
 	Package,
-	Plus,
 	Trash2,
 } from 'lucide-react';
 
@@ -52,7 +51,6 @@ export const ExpenseList = ({
 	onDelete,
 	onPageChange,
 	onLimitChange,
-	onAddExpense,
 	onExport,
 	onBulkDelete,
 }: ExpenseListProps) => {
@@ -117,18 +115,7 @@ export const ExpenseList = ({
 					{/* Mobile Action Buttons */}
 					<div className="md:hidden space-y-3">
 						<div className="flex gap-2">
-							{onAddExpense && (
-								<Button
-									onClick={onAddExpense}
-									size="sm"
-									className="flex-1 h-10 shadow-sm"
-								>
-									<Plus className="h-4 w-4 mr-2" />
-									<span className="font-medium">Add Expense</span>
-								</Button>
-							)}
-						</div>
-						<div className="flex gap-2">
+							{/* Removed Add Expense button - using FAB instead */}
 							{onBulkDelete && (
 								<Button
 									onClick={onBulkDelete}
@@ -202,10 +189,7 @@ export const ExpenseList = ({
 														onCheckedChange={() => onSelectExpense(expense.id)}
 														className="mt-1 flex-shrink-0"
 													/>
-													<div
-														className="w-1 h-12 sm:h-14 rounded-full flex-shrink-0"
-														style={{}}
-													/>
+													<div className="hidden md:block w-1 h-12 sm:h-14 rounded-full flex-shrink-0" />
 													<div className="flex-1 min-w-0">
 														<h3 className="font-semibold text-base sm:text-lg truncate">
 															{expense.title}
