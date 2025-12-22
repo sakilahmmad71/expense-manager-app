@@ -78,22 +78,26 @@ export const ExpenseFilters = ({
 				<div className="flex items-center justify-between">
 					<button
 						onClick={onToggle}
-						className="flex items-center gap-2 text-base font-semibold hover:text-primary transition-colors md:cursor-default md:pointer-events-none"
+						className="flex justify-between items-center gap-2 text-base font-semibold hover:text-primary transition-colors md:cursor-default md:pointer-events-none flex-1"
 					>
-						<Filter className="h-4 w-4" />
-						<span>Filters</span>
-						{activeFilterCount > 0 && (
-							<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
-								{activeFilterCount}
-							</span>
-						)}
-						<span className="md:hidden">
-							{isOpen ? (
-								<ChevronUp className="h-4 w-4" />
-							) : (
-								<ChevronDown className="h-4 w-4" />
+						<div className="flex items-center gap-2 mb-2 md:mb-5">
+							<Filter className="h-4 w-4" />
+							<span>Filters</span>
+						</div>
+						<div className="flex items-center gap-2">
+							{activeFilterCount > 0 && (
+								<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
+									{activeFilterCount}
+								</span>
 							)}
-						</span>
+							<span className="md:hidden">
+								{isOpen ? (
+									<ChevronUp className="h-4 w-4" />
+								) : (
+									<ChevronDown className="h-4 w-4" />
+								)}
+							</span>
+						</div>
 					</button>
 					{activeFilterCount > 0 && (
 						<Button

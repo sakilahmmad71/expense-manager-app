@@ -8,8 +8,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
-import { Category, categoryAPI } from '@/lib/services';
+import { Category } from '@/lib/services';
+import { useDeleteCategory } from '@/hooks/useCategories';
 import { AlertTriangle } from 'lucide-react';
 
 interface CategoryDeleteDialogProps {
@@ -25,7 +25,7 @@ export const CategoryDeleteDialog = ({
 	onClose,
 	onSuccess,
 }: CategoryDeleteDialogProps) => {
-	const { toast } = useToast();
+	const deleteCategory = useDeleteCategory();
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleDelete = async () => {
@@ -33,32 +33,13 @@ export const CategoryDeleteDialog = ({
 
 		setIsDeleting(true);
 		try {
-			await categoryAPI.delete(category.id);
-			toast({
-				variant: 'success',
-				title: '✓ Category deleted',
-				description: `"${category.name}" has been deleted successfully.`,
-			});
-			onSuccess();
+			await deleteCategory.mutateAsync(category.id);
+			// Close dialog after successful mutation
 			onClose();
-		} catch (error: unknown) {
-			const errorMessage =
-				typeof error === 'object' &&
-				error !== null &&
-				'response' in error &&
-				typeof error.response === 'object' &&
-				error.response !== null &&
-				'data' in error.response &&
-				typeof error.response.data === 'object' &&
-				error.response.data !== null &&
-				'error' in error.response.data
-					? String(error.response.data.error)
-					: 'Failed to delete category. Please try again.';
-			toast({
-				variant: 'destructive',
-				title: '✗ Failed to delete category',
-				description: errorMessage,
-			});
+			onSuccess();
+		} catch (_error: unknown) {
+			// Error handling is done in the mutation hook
+			// Only handle errors not covered by the hook
 		} finally {
 			setIsDeleting(false);
 		}

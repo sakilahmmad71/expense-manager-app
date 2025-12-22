@@ -264,6 +264,8 @@ export const useUpdateCategory = () => {
 			queryClient.invalidateQueries({ queryKey: categoryKeys.detail(id) });
 			queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Also invalidate expenses since they contain category references
+			queryClient.invalidateQueries({ queryKey: ['expenses'] });
 		},
 	});
 };
@@ -346,6 +348,8 @@ export const useDeleteCategory = () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Also invalidate expenses since they contain category references
+			queryClient.invalidateQueries({ queryKey: ['expenses'] });
 		},
 	});
 };

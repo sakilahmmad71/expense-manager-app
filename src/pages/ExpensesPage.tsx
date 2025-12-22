@@ -25,6 +25,7 @@ export const ExpensesPage = () => {
 	const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+	const [isBulkDeleteDialog, setIsBulkDeleteDialog] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -260,15 +261,18 @@ export const ExpensesPage = () => {
 		}
 	};
 
-	const handleBulkDelete = async () => {
+	const handleBulkDelete = () => {
 		if (selectedExpenses.length === 0) return;
+		setIsBulkDeleteDialog(true);
+		setDeleteDialogOpen(true);
+	};
 
-		if (!confirm(`Delete ${selectedExpenses.length} selected expenses?`))
-			return;
-
+	const confirmBulkDelete = () => {
 		bulkDeleteExpenses.mutate(selectedExpenses, {
 			onSuccess: () => {
 				setSelectedExpenses([]);
+				setDeleteDialogOpen(false);
+				setIsBulkDeleteDialog(false);
 			},
 		});
 	};
@@ -279,14 +283,16 @@ export const ExpensesPage = () => {
 	};
 
 	const handleDelete = async () => {
-		if (!expenseToDelete) return;
-
-		deleteExpense.mutate(expenseToDelete.id, {
-			onSuccess: () => {
-				setDeleteDialogOpen(false);
-				setExpenseToDelete(null);
-			},
-		});
+		if (isBulkDeleteDialog) {
+			confirmBulkDelete();
+		} else if (expenseToDelete) {
+			deleteExpense.mutate(expenseToDelete.id, {
+				onSuccess: () => {
+					setDeleteDialogOpen(false);
+					setExpenseToDelete(null);
+				},
+			});
+		}
 	};
 
 	const openModal = (expense?: Expense) => {
@@ -327,7 +333,7 @@ export const ExpensesPage = () => {
 
 	if (isLoadingExpenses) {
 		return (
-			<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+			<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 				<div className="space-y-6 animate-in fade-in duration-300">
 					<div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
 					<div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
@@ -346,7 +352,7 @@ export const ExpensesPage = () => {
 	}
 
 	return (
-		<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6">
 				<div className="animate-in fade-in slide-in-from-top-4 duration-300">
 					<ExpenseHeader
@@ -423,7 +429,14 @@ export const ExpensesPage = () => {
 			<DeleteDialog
 				open={deleteDialogOpen}
 				expense={expenseToDelete}
-				onOpenChange={setDeleteDialogOpen}
+				expenseCount={isBulkDeleteDialog ? selectedExpenses.length : undefined}
+				onOpenChange={open => {
+					setDeleteDialogOpen(open);
+					if (!open) {
+						setIsBulkDeleteDialog(false);
+						setExpenseToDelete(null);
+					}
+				}}
 				onConfirm={handleDelete}
 			/>
 

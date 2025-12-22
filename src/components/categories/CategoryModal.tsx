@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Category, categoryAPI } from '@/lib/services';
+import { Category } from '@/lib/services';
+import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
 import { useEffect, useState } from 'react';
 
 interface CategoryModalProps {
@@ -82,6 +83,8 @@ export const CategoryModal = ({
 	onSuccess,
 }: CategoryModalProps) => {
 	const { toast } = useToast();
+	const createCategory = useCreateCategory();
+	const updateCategory = useUpdateCategory();
 	const [formData, setFormData] = useState({
 		name: category?.name || '',
 		color: category?.color || '#3b82f6',
@@ -133,20 +136,12 @@ export const CategoryModal = ({
 
 		try {
 			if (category) {
-				await categoryAPI.update(category.id, formData);
-				toast({
-					variant: 'success',
-					title: '✓ Category updated',
-					description: `"${formData.name}" has been updated successfully.`,
-				});
+				await updateCategory.mutateAsync({ id: category.id, data: formData });
 			} else {
-				await categoryAPI.create(formData);
-				toast({
-					variant: 'success',
-					title: '✓ Category created',
-					description: `"${formData.name}" has been added successfully.`,
-				});
+				await createCategory.mutateAsync(formData);
 			}
+			// Close modal after successful mutation
+			onClose();
 			onSuccess();
 		} catch (err: unknown) {
 			const errorMessage =

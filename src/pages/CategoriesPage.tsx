@@ -172,7 +172,7 @@ export function CategoriesPage() {
 	};
 
 	return (
-		<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			{/* Header */}
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
 				<div>

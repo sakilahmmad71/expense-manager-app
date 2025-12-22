@@ -164,7 +164,7 @@ export const DashboardPage = () => {
 	];
 
 	return (
-		<div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 min-h-screen">
+		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6">
 				{/* Header */}
 				<div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300">

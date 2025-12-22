@@ -8,6 +8,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { CategoriesData } from './useCategories';
 
 // Type for the cached expenses data
 export interface ExpensesData {
@@ -107,14 +108,24 @@ export const useCreateExpense = () => {
 					const oldData = old as ExpensesData | undefined;
 					if (!oldData) return old;
 
-					// Find the category for the new expense
-					const categoryCache = queryClient.getQueryData<{
-						categories: Category[];
-					}>(['categories', 'all']);
-					const category =
-						categoryCache?.categories?.find(
-							(c: Category) => c.id === newExpense.categoryId
-						) || null;
+					// Find the category for the new expense from category cache
+					// Try to get from any category list query
+					let category: Category | null = null;
+					const categoryQueries = queryClient.getQueriesData<CategoriesData>({
+						queryKey: ['categories', 'list'],
+					});
+
+					for (const [, data] of categoryQueries) {
+						if (data?.categories) {
+							const found = data.categories.find(
+								(c: Category) => c.id === newExpense.categoryId
+							);
+							if (found) {
+								category = found;
+								break;
+							}
+						}
+					}
 
 					return {
 						...oldData,

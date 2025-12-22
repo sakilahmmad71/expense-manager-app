@@ -9,8 +9,8 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
-import { Category, Expense, expenseAPI, ExpenseInput } from '@/lib/services';
+import { Category, Expense, ExpenseInput } from '@/lib/services';
+import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +28,9 @@ export const ExpenseModal = ({
 	onClose,
 	onSuccess,
 }: ExpenseModalProps) => {
-	const { toast } = useToast();
 	const navigate = useNavigate();
+	const createExpense = useCreateExpense();
+	const updateExpense = useUpdateExpense();
 	const [selectedCurrency, setSelectedCurrency] = useState(() => {
 		return (
 			expense?.currency || localStorage.getItem('preferredCurrency') || 'USD'
@@ -107,40 +108,25 @@ export const ExpenseModal = ({
 
 		try {
 			if (expense) {
-				await expenseAPI.update(expense.id, formData);
-				toast({
-					variant: 'success',
-					title: '✓ Expense updated',
-					description: `"${formData.title}" has been updated successfully.`,
-				});
+				await updateExpense.mutateAsync({ id: expense.id, data: formData });
 			} else {
-				await expenseAPI.create(formData);
-				toast({
-					variant: 'success',
-					title: '✓ Expense created',
-					description: `"${formData.title}" has been added successfully.`,
-				});
+				await createExpense.mutateAsync(formData);
 			}
+			// Close modal after successful mutation
+			onClose();
 			onSuccess();
 		} catch (err: unknown) {
+			// Error handling is done in the mutation hooks
+			// Only set local error for display purposes
 			if (err && typeof err === 'object' && 'response' in err) {
 				const axiosError = err as {
 					response?: { data?: { message?: string } };
 				};
-				if (axiosError.response?.data?.message === 'Unauthorized') {
-					toast({
-						variant: 'destructive',
-						title: '✗ Session expired',
-						description: 'Please log in again.',
-					});
-					navigate('/login');
-				} else {
+				if (axiosError.response?.data?.message !== 'Unauthorized') {
 					setError(
 						axiosError.response?.data?.message || 'Failed to save expense'
 					);
 				}
-			} else {
-				setError('Failed to save expense');
 			}
 		} finally {
 			setIsSubmitting(false);

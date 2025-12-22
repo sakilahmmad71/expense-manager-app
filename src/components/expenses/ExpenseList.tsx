@@ -57,7 +57,7 @@ export const ExpenseList = ({
 }: ExpenseListProps) => {
 	const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
 
-	// Group expenses by month
+	// Group expenses by month, then by date
 	const groupedExpenses = expenses.reduce(
 		(groups, expense) => {
 			const date = new Date(expense.date);
@@ -67,19 +67,55 @@ export const ExpenseList = ({
 			});
 
 			if (!groups[monthYear]) {
-				groups[monthYear] = [];
+				groups[monthYear] = {};
 			}
-			groups[monthYear].push(expense);
+
+			const dateKey = date.toLocaleDateString('en-US', {
+				weekday: 'long',
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			});
+
+			if (!groups[monthYear][dateKey]) {
+				groups[monthYear][dateKey] = [];
+			}
+
+			groups[monthYear][dateKey].push(expense);
 			return groups;
 		},
-		{} as Record<string, Expense[]>
+		{} as Record<string, Record<string, Expense[]>>
 	);
 
-	const monthGroups = Object.entries(groupedExpenses).sort((a, b) => {
-		const dateA = new Date(a[1][0].date);
-		const dateB = new Date(b[1][0].date);
-		return dateB.getTime() - dateA.getTime();
-	});
+	const monthGroups: [string, [string, Expense[]][]][] = Object.entries(
+		groupedExpenses
+	)
+		.sort((a, b) => {
+			// Sort months by newest first
+			const dateA = new Date(Object.values(a[1])[0][0].date);
+			const dateB = new Date(Object.values(b[1])[0][0].date);
+			return dateB.getTime() - dateA.getTime();
+		})
+		.map(([monthYear, dateGroups]) => {
+			// Sort dates within each month
+			const sortedDates: [string, Expense[]][] = Object.entries(dateGroups)
+				.sort((a, b) => {
+					const dateA = new Date(a[1][0].date).getTime();
+					const dateB = new Date(b[1][0].date).getTime();
+					return dateB - dateA; // Newest date first
+				})
+				.map(([dateKey, dateExpenses]) => [
+					dateKey,
+					// Sort expenses within each date by createdAt
+					dateExpenses.sort((a, b) => {
+						const createdA = new Date(a.createdAt).getTime();
+						const createdB = new Date(b.createdAt).getTime();
+						return createdB - createdA; // Most recently created first
+					}),
+				]);
+
+			return [monthYear, sortedDates];
+		});
 
 	return (
 		<>
@@ -129,7 +165,11 @@ export const ExpenseList = ({
 										className="flex-1 h-10 shadow-sm"
 									>
 										<Trash2 className="h-4 w-4 mr-2" />
-										<span className="font-medium">Delete</span>
+										<span className="font-medium">
+											Delete{' '}
+											{selectedExpenses.length > 0 &&
+												`(${selectedExpenses.length})`}
+										</span>
 									</Button>
 								)}
 								{onExport && (
@@ -159,100 +199,136 @@ export const ExpenseList = ({
 						</div>
 					) : (
 						<>
-							{/* Grouped Card List View by Month */}
+							{/* Grouped Card List View by Month and Date */}
 							<div className="space-y-6">
-								{monthGroups.map(([monthYear, monthExpenses]) => (
-									<div key={monthYear} className="space-y-2">
-										{/* Month Header */}
-										<div className="flex items-center gap-2 pb-1">
-											<h3 className="text-sm font-semibold text-gray-700">
-												{monthYear}
-											</h3>
-											<div className="flex-1 h-px bg-gray-200"></div>
-											<span className="text-xs text-gray-500">
-												{monthExpenses.length} expense
-												{monthExpenses.length !== 1 ? 's' : ''}
-											</span>
-										</div>
+								{monthGroups.map(([monthYear, dateGroups]) => {
+									const totalMonthExpenses = dateGroups.reduce(
+										(sum, [, expenses]) => sum + expenses.length,
+										0
+									);
 
-										{/* Month Expenses */}
-										<div className="space-y-3">
-											{monthExpenses.map((expense, index) => (
-												<div
-													key={expense.id}
-													className="group relative bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-300 hover:shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-2"
-													style={{
-														animationDelay: `${index * 50}ms`,
-														animationFillMode: 'backwards',
-													}}
-												>
-													{/* Content Container */}
-													<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 pl-5 sm:pl-6">
-														{/* Checkbox */}
-														<Checkbox
-															checked={selectedExpenses.includes(expense.id)}
-															onCheckedChange={() =>
-																onSelectExpense(expense.id)
-															}
-															className="flex-shrink-0"
-														/>
+									return (
+										<div key={monthYear} className="space-y-4">
+											{/* Month Header */}
+											<div className="flex items-center gap-2 pb-1">
+												<h3 className="text-sm font-semibold text-gray-700">
+													{monthYear}
+												</h3>
+												<div className="flex-1 h-px bg-gray-200"></div>
+												<span className="text-xs text-gray-500">
+													{totalMonthExpenses} expense
+													{totalMonthExpenses !== 1 ? 's' : ''}
+												</span>
+											</div>
 
-														{/* Main Content */}
-														<div
-															className="flex-1 min-w-0 space-y-2 cursor-pointer"
-															onClick={() => setViewingExpense(expense)}
-															title="Click to view details"
-														>
-															{/* Title and Amount Row */}
-															<div className="flex items-start justify-between gap-3">
-																<h3 className="font-semibold text-lg text-gray-900 truncate">
-																	{expense.title}
-																</h3>
-																<p className="text-xl font-bold text-gray-900 whitespace-nowrap flex-shrink-0">
-																	{formatCurrency(
-																		expense.amount,
-																		expense.currency
-																	)}
-																</p>
-															</div>
+											{/* Date Groups within Month */}
+											<div className="space-y-4">
+												{dateGroups.map(([dateKey, dateExpenses]) => (
+													<div key={dateKey} className="space-y-2">
+														{/* Date Header */}
+														<div className="flex items-center gap-2 pl-2">
+															<h4 className="text-xs font-medium text-gray-600">
+																{dateKey}
+															</h4>
+															<div className="flex-1 h-px bg-gray-100"></div>
+															<span className="text-xs text-gray-400">
+																{dateExpenses.length}
+															</span>
+														</div>
 
-															{/* Category and Date Row */}
-															<div className="flex flex-wrap items-center gap-2 text-sm">
-																<span
-																	className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-colors"
+														{/* Expenses for this Date */}
+														<div className="space-y-3">
+															{dateExpenses.map((expense, index) => (
+																<div
+																	key={expense.id}
+																	className="group relative bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-300 hover:shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-2"
 																	style={{
-																		backgroundColor: expense.category.color
-																			? `${expense.category.color}15`
-																			: '#dbeafe',
-																		color: expense.category.color || '#1e40af',
+																		animationDelay: `${index * 50}ms`,
+																		animationFillMode: 'backwards',
 																	}}
 																>
-																	{expense.category.icon && (
-																		<span className="text-base">
-																			{expense.category.icon}
-																		</span>
-																	)}
-																	<span>{expense.category.name}</span>
-																</span>
-																<span className="text-gray-400">•</span>
-																<span className="text-gray-600 font-medium">
-																	{formatDate(expense.date)}
-																</span>
-															</div>
+																	{/* Content Container */}
+																	<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 pl-5 sm:pl-6">
+																		{/* Checkbox */}
+																		<Checkbox
+																			checked={selectedExpenses.includes(
+																				expense.id
+																			)}
+																			onCheckedChange={() =>
+																				onSelectExpense(expense.id)
+																			}
+																			className="flex-shrink-0"
+																		/>
 
-															{/* Description */}
-															{expense.description && (
-																<p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-																	{expense.description}
-																</p>
-															)}
+																		{/* Main Content */}
+																		<div
+																			className="flex-1 min-w-0 space-y-2 cursor-pointer"
+																			onClick={() => setViewingExpense(expense)}
+																			title="Click to view details"
+																		>
+																			{/* Title and Amount Row */}
+																			<div className="flex items-start justify-between gap-3">
+																				<h3 className="font-semibold text-lg text-gray-900 truncate">
+																					{expense.title}
+																				</h3>
+																				<p className="text-xl font-bold text-gray-900 whitespace-nowrap flex-shrink-0">
+																					{formatCurrency(
+																						expense.amount,
+																						expense.currency
+																					)}
+																				</p>
+																			</div>
+
+																			{/* Category and Date Row */}
+																			<div className="flex flex-wrap items-center gap-2 text-sm">
+																				{expense.category ? (
+																					<span
+																						className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-colors"
+																						style={{
+																							backgroundColor: expense.category
+																								.color
+																								? `${expense.category.color}15`
+																								: '#dbeafe',
+																							color:
+																								expense.category.color ||
+																								'#1e40af',
+																						}}
+																					>
+																						{expense.category.icon && (
+																							<span className="text-base">
+																								{expense.category.icon}
+																							</span>
+																						)}
+																						<span>{expense.category.name}</span>
+																					</span>
+																				) : (
+																					<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium bg-gray-100 text-gray-600">
+																						<span>Loading...</span>
+																					</span>
+																				)}
+																				<span className="text-gray-400">•</span>
+																				<span className="text-gray-600 font-medium">
+																					{formatDate(expense.date)}
+																				</span>
+																			</div>
+
+																			{/* Description */}
+																			{expense.description && (
+																				<p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+																					{expense.description}
+																				</p>
+																			)}
+																		</div>
+																	</div>
+																</div>
+															))}
 														</div>
-													</div>{' '}
-												</div>
-											))}
+													</div>
+												))}
+											</div>
 										</div>
-									</div>
-								))}
+									);
+								})}
 							</div>
 
 							{/* Pagination */}
