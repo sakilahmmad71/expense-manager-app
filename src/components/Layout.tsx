@@ -49,10 +49,9 @@ export const Layout = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex justify-between items-center h-16">
 						<Link to="/expenses" className="flex items-center gap-3">
-							<div className="h-10 w-10 bg-gray-900 rounded-lg flex items-center justify-center">
+							<div className="h-10 w-10 bg-blue-500 rounded-lg flex items-center justify-center">
 								<Wallet className="h-6 w-6 text-white" />
 							</div>
-							<h1 className="text-2xl font-bold text-gray-900">Expenser</h1>
 						</Link>
 
 						{/* Desktop Navigation */}
@@ -128,7 +127,7 @@ export const Layout = () => {
 				</div>
 			</header>{' '}
 			{/* Main Content */}
-			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-24 md:pb-8">
 				<Outlet />
 			</main>
 			{/* Footer - Hidden on mobile (bottom nav takes precedence) */}

@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Expense } from '@/lib/services';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -177,68 +171,43 @@ export const ExpenseDetailModal = ({
 
 			{/* Modal Footer with Actions */}
 			<div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-6 -mt-2">
-				<TooltipProvider delayDuration={200}>
-					<div className="flex gap-2">
-						{/* Delete Button - Left */}
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => {
-										onDelete(expense);
-										onClose();
-									}}
-									className="flex-1 sm:gap-2 h-11 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors justify-center"
-								>
-									<Trash2 className="h-4 w-4" />
-									<span className="hidden sm:inline">Delete</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent side="top" className="sm:hidden">
-								<p>Delete expense</p>
-							</TooltipContent>
-						</Tooltip>
+				<div className="flex justify-between items-center">
+					{/* Delete Button - Left */}
+					<Button
+						type="button"
+						onClick={() => {
+							onDelete(expense);
+							onClose();
+						}}
+						className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						title="Delete expense"
+					>
+						<Trash2 className="h-11 w-11" strokeWidth={3} />
+					</Button>
 
-						{/* Edit Button - Middle */}
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									type="button"
-									onClick={() => {
-										onEdit(expense);
-										onClose();
-									}}
-									className="flex-1 sm:gap-2 h-11 bg-black hover:bg-gray-800 text-white font-medium shadow-sm hover:shadow-md transition-all justify-center"
-								>
-									<Edit className="h-4 w-4" />
-									<span className="hidden sm:inline">Edit Expense</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent side="top" className="sm:hidden">
-								<p>Edit expense</p>
-							</TooltipContent>
-						</Tooltip>
+					{/* Edit Button - Center */}
+					<Button
+						type="button"
+						onClick={() => {
+							onEdit(expense);
+							onClose();
+						}}
+						className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						title="Edit expense"
+					>
+						<Edit className="h-11 w-11" strokeWidth={3} />
+					</Button>
 
-						{/* Close Button - Right */}
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									type="button"
-									variant="outline"
-									onClick={onClose}
-									className="flex-1 sm:gap-2 h-11 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-colors justify-center"
-								>
-									<X className="h-4 w-4" />
-									<span className="hidden sm:inline">Close</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent side="top" className="sm:hidden">
-								<p>Close modal</p>
-							</TooltipContent>
-						</Tooltip>
-					</div>
-				</TooltipProvider>
+					{/* Close Button - Right */}
+					<Button
+						type="button"
+						onClick={onClose}
+						className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						title="Close modal"
+					>
+						<X className="h-11 w-11" strokeWidth={3} />
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

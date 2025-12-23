@@ -10,11 +10,14 @@ import {
 	StatCard,
 	TopCategoriesChart,
 } from '@/components/dashboard';
+import { ExpenseModal } from '@/components/expenses';
 import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { FolderKanban, PiggyBank, Receipt, TrendingUp } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useCategories, CategoriesData } from '@/hooks/useCategories';
 
 interface CategoryAnalytics {
 	categoryId: string;
@@ -27,12 +30,32 @@ interface CategoryAnalytics {
 }
 
 export const DashboardPage = () => {
+	const navigate = useNavigate();
 	const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
 	const [isFiltered, setIsFiltered] = useState(false);
 	const [hasMixedCurrencies, setHasMixedCurrencies] = useState(false);
 	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
 
-	// Fetch all dashboard data with React Query
+	// Set document title and meta description
+	useEffect(() => {
+		document.title = 'Dashboard - Expense Manager';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'View your expense analytics, trends, and recent transactions'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'View your expense analytics, trends, and recent transactions';
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	const {
 		summary: summaryData,
 		recentExpenses: recentExpensesData,
@@ -40,6 +63,9 @@ export const DashboardPage = () => {
 		categoryAnalytics: categoryAnalyticsData,
 		isLoading,
 	} = useDashboard(isFiltered ? dateFilter : {});
+
+	// Fetch categories for the modal
+	const { data: categoriesData } = useCategories({ page: 1, limit: 100 });
 
 	// Cast data to proper types with useMemo to avoid recreating on every render
 	const summary = summaryData as DashboardSummary | undefined;
@@ -57,6 +83,12 @@ export const DashboardPage = () => {
 	const categoryAnalytics = useMemo(
 		() => (categoryAnalyticsData as CategoryAnalytics[] | undefined) || [],
 		[categoryAnalyticsData]
+	);
+
+	// Extract categories for the modal
+	const categories = useMemo(
+		() => (categoriesData as CategoriesData | undefined)?.categories || [],
+		[categoriesData]
 	);
 
 	// Detect mixed currencies and primary currency
@@ -167,7 +199,10 @@ export const DashboardPage = () => {
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6">
 				{/* Header */}
-				<div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300">
+				<div
+					className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300"
+					id="dashboard-header"
+				>
 					<div>
 						<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
 							Dashboard
@@ -176,6 +211,25 @@ export const DashboardPage = () => {
 							Overview of your expenses
 						</p>
 					</div>
+					<button
+						onClick={() => setIsModalOpen(true)}
+						className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 rounded-lg transition-colors duration-200"
+					>
+						<svg
+							className="w-4 h-4 sm:w-5 sm:h-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M12 4v16m8-8H4"
+							/>
+						</svg>
+						<span className="text-sm sm:text-base">Add Expense</span>
+					</button>
 				</div>
 
 				{/* Mixed Currency Warning */}
@@ -192,12 +246,15 @@ export const DashboardPage = () => {
 				<div
 					className="animate-in fade-in slide-in-from-top-4 duration-300"
 					style={{ animationDelay: '100ms' }}
+					id="date-filter"
 				>
 					<DateRangeFilter
 						startDate={dateFilter.startDate}
 						endDate={dateFilter.endDate}
 						isFiltered={isFiltered}
 						isLoading={isLoading}
+						isOpen={isDateFilterOpen}
+						onToggle={() => setIsDateFilterOpen(!isDateFilterOpen)}
 						onStartDateChange={value =>
 							setDateFilter({ ...dateFilter, startDate: value })
 						}
@@ -213,16 +270,18 @@ export const DashboardPage = () => {
 				<div
 					className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
 					style={{ animationDelay: '150ms' }}
+					id="stats-overview"
 				>
 					{stats.map((stat, index) => (
 						<StatCard key={stat.title} {...stat} index={index} />
 					))}
+					{/* Primary Charts */}
 				</div>
 
-				{/* Charts */}
 				<div
 					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
 					style={{ animationDelay: '200ms' }}
+					id="primary-charts"
 				>
 					<MonthlyTrendsChart
 						data={monthlyTrends}
@@ -240,6 +299,7 @@ export const DashboardPage = () => {
 				<div
 					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
 					style={{ animationDelay: '250ms' }}
+					id="trend-charts"
 				>
 					<ExpenseTrendChart
 						data={monthlyTrends}
@@ -256,6 +316,7 @@ export const DashboardPage = () => {
 				{/* Category Analytics Table */}
 				<div
 					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+					id="category-analytics"
 					style={{ animationDelay: '300ms' }}
 				>
 					<CategoryAnalyticsTable
@@ -269,6 +330,7 @@ export const DashboardPage = () => {
 				<div
 					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
 					style={{ animationDelay: '350ms' }}
+					id="recent-expenses"
 				>
 					<RecentExpensesList
 						expenses={recentExpenses}
@@ -276,6 +338,19 @@ export const DashboardPage = () => {
 						formatDate={formatDate}
 					/>
 				</div>
+
+				{/* Expense Modal */}
+				{isModalOpen && (
+					<ExpenseModal
+						expense={null}
+						categories={categories}
+						onClose={() => setIsModalOpen(false)}
+						onSuccess={() => {
+							setIsModalOpen(false);
+							navigate('/expenses');
+						}}
+					/>
+				)}
 			</div>
 		</div>
 	);
