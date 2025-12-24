@@ -28,6 +28,22 @@ export const LoginPage = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		// Set document title and meta description
+		document.title = 'Login - Expenser | Sign In to Your Account';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Sign in to your Expenser account to track expenses, manage budgets, and gain insights into your spending habits.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Sign in to your Expenser account to track expenses, manage budgets, and gain insights into your spending habits.';
+			document.head.appendChild(meta);
+		}
+
 		const savedEmail = localStorage.getItem('rememberedEmail');
 		if (savedEmail) {
 			setEmail(savedEmail);
@@ -73,7 +89,10 @@ export const LoginPage = () => {
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-			<Card className="w-full max-w-md">
+			<Card
+				id="login-form"
+				className="w-full max-w-md animate-in fade-in duration-300"
+			>
 				<CardHeader className="space-y-1">
 					<CardTitle className="text-3xl font-bold text-center">
 						Welcome Back

@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Expense } from '@/lib/services';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -279,7 +279,7 @@ export const ExpenseList = ({
 																				</p>
 																			</div>
 
-																			{/* Category and Date Row */}
+																			{/* Category Row */}
 																			<div className="flex flex-wrap items-center gap-2 text-sm">
 																				{expense.category ? (
 																					<span
@@ -306,10 +306,6 @@ export const ExpenseList = ({
 																						<span>Loading...</span>
 																					</span>
 																				)}
-																				<span className="text-gray-400">•</span>
-																				<span className="text-gray-600 font-medium">
-																					{formatDate(expense.date)}
-																				</span>
 																			</div>
 
 																			{/* Description */}

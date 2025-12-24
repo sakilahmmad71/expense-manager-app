@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleButton from '@/components/GoogleButton';
 import { Eye, EyeOff } from 'lucide-react';
@@ -31,6 +31,24 @@ export const RegisterPage = () => {
 		useState<PasswordStrength | null>(null);
 	const { register } = useAuth();
 	const navigate = useNavigate();
+
+	// Set document title and meta description
+	useEffect(() => {
+		document.title = 'Sign Up - Expenser | Create Your Free Account';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Create a free Expenser account to start tracking your expenses, managing budgets, and gaining financial insights.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Create a free Expenser account to start tracking your expenses, managing budgets, and gaining financial insights.';
+			document.head.appendChild(meta);
+		}
+	}, []);
 
 	const calculatePasswordStrength = (pwd: string): PasswordStrength => {
 		if (pwd.length === 0) return 'weak';
@@ -116,7 +134,10 @@ export const RegisterPage = () => {
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-			<Card className="w-full max-w-md">
+			<Card
+				id="register-form"
+				className="w-full max-w-md animate-in fade-in duration-300"
+			>
 				<CardHeader className="space-y-1">
 					<CardTitle className="text-3xl font-bold text-center">
 						Create Account

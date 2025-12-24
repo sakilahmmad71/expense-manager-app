@@ -8,6 +8,22 @@ const AuthCallback = () => {
 	const { setToken, setUser, setIsAuthenticated } = useAuth();
 
 	useEffect(() => {
+		// Set document title and meta description
+		document.title = 'Authenticating - Expenser | Signing You In';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Completing your authentication with Expenser. Please wait while we sign you in.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Completing your authentication with Expenser. Please wait while we sign you in.';
+			document.head.appendChild(meta);
+		}
+
 		const handleCallback = async () => {
 			try {
 				// Get token from URL parameters
@@ -65,7 +81,10 @@ const AuthCallback = () => {
 
 	return (
 		<div className="flex items-center justify-center min-h-screen">
-			<div className="text-center">
+			<div
+				id="auth-loading"
+				className="text-center animate-in fade-in duration-300"
+			>
 				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
 				<p className="mt-4 text-gray-600">Completing authentication...</p>
 			</div>
