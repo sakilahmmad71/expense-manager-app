@@ -1,11 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Lock, Database, Eye, FileText, UserCheck } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const PrivacyPage = () => {
+	// Set document title and meta description
+	useEffect(() => {
+		document.title =
+			'Privacy Policy - Expenser | Your Data Privacy & Protection';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Learn how Expenser protects your privacy and handles your financial data. Read our comprehensive privacy policy and data protection practices.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Learn how Expenser protects your privacy and handles your financial data. Read our comprehensive privacy policy and data protection practices.';
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	return (
 		<div className="max-w-4xl mx-auto space-y-6">
 			{/* Header */}
-			<div className="text-center space-y-2">
+			<div id="privacy-header" className="text-center space-y-2">
 				<h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
 					Privacy Policy
 				</h1>
@@ -16,7 +36,7 @@ export const PrivacyPage = () => {
 			</div>
 
 			{/* Introduction */}
-			<Card>
+			<Card id="privacy-introduction">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Shield className="h-5 w-5 text-blue-600" />
@@ -39,7 +59,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Data Collection */}
-			<Card>
+			<Card id="data-collection">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Database className="h-5 w-5 text-green-600" />
@@ -83,7 +103,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Data Usage */}
-			<Card>
+			<Card id="data-usage">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Eye className="h-5 w-5 text-purple-600" />
@@ -109,7 +129,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Data Security */}
-			<Card>
+			<Card id="data-security">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Lock className="h-5 w-5 text-red-600" />
@@ -156,7 +176,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Third-Party Services */}
-			<Card>
+			<Card id="third-party">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<UserCheck className="h-5 w-5 text-orange-600" />
@@ -183,7 +203,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* User Rights */}
-			<Card>
+			<Card id="user-rights">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<FileText className="h-5 w-5 text-indigo-600" />
@@ -226,7 +246,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Data Retention */}
-			<Card>
+			<Card id="data-retention">
 				<CardHeader>
 					<CardTitle>Data Retention</CardTitle>
 				</CardHeader>
@@ -245,7 +265,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Changes to Policy */}
-			<Card>
+			<Card id="policy-changes">
 				<CardHeader>
 					<CardTitle>Changes to This Policy</CardTitle>
 				</CardHeader>
@@ -260,7 +280,7 @@ export const PrivacyPage = () => {
 			</Card>
 
 			{/* Contact */}
-			<Card>
+			<Card id="privacy-contact">
 				<CardHeader>
 					<CardTitle>Contact Us</CardTitle>
 				</CardHeader>

@@ -9,12 +9,32 @@ import {
 	AlertCircle,
 	CheckCircle2,
 } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const SecurityPage = () => {
+	// Set document title and meta description
+	useEffect(() => {
+		document.title =
+			'Security Practices - Expenser | Data Protection & Security';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				"Learn about Expenser's security practices, data encryption, authentication methods, and how we protect your financial information."
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				"Learn about Expenser's security practices, data encryption, authentication methods, and how we protect your financial information.";
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
+		<div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
 			{/* Header */}
-			<div className="text-center space-y-2">
+			<div id="security-header" className="text-center space-y-2">
 				<h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
 					Security Practices
 				</h1>
@@ -24,7 +44,7 @@ export const SecurityPage = () => {
 			</div>
 
 			{/* Overview */}
-			<Card>
+			<Card id="security-commitment">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Shield className="h-5 w-5 text-blue-600" />
@@ -46,7 +66,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Data Encryption */}
-			<Card>
+			<Card id="data-encryption">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Lock className="h-5 w-5 text-green-600" />
@@ -103,7 +123,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Authentication */}
-			<Card>
+			<Card id="authentication">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Key className="h-5 w-5 text-purple-600" />
@@ -179,7 +199,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Database Security */}
-			<Card>
+			<Card id="database-security">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Database className="h-5 w-5 text-red-600" />
@@ -221,7 +241,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Infrastructure */}
-			<Card>
+			<Card id="infrastructure">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Server className="h-5 w-5 text-orange-600" />
@@ -302,7 +322,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Application Security */}
-			<Card>
+			<Card id="application-security">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Eye className="h-5 w-5 text-indigo-600" />
@@ -343,7 +363,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Monitoring */}
-			<Card>
+			<Card id="monitoring">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<AlertCircle className="h-5 w-5 text-yellow-600" />
@@ -379,7 +399,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Best Practices */}
-			<Card>
+			<Card id="best-practices">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -429,7 +449,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Open Source */}
-			<Card>
+			<Card id="open-source">
 				<CardHeader>
 					<CardTitle>Open Source & Transparency</CardTitle>
 				</CardHeader>
@@ -483,7 +503,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Responsible Disclosure */}
-			<Card>
+			<Card id="responsible-disclosure">
 				<CardHeader>
 					<CardTitle>Responsible Vulnerability Disclosure</CardTitle>
 				</CardHeader>
@@ -525,7 +545,7 @@ export const SecurityPage = () => {
 			</Card>
 
 			{/* Contact */}
-			<Card>
+			<Card id="security-contact">
 				<CardHeader>
 					<CardTitle>Security Contact</CardTitle>
 				</CardHeader>

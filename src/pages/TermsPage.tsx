@@ -7,12 +7,31 @@ import {
 	Scale,
 	Ban,
 } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const TermsPage = () => {
+	// Set document title and meta description
+	useEffect(() => {
+		document.title = 'Terms & Conditions - Expenser | User Agreement';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Read the Terms and Conditions for using Expenser. Understand your rights, responsibilities, and our service agreement.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Read the Terms and Conditions for using Expenser. Understand your rights, responsibilities, and our service agreement.';
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
+		<div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
 			{/* Header */}
-			<div className="text-center space-y-2">
+			<div id="terms-header" className="text-center space-y-2">
 				<h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
 					Terms and Conditions
 				</h1>
@@ -22,7 +41,7 @@ export const TermsPage = () => {
 			</div>
 
 			{/* Introduction */}
-			<Card>
+			<Card id="agreement-to-terms">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<FileText className="h-5 w-5 text-blue-600" />
@@ -44,7 +63,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Acceptance */}
-			<Card>
+			<Card id="use-of-service">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<CheckCircle className="h-5 w-5 text-green-600" />
@@ -104,7 +123,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* User Content */}
-			<Card>
+			<Card id="user-content">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Users className="h-5 w-5 text-purple-600" />
@@ -142,7 +161,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Intellectual Property */}
-			<Card>
+			<Card id="intellectual-property">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Scale className="h-5 w-5 text-indigo-600" />
@@ -169,7 +188,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Service Availability */}
-			<Card>
+			<Card id="service-availability">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -201,7 +220,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Termination */}
-			<Card>
+			<Card id="account-termination">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Ban className="h-5 w-5 text-red-600" />
@@ -229,7 +248,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Disclaimer */}
-			<Card>
+			<Card id="disclaimer">
 				<CardHeader>
 					<CardTitle>Disclaimer of Warranties</CardTitle>
 				</CardHeader>
@@ -254,7 +273,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Limitation of Liability */}
-			<Card>
+			<Card id="liability">
 				<CardHeader>
 					<CardTitle>Limitation of Liability</CardTitle>
 				</CardHeader>
@@ -274,7 +293,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Governing Law */}
-			<Card>
+			<Card id="governing-law">
 				<CardHeader>
 					<CardTitle>Governing Law and Disputes</CardTitle>
 				</CardHeader>
@@ -294,7 +313,7 @@ export const TermsPage = () => {
 			</Card>
 
 			{/* Changes to Terms */}
-			<Card>
+			<Card id="changes-to-terms">
 				<CardHeader>
 					<CardTitle>Changes to Terms</CardTitle>
 				</CardHeader>

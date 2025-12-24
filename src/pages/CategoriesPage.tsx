@@ -69,6 +69,24 @@ export function CategoriesPage() {
 		[categoriesData]
 	);
 
+	// Set document title and meta description
+	useEffect(() => {
+		document.title = 'Categories - Expenser | Organize Your Expenses';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Create and manage expense categories. Organize your spending with custom categories, icons, and colors.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Create and manage expense categories. Organize your spending with custom categories, icons, and colors.';
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	// Client-side filtering for immediate feedback
 	const filteredCategories = useMemo(() => {
 		if (!searchTerm) {
@@ -172,14 +190,15 @@ export function CategoriesPage() {
 	};
 
 	return (
-		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
+		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
 			{/* Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+			<div
+				id="categories-header"
+				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"
+			>
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-						Categories
-					</h1>
-					<p className="text-gray-600 dark:text-gray-400 mt-1">
+					<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+					<p className="text-muted-foreground mt-1">
 						Manage your expense categories
 					</p>
 				</div>
@@ -190,10 +209,7 @@ export function CategoriesPage() {
 			</div>
 
 			{/* Search and Filters */}
-			<Card
-				className="animate-in fade-in slide-in-from-top-4 duration-300"
-				style={{ animationDelay: '100ms' }}
-			>
+			<Card id="categories-filters">
 				<CardContent className="p-3 sm:p-4">
 					<div className="flex flex-col sm:flex-row gap-3">
 						{/* Search Bar */}
@@ -247,7 +263,7 @@ export function CategoriesPage() {
 
 			{/* Results count */}
 			{!loading && categories && (
-				<div className="mt-4 mb-4 animate-in fade-in duration-300">
+				<div className="mt-4 mb-4">
 					<p className="text-sm text-gray-600 dark:text-gray-400">
 						{searchTerm && filteredCategories.length !== categories.length
 							? `Showing ${filteredCategories.length} of ${categories.length} categories`
@@ -258,7 +274,7 @@ export function CategoriesPage() {
 
 			{/* Loading State */}
 			{loading && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6 animate-in fade-in duration-300">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
 					{[...Array(8)].map((_, i) => (
 						<div
 							key={i}
@@ -270,7 +286,10 @@ export function CategoriesPage() {
 
 			{/* Categories Grid */}
 			{!loading && filteredCategories && filteredCategories.length > 0 && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+				<div
+					id="categories-grid"
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6"
+				>
 					{filteredCategories.map((category: Category, index: number) => (
 						<CategoryCard
 							key={category.id}
@@ -284,7 +303,7 @@ export function CategoriesPage() {
 
 			{/* Empty State */}
 			{!loading && (!filteredCategories || filteredCategories.length === 0) && (
-				<div className="text-center py-12 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+				<div className="text-center py-12 mt-6">
 					<div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
 						<Filter className="h-8 w-8 text-gray-400" />
 					</div>

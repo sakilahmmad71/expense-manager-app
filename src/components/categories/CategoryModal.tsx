@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Category } from '@/lib/services';
 import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
+import { Check, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface CategoryModalProps {
@@ -264,22 +265,29 @@ export const CategoryModal = ({
 						</div>
 					</div>
 
-					<div className="flex gap-3 pt-4 sticky bottom-0 bg-white border-t -mx-6 px-6 py-4 mt-6">
+					<div className="flex justify-between items-center pt-6 sticky bottom-0 bg-white border-t -mx-6 px-6 py-4 mt-6">
 						<Button
 							type="button"
-							variant="outline"
 							onClick={onClose}
-							className="flex-1"
+							className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 							disabled={isSubmitting}
+							title="Cancel"
 						>
-							Cancel
+							<X className="h-11 w-11" strokeWidth={3} />
 						</Button>
-						<Button type="submit" className="flex-1" disabled={isSubmitting}>
-							{isSubmitting
-								? 'Saving...'
-								: category
-									? 'Update Category'
-									: 'Create Category'}
+						<Button
+							type="submit"
+							className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+							disabled={isSubmitting}
+							title={
+								isSubmitting
+									? 'Saving...'
+									: category
+										? 'Update Category'
+										: 'Create Category'
+							}
+						>
+							<Check className="h-11 w-11" strokeWidth={3} />
 						</Button>
 					</div>
 				</form>

@@ -20,6 +20,22 @@ export const ProfilePage = () => {
 	});
 
 	useEffect(() => {
+		// Set document title and meta description
+		document.title = 'Profile Settings - Expenser | Manage Your Account';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'Manage your Expenser account settings, update personal information, and change your password.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'Manage your Expenser account settings, update personal information, and change your password.';
+			document.head.appendChild(meta);
+		}
+
 		if (user) {
 			setFormData({
 				name: user.name || '',
@@ -106,8 +122,8 @@ export const ProfilePage = () => {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="mb-8">
+		<div className="space-y-6 animate-in fade-in duration-300">
+			<div id="profile-header" className="mb-8">
 				<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
 					Profile Settings
 				</h1>
@@ -116,7 +132,7 @@ export const ProfilePage = () => {
 				</p>
 			</div>
 
-			<Card>
+			<Card id="personal-information">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-base sm:text-lg">
 						<User className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -222,7 +238,7 @@ export const ProfilePage = () => {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card id="account-information">
 				<CardHeader>
 					<CardTitle className="text-base sm:text-lg">
 						Account Information

@@ -78,6 +78,24 @@ export const ExpensesPage = () => {
 	const deleteExpense = useDeleteExpense();
 	const bulkDeleteExpenses = useBulkDeleteExpenses();
 
+	// Set document title and meta description
+	useEffect(() => {
+		document.title = 'Expenses - Expenser | Manage Your Expenses';
+		const metaDescription = document.querySelector('meta[name="description"]');
+		if (metaDescription) {
+			metaDescription.setAttribute(
+				'content',
+				'View, filter, and manage all your expenses. Sort by date, amount, or category. Export data and track spending patterns.'
+			);
+		} else {
+			const meta = document.createElement('meta');
+			meta.name = 'description';
+			meta.content =
+				'View, filter, and manage all your expenses. Sort by date, amount, or category. Export data and track spending patterns.';
+			document.head.appendChild(meta);
+		}
+	}, []);
+
 	// Generate month options for the past 12 months and next month
 	const generateMonthOptions = () => {
 		const months = [];
@@ -333,8 +351,8 @@ export const ExpensesPage = () => {
 
 	if (isLoadingExpenses) {
 		return (
-			<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
-				<div className="space-y-6 animate-in fade-in duration-300">
+			<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
+				<div className="space-y-6">
 					<div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
 					<div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
 					<div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
@@ -352,9 +370,9 @@ export const ExpensesPage = () => {
 	}
 
 	return (
-		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
+		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
 			<div className="space-y-6">
-				<div className="animate-in fade-in slide-in-from-top-4 duration-300">
+				<div id="expenses-header">
 					<ExpenseHeader
 						selectedCount={selectedExpenses.length}
 						onAddExpense={() => openModal()}
@@ -363,10 +381,7 @@ export const ExpensesPage = () => {
 					/>
 				</div>
 
-				<div
-					className="animate-in fade-in slide-in-from-top-4 duration-300"
-					style={{ animationDelay: '100ms' }}
-				>
+				<div id="expenses-filters">
 					<ExpenseFilters
 						isOpen={isFiltersOpen}
 						categories={categories}
@@ -384,20 +399,14 @@ export const ExpensesPage = () => {
 					/>
 				</div>
 
-				<div
-					className="animate-in fade-in slide-in-from-top-4 duration-300"
-					style={{ animationDelay: '200ms' }}
-				>
+				<div id="expenses-search">
 					<ExpenseSearch
 						searchQuery={searchQuery}
 						onSearchChange={setSearchQuery}
 					/>
 				</div>
 
-				<div
-					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '300ms' }}
-				>
+				<div id="expenses-list">
 					<ExpenseList
 						expenses={filteredAndSortedExpenses}
 						selectedExpenses={selectedExpenses}
