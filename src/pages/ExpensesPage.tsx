@@ -265,6 +265,37 @@ export const ExpensesPage = () => {
 		});
 	}, [expenses, sortBy, sortOrder]);
 
+	// Calculate total of selected expenses
+	const selectedExpensesTotal = useMemo(() => {
+		if (selectedExpenses.length === 0) return 0;
+		return filteredAndSortedExpenses
+			.filter(exp => selectedExpenses.includes(exp.id))
+			.reduce((sum, exp) => sum + exp.amount, 0);
+	}, [selectedExpenses, filteredAndSortedExpenses]);
+
+	// Get currency from the first selected expense
+	const selectedCurrency = useMemo(() => {
+		if (selectedExpenses.length === 0) return 'BDT';
+		const firstSelectedExpense = filteredAndSortedExpenses.find(exp =>
+			selectedExpenses.includes(exp.id)
+		);
+		return firstSelectedExpense?.currency || 'BDT';
+	}, [selectedExpenses, filteredAndSortedExpenses]);
+
+	// Currency symbol mapping
+	const getCurrencySymbol = (currency: string) => {
+		const symbols: Record<string, string> = {
+			BDT: '৳',
+			USD: '$',
+			EUR: '€',
+			GBP: '£',
+			INR: '₹',
+			JPY: '¥',
+			CNY: '¥',
+		};
+		return symbols[currency] || currency;
+	};
+
 	const toggleSelectExpense = (id: string) => {
 		setSelectedExpenses(prev =>
 			prev.includes(id) ? prev.filter(expId => expId !== id) : [...prev, id]
@@ -423,6 +454,32 @@ export const ExpensesPage = () => {
 					/>
 				</div>
 			</div>
+
+			{/* Selected Expenses Total - Responsive Positioning */}
+			{selectedExpenses.length > 0 && (
+				<div
+					className="fixed z-50 animate-in fade-in slide-in-from-bottom-4 duration-300
+						top-4 left-1/2 -translate-x-1/2
+						md:top-auto md:bottom-6"
+				>
+					<div className="bg-white text-gray-900 px-5 py-3 rounded-full shadow-lg border-2 border-gray-200">
+						<div className="flex items-center gap-3">
+							<span className="text-sm font-medium text-gray-700">
+								{selectedExpenses.length}{' '}
+								{selectedExpenses.length === 1 ? 'item' : 'items'} selected
+							</span>
+							<div className="h-4 w-px bg-gray-300" />
+							<span className="text-base font-bold text-gray-900">
+								{getCurrencySymbol(selectedCurrency)}
+								{selectedExpensesTotal.toLocaleString('en-US', {
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								})}
+							</span>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{isModalOpen && (
 				<ExpenseModal
