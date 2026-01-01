@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Expense } from '@/lib/services';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatCurrencySymbol } from '@/lib/utils';
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -131,7 +131,7 @@ export const ExpenseList = ({
 								</span>
 							</CardTitle>
 							{expenses.length > 0 && (
-								<div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md border border-gray-200">
+								<div className="flex items-center gap-1.5 px-2 py-1 rounded-md">
 									<Checkbox
 										checked={selectedExpenses.length === expenses.length}
 										onCheckedChange={onSelectAll}
@@ -200,7 +200,7 @@ export const ExpenseList = ({
 					) : (
 						<>
 							{/* Grouped Card List View by Month and Date */}
-							<div className="space-y-6">
+							<div className="space-y-3 sm:space-y-6">
 								{monthGroups.map(([monthYear, dateGroups]) => {
 									const totalMonthExpenses = dateGroups.reduce(
 										(sum, [, expenses]) => sum + expenses.length,
@@ -208,9 +208,9 @@ export const ExpenseList = ({
 									);
 
 									return (
-										<div key={monthYear} className="space-y-4">
+										<div key={monthYear} className="space-y-2 sm:space-y-4">
 											{/* Month Header */}
-											<div className="flex items-center gap-2 pb-1">
+											<div className="flex items-center gap-2 pb-0.5 sm:pb-1">
 												<h3 className="text-sm font-semibold text-gray-700">
 													{monthYear}
 												</h3>
@@ -222,11 +222,11 @@ export const ExpenseList = ({
 											</div>
 
 											{/* Date Groups within Month */}
-											<div className="space-y-4">
+											<div className="space-y-2 sm:space-y-4">
 												{dateGroups.map(([dateKey, dateExpenses]) => (
-													<div key={dateKey} className="space-y-2">
+													<div key={dateKey} className="space-y-1 sm:space-y-2">
 														{/* Date Header */}
-														<div className="flex items-center gap-2 pl-2">
+														<div className="flex items-center gap-2 pl-1 sm:pl-2">
 															<h4 className="text-xs font-medium text-gray-600">
 																{dateKey}
 															</h4>
@@ -237,18 +237,18 @@ export const ExpenseList = ({
 														</div>
 
 														{/* Expenses for this Date */}
-														<div className="space-y-3">
+														<div className="space-y-1.5 sm:space-y-2">
 															{dateExpenses.map((expense, index) => (
 																<div
 																	key={expense.id}
-																	className="group relative bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-300 hover:shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-2"
+																	className="group relative bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden animate-in fade-in slide-in-from-bottom-2"
 																	style={{
 																		animationDelay: `${index * 50}ms`,
 																		animationFillMode: 'backwards',
 																	}}
 																>
 																	{/* Content Container */}
-																	<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 pl-5 sm:pl-6">
+																	<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3">
 																		{/* Checkbox */}
 																		<Checkbox
 																			checked={selectedExpenses.includes(
@@ -260,60 +260,51 @@ export const ExpenseList = ({
 																			className="flex-shrink-0"
 																		/>
 
+																		{/* Category Icon */}
+																		<div
+																			className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl"
+																			style={{
+																				backgroundColor: expense.category?.color
+																					? `${expense.category.color}20`
+																					: '#f3f4f6',
+																			}}
+																		>
+																			{expense.category?.icon || '📦'}
+																		</div>
+
 																		{/* Main Content */}
 																		<div
-																			className="flex-1 min-w-0 space-y-2 cursor-pointer"
+																			className="flex-1 min-w-0 cursor-pointer"
 																			onClick={() => setViewingExpense(expense)}
 																			title="Click to view details"
 																		>
-																			{/* Title and Amount Row */}
-																			<div className="flex items-start justify-between gap-3">
-																				<h3 className="font-semibold text-lg text-gray-900 truncate">
-																					{expense.title}
-																				</h3>
-																				<p className="text-xl font-bold text-gray-900 whitespace-nowrap flex-shrink-0">
-																					{formatCurrency(
-																						expense.amount,
-																						expense.currency
-																					)}
-																				</p>
+																			<h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
+																				{expense.title}
+																			</h3>
+																			<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mt-0.5">
+																				<span className="truncate">
+																					{expense.category?.name ||
+																						'Uncategorized'}
+																				</span>
 																			</div>
+																		</div>
 
-																			{/* Category Row */}
-																			<div className="flex flex-wrap items-center gap-2 text-sm">
-																				{expense.category ? (
-																					<span
-																						className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-colors"
-																						style={{
-																							backgroundColor: expense.category
-																								.color
-																								? `${expense.category.color}15`
-																								: '#dbeafe',
-																							color:
-																								expense.category.color ||
-																								'#1e40af',
-																						}}
-																					>
-																						{expense.category.icon && (
-																							<span className="text-base">
-																								{expense.category.icon}
-																							</span>
-																						)}
-																						<span>{expense.category.name}</span>
-																					</span>
-																				) : (
-																					<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium bg-gray-100 text-gray-600">
-																						<span>Loading...</span>
-																					</span>
+																		{/* Amount */}
+																		<div className="flex-shrink-0 text-right">
+																			{/* Desktop: Full currency format */}
+																			<p className="hidden sm:block text-lg font-bold text-gray-900">
+																				{formatCurrency(
+																					expense.amount,
+																					expense.currency
 																				)}
-																			</div>
-
-																			{/* Description */}
-																			{expense.description && (
-																				<p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-																					{expense.description}
-																				</p>
-																			)}
+																			</p>
+																			{/* Mobile: Symbol only */}
+																			<p className="sm:hidden text-base font-bold text-gray-900">
+																				{formatCurrencySymbol(
+																					expense.amount,
+																					expense.currency
+																				)}
+																			</p>
 																		</div>
 																	</div>
 																</div>
