@@ -6,11 +6,12 @@ import {
 	ExpenseModal,
 	ExpenseSearch,
 } from '@/components/expenses';
+import { ExpenseCardSkeleton } from '@/components/Skeletons';
 import { useToast } from '@/components/ui/use-toast';
 import { Expense } from '@/lib/services';
 import { formatDate } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import {
 	useExpenses,
 	useDeleteExpense,
@@ -296,25 +297,25 @@ export const ExpensesPage = () => {
 		return symbols[currency] || currency;
 	};
 
-	const toggleSelectExpense = (id: string) => {
+	const toggleSelectExpense = useCallback((id: string) => {
 		setSelectedExpenses(prev =>
 			prev.includes(id) ? prev.filter(expId => expId !== id) : [...prev, id]
 		);
-	};
+	}, []);
 
-	const toggleSelectAll = () => {
+	const toggleSelectAll = useCallback(() => {
 		if (selectedExpenses.length === filteredAndSortedExpenses.length) {
 			setSelectedExpenses([]);
 		} else {
 			setSelectedExpenses(filteredAndSortedExpenses.map(exp => exp.id));
 		}
-	};
+	}, [selectedExpenses.length, filteredAndSortedExpenses]);
 
-	const handleBulkDelete = () => {
+	const handleBulkDelete = useCallback(() => {
 		if (selectedExpenses.length === 0) return;
 		setIsBulkDeleteDialog(true);
 		setDeleteDialogOpen(true);
-	};
+	}, [selectedExpenses.length]);
 
 	const confirmBulkDelete = () => {
 		bulkDeleteExpenses.mutate(selectedExpenses, {
@@ -384,15 +385,16 @@ export const ExpensesPage = () => {
 		return (
 			<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
 				<div className="space-y-6">
+					{/* Header Skeleton */}
 					<div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+					{/* Filters Skeleton */}
 					<div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
+					{/* Stats Skeleton */}
 					<div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
+					{/* Expenses List Skeleton */}
 					<div className="space-y-3">
-						{[...Array(5)].map((_, i) => (
-							<div
-								key={i}
-								className="h-24 bg-gray-200 rounded-lg animate-pulse"
-							/>
+						{[...Array(8)].map((_, i) => (
+							<ExpenseCardSkeleton key={i} />
 						))}
 					</div>
 				</div>

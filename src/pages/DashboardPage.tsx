@@ -13,8 +13,9 @@ import {
 import { ExpenseModal } from '@/components/expenses';
 import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatNumberWithTooltip } from '@/lib/formatNumber';
 import { FolderKanban, PiggyBank, Receipt, TrendingUp } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
@@ -113,16 +114,16 @@ export const DashboardPage = () => {
 		}
 	}, [recentExpenses]);
 
-	const handleApplyFilter = () => {
+	const handleApplyFilter = useCallback(() => {
 		if (dateFilter.startDate || dateFilter.endDate) {
 			setIsFiltered(true);
 		}
-	};
+	}, [dateFilter]);
 
-	const handleClearFilter = () => {
+	const handleClearFilter = useCallback(() => {
 		setDateFilter({ startDate: '', endDate: '' });
 		setIsFiltered(false);
-	};
+	}, []);
 
 	if (isLoading) {
 		return <DashboardSkeleton />;
@@ -155,12 +156,32 @@ export const DashboardPage = () => {
 		)
 		.slice(0, 5);
 
+	// Format stat values with compact notation for large numbers
+	const totalExpenseFormatted = formatNumberWithTooltip(
+		summary?.totalAmount || 0,
+		{
+			currency: primaryCurrency,
+			threshold: 100000,
+		}
+	);
+	const avgExpenseFormatted = formatNumberWithTooltip(
+		summary?.averageExpense || 0,
+		{
+			currency: primaryCurrency,
+			threshold: 100000,
+		}
+	);
+	const totalCountFormatted = formatNumberWithTooltip(summary?.totalCount || 0);
+
 	const stats = [
 		{
 			title: 'Total Expenses',
 			value: hasMixedCurrencies
-				? `${formatCurrency(summary?.totalAmount || 0, primaryCurrency)} *`
-				: formatCurrency(summary?.totalAmount || 0, primaryCurrency),
+				? `${totalExpenseFormatted.compact} *`
+				: totalExpenseFormatted.compact,
+			fullValue: hasMixedCurrencies
+				? `${totalExpenseFormatted.full} *`
+				: totalExpenseFormatted.full,
 			icon: PiggyBank,
 			iconBg: 'bg-blue-100',
 			iconColor: 'text-blue-600',
@@ -172,7 +193,8 @@ export const DashboardPage = () => {
 		},
 		{
 			title: 'Total Count',
-			value: summary?.totalCount || 0,
+			value: totalCountFormatted.compact,
+			fullValue: totalCountFormatted.full,
 			icon: Receipt,
 			iconBg: 'bg-green-100',
 			iconColor: 'text-green-600',
@@ -180,8 +202,11 @@ export const DashboardPage = () => {
 		{
 			title: 'Average Expense',
 			value: hasMixedCurrencies
-				? `${formatCurrency(summary?.averageExpense || 0, primaryCurrency)} *`
-				: formatCurrency(summary?.averageExpense || 0, primaryCurrency),
+				? `${avgExpenseFormatted.compact} *`
+				: avgExpenseFormatted.compact,
+			fullValue: hasMixedCurrencies
+				? `${avgExpenseFormatted.full} *`
+				: avgExpenseFormatted.full,
 			icon: TrendingUp,
 			iconBg: 'bg-orange-100',
 			iconColor: 'text-orange-600',
@@ -204,10 +229,8 @@ export const DashboardPage = () => {
 					id="dashboard-header"
 				>
 					<div>
-						<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-							Dashboard
-						</h1>
-						<p className="text-sm sm:text-base text-gray-600">
+						<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+						<p className="text-muted-foreground mt-1">
 							Overview of your expenses
 						</p>
 					</div>
@@ -322,7 +345,6 @@ export const DashboardPage = () => {
 					<CategoryAnalyticsTable
 						data={categoryAnalytics}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 

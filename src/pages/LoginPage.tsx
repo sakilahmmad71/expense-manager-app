@@ -56,8 +56,12 @@ export const LoginPage = () => {
 		setError('');
 		setIsLoading(true);
 
+		// Auto-trim whitespace
+		const trimmedEmail = email.trim();
+		const trimmedPassword = password.trim();
+
 		try {
-			await login(email, password);
+			await login(trimmedEmail, trimmedPassword);
 
 			// Save email if Remember Me is checked
 			if (rememberMe) {
@@ -73,9 +77,19 @@ export const LoginPage = () => {
 			});
 			setTimeout(() => navigate('/dashboard'), 500);
 		} catch (err: unknown) {
-			const errorMessage =
+			let errorMessage =
 				(err as { response?: { data?: { error?: string } } }).response?.data
 					?.error || 'Failed to login. Please try again.';
+
+			// Better rate limiting feedback
+			if (
+				errorMessage.toLowerCase().includes('too many') ||
+				errorMessage.toLowerCase().includes('rate limit')
+			) {
+				errorMessage =
+					'Too many login attempts. Please try again in a few minutes.';
+			}
+
 			setError(errorMessage);
 			toast({
 				variant: 'destructive',
@@ -100,14 +114,34 @@ export const LoginPage = () => {
 					<CardDescription className="text-center">
 						Enter your credentials to access your account
 					</CardDescription>
+					<p className="text-xs text-center text-gray-500 mt-2">
+						Join thousands managing their finances with Expenser
+					</p>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-4">
 						{error && (
-							<div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+							<div
+								role="alert"
+								aria-live="assertive"
+								className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm"
+							>
 								{error}
 							</div>
 						)}
+
+						<GoogleButton />
+
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-white px-2 text-muted-foreground">
+									Or continue with email
+								</span>
+							</div>
+						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="email" className="text-sm">
@@ -122,6 +156,8 @@ export const LoginPage = () => {
 								required
 								disabled={isLoading}
 								className="h-10"
+								autoFocus
+								autoComplete="email"
 							/>
 						</div>
 
@@ -155,37 +191,32 @@ export const LoginPage = () => {
 							</div>
 						</div>
 
-						<div className="flex items-center space-x-2">
-							<Checkbox
-								id="remember"
-								checked={rememberMe}
-								onCheckedChange={checked => setRememberMe(checked as boolean)}
-								disabled={isLoading}
-							/>
-							<label
-								htmlFor="remember"
-								className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+						<div className="flex items-center justify-between">
+							<div className="flex items-center space-x-2">
+								<Checkbox
+									id="remember"
+									checked={rememberMe}
+									onCheckedChange={checked => setRememberMe(checked as boolean)}
+									disabled={isLoading}
+								/>
+								<label
+									htmlFor="remember"
+									className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+								>
+									Remember me
+								</label>
+							</div>
+							<Link
+								to="/forgot-password"
+								className="text-sm text-primary font-medium hover:underline"
 							>
-								Remember me
-							</label>
+								Forgot password?
+							</Link>
 						</div>
 
 						<Button type="submit" className="w-full h-10" disabled={isLoading}>
 							{isLoading ? 'Logging in...' : 'Log In'}
 						</Button>
-
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<span className="w-full border-t" />
-							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-white px-2 text-muted-foreground">
-									Or continue with
-								</span>
-							</div>
-						</div>
-
-						<GoogleButton />
 
 						<p className="text-center text-sm text-gray-600">
 							Don't have an account?{' '}

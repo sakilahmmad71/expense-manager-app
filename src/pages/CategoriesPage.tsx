@@ -1,12 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import {
-	Plus,
-	Search,
-	Filter,
-	ChevronLeft,
-	ChevronRight,
-	X,
-} from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, Search, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +10,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { ModernPagination } from '@/components/ui/modern-pagination';
 import {
 	CategoryCard,
 	CategoryModal,
@@ -110,84 +104,87 @@ export function CategoriesPage() {
 		return () => clearTimeout(timer);
 	}, [searchTerm, searchQuery]);
 
-	const handleCreateCategory = () => {
+	const handleCreateCategory = useCallback(() => {
 		setSelectedCategory(null);
 		setIsModalOpen(true);
-	};
+	}, []);
 
-	const handleEditCategory = (category: Category) => {
+	const handleEditCategory = useCallback((category: Category) => {
 		setIsDetailModalOpen(false); // Close detail modal if open
 		// Small delay to ensure modal state updates properly
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsModalOpen(true);
 		}, 50);
-	};
+	}, []);
 
-	const handleDeleteCategory = (category: Category) => {
+	const handleDeleteCategory = useCallback((category: Category) => {
 		setIsDetailModalOpen(false); // Close detail modal if open
 		// Small delay to ensure modal state updates properly
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsDeleteDialogOpen(true);
 		}, 50);
-	};
+	}, []);
 
-	const handleModalClose = () => {
+	const handleModalClose = useCallback(() => {
 		setIsModalOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleModalSuccess = () => {
+	const handleModalSuccess = useCallback(() => {
 		// React Query will automatically refetch after mutation
 		handleModalClose();
-	};
+	}, [handleModalClose]);
 
-	const handleDeleteDialogClose = () => {
+	const handleDeleteDialogClose = useCallback(() => {
 		setIsDeleteDialogOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleDeleteSuccess = () => {
+	const handleDeleteSuccess = useCallback(() => {
 		// React Query will automatically refetch after mutation
 		handleDeleteDialogClose();
-	};
+	}, [handleDeleteDialogClose]);
 
-	const handleViewCategory = (category: Category) => {
+	const handleViewCategory = useCallback((category: Category) => {
 		setSelectedCategory(category);
 		setIsDetailModalOpen(true);
-	};
+	}, []);
 
-	const handleDetailModalClose = () => {
+	const handleDetailModalClose = useCallback(() => {
 		setIsDetailModalOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleLimitChange = (newLimit: number) => {
+	const handleLimitChange = useCallback((newLimit: number) => {
 		localStorage.setItem('categoriesPerPage', newLimit.toString());
 		setLimit(newLimit);
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSearchTerm(e.target.value);
-	};
+	const handleSearchChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			setSearchTerm(e.target.value);
+		},
+		[]
+	);
 
-	const handleClearSearch = () => {
+	const handleClearSearch = useCallback(() => {
 		setSearchTerm('');
 		setSearchQuery('');
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSortChange = (value: string) => {
+	const handleSortChange = useCallback((value: string) => {
 		setSortBy(value);
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSortOrderChange = (value: string) => {
+	const handleSortOrderChange = useCallback((value: string) => {
 		setSortOrder(value as 'asc' | 'desc');
 		setCurrentPage(1);
-	};
+	}, []);
 
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
@@ -326,48 +323,16 @@ export function CategoriesPage() {
 
 			{/* Pagination */}
 			{!loading && categories && categories.length > 0 && totalPages > 1 && (
-				<div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-					<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-						<span>Items per page:</span>
-						<Select
-							value={limit.toString()}
-							onValueChange={value => handleLimitChange(parseInt(value))}
-						>
-							<SelectTrigger className="h-8 w-[70px]">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="10">10</SelectItem>
-								<SelectItem value="20">20</SelectItem>
-								<SelectItem value="25">25</SelectItem>
-								<SelectItem value="50">50</SelectItem>
-								<SelectItem value="100">100</SelectItem>
-							</SelectContent>
-						</Select>
-						<span className="hidden sm:inline">
-							| Page {currentPage} of {totalPages} | Total: {totalCount}
-						</span>
-					</div>
-					<div className="flex gap-2">
-						<Button
-							onClick={() => setCurrentPage(currentPage - 1)}
-							disabled={currentPage === 1}
-							variant="outline"
-							size="sm"
-						>
-							<ChevronLeft className="h-4 w-4" />
-							<span className="hidden sm:inline ml-1">Previous</span>
-						</Button>
-						<Button
-							onClick={() => setCurrentPage(currentPage + 1)}
-							disabled={currentPage === totalPages}
-							variant="outline"
-							size="sm"
-						>
-							<span className="hidden sm:inline mr-1">Next</span>
-							<ChevronRight className="h-4 w-4" />
-						</Button>
-					</div>
+				<div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-4">
+					<ModernPagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						totalItems={totalCount}
+						itemsPerPage={limit}
+						onPageChange={setCurrentPage}
+						onItemsPerPageChange={handleLimitChange}
+						itemsPerPageOptions={[10, 20, 25, 50, 100]}
+					/>
 				</div>
 			)}
 

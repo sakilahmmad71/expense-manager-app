@@ -84,28 +84,34 @@ export const DateRangeFilter = ({
 				<CardContent className="space-y-3 pt-3 md:pt-0">
 					<div className="flex flex-col sm:flex-row gap-4">
 						<div className="flex-1 space-y-2">
-							<Label htmlFor="startDate" className="text-sm">
+							<Label htmlFor="startDate" className="text-sm font-medium">
 								Start Date
 							</Label>
-							<Input
-								id="startDate"
-								type="date"
-								value={startDate}
-								onChange={e => onStartDateChange(e.target.value)}
-								className="h-10"
-							/>
+							<div className="relative">
+								<Input
+									id="startDate"
+									type="date"
+									value={startDate}
+									onChange={e => onStartDateChange(e.target.value)}
+									className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+								/>
+								<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							</div>
 						</div>
 						<div className="flex-1 space-y-2">
-							<Label htmlFor="endDate" className="text-sm">
+							<Label htmlFor="endDate" className="text-sm font-medium">
 								End Date
 							</Label>
-							<Input
-								id="endDate"
-								type="date"
-								value={endDate}
-								onChange={e => onEndDateChange(e.target.value)}
-								className="h-10"
-							/>
+							<div className="relative">
+								<Input
+									id="endDate"
+									type="date"
+									value={endDate}
+									onChange={e => onEndDateChange(e.target.value)}
+									className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+								/>
+								<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							</div>
 						</div>
 						<div className="flex items-end gap-2">
 							<Button

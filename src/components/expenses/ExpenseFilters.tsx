@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Category } from '@/lib/services';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, Filter } from 'lucide-react';
 
 interface MonthFilter {
 	startMonth: string;
@@ -283,44 +283,50 @@ export const ExpenseFilters = ({
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="startDate"
-									className="text-xs sm:text-sm text-muted-foreground"
+									className="text-xs sm:text-sm text-muted-foreground font-medium"
 								>
 									Start Date
 								</Label>
-								<Input
-									id="startDate"
-									type="date"
-									value={filters.startDate}
-									onChange={e => {
-										onFiltersChange({
-											...filters,
-											startDate: e.target.value,
-											page: 1,
-										});
-									}}
-									className="h-10"
-								/>
+								<div className="relative">
+									<Input
+										id="startDate"
+										type="date"
+										value={filters.startDate}
+										onChange={e => {
+											onFiltersChange({
+												...filters,
+												startDate: e.target.value,
+												page: 1,
+											});
+										}}
+										className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+									/>
+									<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+								</div>
 							</div>
 							<div className="space-y-1.5">
 								<Label
 									htmlFor="endDate"
-									className="text-xs sm:text-sm text-muted-foreground"
+									className="text-xs sm:text-sm text-muted-foreground font-medium"
 								>
 									End Date
 								</Label>
-								<Input
-									id="endDate"
-									type="date"
-									value={filters.endDate}
-									onChange={e => {
-										onFiltersChange({
-											...filters,
-											endDate: e.target.value,
-											page: 1,
-										});
-									}}
-									className="h-10"
-								/>
+								<div className="relative">
+									<Input
+										id="endDate"
+										type="date"
+										value={filters.endDate}
+										onChange={e => {
+											onFiltersChange({
+												...filters,
+												endDate: e.target.value,
+												page: 1,
+											});
+										}}
+										className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+									/>
+									<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+								</div>
 							</div>
 						</div>
 					)}

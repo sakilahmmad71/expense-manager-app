@@ -11,7 +11,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Category, Expense, ExpenseInput } from '@/lib/services';
 import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
-import { Check, Plus, Search, X } from 'lucide-react';
+import { Calendar, Check, Clock, Plus, Search, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -362,33 +362,45 @@ export const ExpenseModal = ({
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="date">Date (Optional)</Label>
-							<Input
-								id="date"
-								type="date"
-								value={formData.date}
-								onChange={e =>
-									setFormData({ ...formData, date: e.target.value })
-								}
-								disabled={isSubmitting}
-								placeholder="Current date"
-							/>
-							<p className="text-xs text-gray-500">
+							<Label htmlFor="date" className="text-sm font-medium">
+								Date (Optional)
+							</Label>
+							<div className="relative">
+								<Input
+									id="date"
+									type="date"
+									value={formData.date}
+									onChange={e =>
+										setFormData({ ...formData, date: e.target.value })
+									}
+									disabled={isSubmitting}
+									placeholder="Current date"
+									className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+								/>
+								<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							</div>
+							<p className="text-xs text-muted-foreground">
 								Defaults to current date if not provided
 							</p>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="time">Time (Optional)</Label>
-							<Input
-								id="time"
-								type="time"
-								value={time}
-								onChange={e => setTime(e.target.value)}
-								disabled={isSubmitting}
-								placeholder="Current time"
-							/>
-							<p className="text-xs text-gray-500">
+							<Label htmlFor="time" className="text-sm font-medium">
+								Time (Optional)
+							</Label>
+							<div className="relative">
+								<Input
+									id="time"
+									type="time"
+									value={time}
+									onChange={e => setTime(e.target.value)}
+									disabled={isSubmitting}
+									placeholder="Current time"
+									className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+								/>
+								<Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							</div>
+							<p className="text-xs text-muted-foreground">
 								Defaults to current time if not provided
 							</p>
 						</div>

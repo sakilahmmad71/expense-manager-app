@@ -1,24 +1,12 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { ModernPagination } from '@/components/ui/modern-pagination';
 import { Expense } from '@/lib/services';
-import { formatCurrency, formatCurrencySymbol } from '@/lib/utils';
-import {
-	ChevronLeft,
-	ChevronRight,
-	Download,
-	Package,
-	Trash2,
-} from 'lucide-react';
+import { Download, Package, Trash2 } from 'lucide-react';
 import { ExpenseDetailModal } from './ExpenseDetailModal';
+import { ExpenseCard } from './ExpenseCard';
 
 interface Pagination {
 	total: number;
@@ -56,6 +44,15 @@ export const ExpenseList = ({
 	onBulkDelete,
 }: ExpenseListProps) => {
 	const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
+
+	// Memoize handlers to prevent unnecessary re-renders
+	const handleCloseDetailModal = useCallback(() => {
+		setViewingExpense(null);
+	}, []);
+
+	const handleViewExpense = useCallback((expense: Expense) => {
+		setViewingExpense(expense);
+	}, []);
 
 	// Group expenses by month, then by date
 	const groupedExpenses = expenses.reduce(
@@ -200,7 +197,7 @@ export const ExpenseList = ({
 					) : (
 						<>
 							{/* Grouped Card List View by Month and Date */}
-							<div className="space-y-3 sm:space-y-6">
+							<div className="space-y-6 sm:space-y-8">
 								{monthGroups.map(([monthYear, dateGroups]) => {
 									const totalMonthExpenses = dateGroups.reduce(
 										(sum, [, expenses]) => sum + expenses.length,
@@ -208,9 +205,9 @@ export const ExpenseList = ({
 									);
 
 									return (
-										<div key={monthYear} className="space-y-2 sm:space-y-4">
+										<div key={monthYear} className="space-y-3 sm:space-y-5">
 											{/* Month Header */}
-											<div className="flex items-center gap-2 pb-0.5 sm:pb-1">
+											<div className="flex items-center gap-2 pb-1 sm:pb-2">
 												<h3 className="text-sm font-semibold text-gray-700">
 													{monthYear}
 												</h3>
@@ -222,9 +219,9 @@ export const ExpenseList = ({
 											</div>
 
 											{/* Date Groups within Month */}
-											<div className="space-y-2 sm:space-y-4">
+											<div className="space-y-4 sm:space-y-5">
 												{dateGroups.map(([dateKey, dateExpenses]) => (
-													<div key={dateKey} className="space-y-1 sm:space-y-2">
+													<div key={dateKey} className="space-y-2 sm:space-y-3">
 														{/* Date Header */}
 														<div className="flex items-center gap-2 pl-1 sm:pl-2">
 															<h4 className="text-xs font-medium text-gray-600">
@@ -237,77 +234,18 @@ export const ExpenseList = ({
 														</div>
 
 														{/* Expenses for this Date */}
-														<div className="space-y-1.5 sm:space-y-2">
+														<div className="space-y-2.5 sm:space-y-3">
 															{dateExpenses.map((expense, index) => (
-																<div
+																<ExpenseCard
 																	key={expense.id}
-																	className="group relative bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden animate-in fade-in slide-in-from-bottom-2"
-																	style={{
-																		animationDelay: `${index * 50}ms`,
-																		animationFillMode: 'backwards',
-																	}}
-																>
-																	{/* Content Container */}
-																	<div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3">
-																		{/* Checkbox */}
-																		<Checkbox
-																			checked={selectedExpenses.includes(
-																				expense.id
-																			)}
-																			onCheckedChange={() =>
-																				onSelectExpense(expense.id)
-																			}
-																			className="flex-shrink-0"
-																		/>
-
-																		{/* Category Icon */}
-																		<div
-																			className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl"
-																			style={{
-																				backgroundColor: expense.category?.color
-																					? `${expense.category.color}20`
-																					: '#f3f4f6',
-																			}}
-																		>
-																			{expense.category?.icon || '📦'}
-																		</div>
-
-																		{/* Main Content */}
-																		<div
-																			className="flex-1 min-w-0 cursor-pointer"
-																			onClick={() => setViewingExpense(expense)}
-																			title="Click to view details"
-																		>
-																			<h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
-																				{expense.title}
-																			</h3>
-																			<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mt-0.5">
-																				<span className="truncate">
-																					{expense.category?.name ||
-																						'Uncategorized'}
-																				</span>
-																			</div>
-																		</div>
-
-																		{/* Amount */}
-																		<div className="flex-shrink-0 text-right">
-																			{/* Desktop: Full currency format */}
-																			<p className="hidden sm:block text-lg font-bold text-gray-900">
-																				{formatCurrency(
-																					expense.amount,
-																					expense.currency
-																				)}
-																			</p>
-																			{/* Mobile: Symbol only */}
-																			<p className="sm:hidden text-base font-bold text-gray-900">
-																				{formatCurrencySymbol(
-																					expense.amount,
-																					expense.currency
-																				)}
-																			</p>
-																		</div>
-																	</div>
-																</div>
+																	expense={expense}
+																	isSelected={selectedExpenses.includes(
+																		expense.id
+																	)}
+																	index={index}
+																	onSelect={onSelectExpense}
+																	onView={handleViewExpense}
+																/>
 															))}
 														</div>
 													</div>
@@ -320,86 +258,16 @@ export const ExpenseList = ({
 
 							{/* Pagination */}
 							{pagination.pages > 1 && (
-								<div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t">
-									<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-										<span>Items per page:</span>
-										{onLimitChange && (
-											<Select
-												value={pagination.limit.toString()}
-												onValueChange={value => onLimitChange(parseInt(value))}
-											>
-												<SelectTrigger className="h-8 w-[70px]">
-													<SelectValue />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectItem value="10">10</SelectItem>
-													<SelectItem value="20">20</SelectItem>
-													<SelectItem value="50">50</SelectItem>
-													<SelectItem value="100">100</SelectItem>
-												</SelectContent>
-											</Select>
-										)}
-										<span className="hidden sm:inline">
-											| Showing {(pagination.page - 1) * pagination.limit + 1}-
-											{Math.min(
-												pagination.page * pagination.limit,
-												pagination.total
-											)}{' '}
-											of {pagination.total}
-										</span>
-									</div>
-									<div className="flex gap-1 sm:gap-2">
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() => onPageChange(pagination.page - 1)}
-											disabled={pagination.page === 1}
-											className="text-xs sm:text-sm"
-										>
-											<ChevronLeft className="h-4 w-4" />
-											<span className="hidden sm:inline ml-1">Previous</span>
-										</Button>
-										<div className="flex items-center gap-0.5 sm:gap-1">
-											{Array.from({ length: pagination.pages }, (_, i) => i + 1)
-												.filter(
-													page =>
-														page === 1 ||
-														page === pagination.pages ||
-														(page >= pagination.page - 1 &&
-															page <= pagination.page + 1)
-												)
-												.map((page, index, array) => (
-													<>
-														{index > 0 && array[index - 1] !== page - 1 && (
-															<span className="px-1 text-xs sm:px-2 sm:text-sm text-gray-400">
-																...
-															</span>
-														)}
-														<Button
-															key={page}
-															variant={
-																pagination.page === page ? 'default' : 'outline'
-															}
-															size="sm"
-															onClick={() => onPageChange(page)}
-															className="h-8 w-8 sm:h-9 sm:w-9 p-0 text-xs sm:text-sm"
-														>
-															{page}
-														</Button>
-													</>
-												))}
-										</div>
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() => onPageChange(pagination.page + 1)}
-											disabled={pagination.page === pagination.pages}
-											className="text-xs sm:text-sm"
-										>
-											<span className="hidden sm:inline mr-1">Next</span>
-											<ChevronRight className="h-4 w-4" />
-										</Button>
-									</div>
+								<div className="mt-6 pt-4 border-t">
+									<ModernPagination
+										currentPage={pagination.page}
+										totalPages={pagination.pages}
+										totalItems={pagination.total}
+										itemsPerPage={pagination.limit}
+										onPageChange={onPageChange}
+										onItemsPerPageChange={onLimitChange || (() => {})}
+										itemsPerPageOptions={[10, 20, 50, 100]}
+									/>
 								</div>
 							)}
 						</>
@@ -411,11 +279,11 @@ export const ExpenseList = ({
 			{viewingExpense && (
 				<div
 					className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 animate-in fade-in duration-200 !m-0"
-					onClick={() => setViewingExpense(null)}
+					onClick={handleCloseDetailModal}
 				>
 					<ExpenseDetailModal
 						expense={viewingExpense}
-						onClose={() => setViewingExpense(null)}
+						onClose={handleCloseDetailModal}
 						onEdit={onEdit}
 						onDelete={onDelete}
 					/>
