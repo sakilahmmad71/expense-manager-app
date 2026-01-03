@@ -8,14 +8,22 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Textarea } from '@/components/ui/textarea';
 import { Category, Expense, ExpenseInput } from '@/lib/services';
 import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
-import { Calendar, Check, Clock, Plus, Search, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+} from '@/components/ui/drawer';
 
 interface ExpenseModalProps {
+	isOpen: boolean;
 	expense: Expense | null;
 	categories: Category[];
 	onClose: () => void;
@@ -23,6 +31,7 @@ interface ExpenseModalProps {
 }
 
 export const ExpenseModal = ({
+	isOpen,
 	expense,
 	categories,
 	onClose,
@@ -84,11 +93,12 @@ export const ExpenseModal = ({
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
-	const [categorySearch, setCategorySearch] = useState('');
 
-	const filteredCategories = categories.filter(category =>
-		category.name.toLowerCase().includes(categorySearch.toLowerCase())
-	);
+	const categoryOptions = categories.map(category => ({
+		value: category.id,
+		label: category.name,
+		icon: category.icon,
+	}));
 
 	const currencies = [
 		{ code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
@@ -108,35 +118,6 @@ export const ExpenseModal = ({
 		setFormData({ ...formData, currency });
 		localStorage.setItem('preferredCurrency', currency);
 	};
-
-	// Prevent background scroll when modal is open
-	useEffect(() => {
-		// Calculate scrollbar width before hiding
-		const scrollbarWidth =
-			window.innerWidth - document.documentElement.clientWidth;
-		document.documentElement.style.setProperty(
-			'--scrollbar-width',
-			`${scrollbarWidth}px`
-		);
-
-		// Add modal-open class instead of inline style
-		document.body.classList.add('modal-open');
-
-		// Close modal on Escape key
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				onClose();
-			}
-		};
-
-		window.addEventListener('keydown', handleEscape);
-
-		return () => {
-			document.body.classList.remove('modal-open');
-			document.documentElement.style.removeProperty('--scrollbar-width');
-			window.removeEventListener('keydown', handleEscape);
-		};
-	}, [onClose]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -204,23 +185,14 @@ export const ExpenseModal = ({
 		}
 	};
 
-	const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (e.target === e.currentTarget) {
-			onClose();
-		}
-	};
-
 	return (
-		<div
-			className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200 !m-0"
-			onClick={handleBackdropClick}
-		>
-			<div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 [scrollbar-gutter:stable]">
-				<div className="p-6 border-b sticky top-0 bg-white z-10">
-					<h2 className="text-2xl font-bold">
+		<Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
+				<DrawerHeader className="border-b">
+					<DrawerTitle className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}
-					</h2>
-				</div>
+					</DrawerTitle>
+				</DrawerHeader>
 
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
 					{error && (
@@ -294,70 +266,27 @@ export const ExpenseModal = ({
 						<Label htmlFor="category">
 							Category <span className="text-red-500">*</span>
 						</Label>
-						<Select
+						<Combobox
+							options={categoryOptions}
 							value={formData.categoryId}
 							onValueChange={value => {
 								setFormData({ ...formData, categoryId: value });
-								setCategorySearch(''); // Reset search when category is selected
 							}}
+							placeholder="Select a category"
+							searchPlaceholder="Search categories..."
+							emptyText="No category found."
 							disabled={isSubmitting}
-							onOpenChange={open => {
-								if (!open) setCategorySearch(''); // Reset search when dropdown closes
-							}}
+						/>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() => navigate('/categories')}
+							className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
 						>
-							<SelectTrigger id="category">
-								<SelectValue placeholder="Select a category" />
-							</SelectTrigger>
-							<SelectContent
-								className="max-h-[320px]"
-								position="popper"
-								side="bottom"
-								sideOffset={4}
-								align="start"
-							>
-								<div className="sticky top-0 z-10 bg-popover p-2 border-b">
-									<div className="relative">
-										<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-										<Input
-											type="text"
-											placeholder="Search categories..."
-											value={categorySearch}
-											onChange={e => setCategorySearch(e.target.value)}
-											className="pl-8 h-9 text-sm"
-											onKeyDown={e => e.stopPropagation()} // Prevent select from closing on keydown
-										/>
-									</div>
-								</div>
-								<div className="max-h-[200px] overflow-y-auto">
-									{filteredCategories.length > 0 ? (
-										filteredCategories.map(category => (
-											<SelectItem key={category.id} value={category.id}>
-												<span className="flex items-center gap-2">
-													{category.icon && <span>{category.icon}</span>}
-													{category.name}
-												</span>
-											</SelectItem>
-										))
-									) : (
-										<div className="px-2 py-6 text-center text-sm text-muted-foreground">
-											No categories found
-										</div>
-									)}
-								</div>
-								<div className="border-t mt-1 pt-1">
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										onClick={() => navigate('/categories')}
-										className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10"
-									>
-										<Plus className="h-4 w-4 mr-2" />
-										Add New Category
-									</Button>
-								</div>
-							</SelectContent>
-						</Select>
+							<Plus className="h-4 w-4 mr-2" />
+							Add New Category
+						</Button>
 					</div>
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -446,7 +375,7 @@ export const ExpenseModal = ({
 						</Button>
 					</div>
 				</form>
-			</div>
-		</div>
+			</DrawerContent>
+		</Drawer>
 	);
 };

@@ -276,19 +276,12 @@ export const ExpenseList = ({
 			</Card>
 
 			{/* Expense Detail Modal */}
-			{viewingExpense && (
-				<div
-					className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 animate-in fade-in duration-200 !m-0"
-					onClick={handleCloseDetailModal}
-				>
-					<ExpenseDetailModal
-						expense={viewingExpense}
-						onClose={handleCloseDetailModal}
-						onEdit={onEdit}
-						onDelete={onDelete}
-					/>
-				</div>
-			)}
+			<ExpenseDetailModal
+				expense={viewingExpense}
+				onClose={handleCloseDetailModal}
+				onEdit={onEdit}
+				onDelete={onDelete}
+			/>
 		</>
 	);
 };

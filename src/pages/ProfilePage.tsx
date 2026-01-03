@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/services';
 import { Lock, Mail, Save, User } from 'lucide-react';
@@ -167,14 +170,27 @@ export const ProfilePage = () => {
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6 animate-in fade-in duration-300">
-				<div id="profile-header">
-					<h1 className="text-3xl font-bold tracking-tight">
-						Profile Settings
-					</h1>
-					<p className="text-muted-foreground mt-1">
-						Manage your account information
-					</p>
+				{/* Breadcrumb Navigation */}
+				<PageBreadcrumb items={[{ label: 'Profile Settings' }]} />
+
+				<div id="profile-header" className="flex items-center gap-4">
+					<Avatar className="h-16 w-16">
+						<AvatarImage src="" alt={user?.name || 'User'} />
+						<AvatarFallback className="text-lg bg-gray-900 text-white">
+							{user?.name?.charAt(0).toUpperCase() || 'U'}
+						</AvatarFallback>
+					</Avatar>
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">
+							Profile Settings
+						</h1>
+						<p className="text-muted-foreground mt-1">
+							Manage your account information
+						</p>
+					</div>
 				</div>
+
+				<Separator />
 
 				<Card id="personal-information">
 					<CardHeader>

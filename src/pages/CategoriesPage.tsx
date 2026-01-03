@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, Search, Filter, X } from 'lucide-react';
+import { Plus, Search, Filter, X, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import {
 	Select,
 	SelectContent,
@@ -188,10 +190,13 @@ export function CategoriesPage() {
 
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
+			{/* Breadcrumb Navigation */}
+			<PageBreadcrumb items={[{ label: 'Categories' }]} />
+
 			{/* Header */}
 			<div
 				id="categories-header"
-				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"
+				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 mt-6"
 			>
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
@@ -300,25 +305,24 @@ export function CategoriesPage() {
 
 			{/* Empty State */}
 			{!loading && (!filteredCategories || filteredCategories.length === 0) && (
-				<div className="text-center py-12 mt-6">
-					<div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-						<Filter className="h-8 w-8 text-gray-400" />
-					</div>
-					<h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-						{searchTerm ? 'No categories found' : 'No categories yet'}
-					</h3>
-					<p className="text-gray-600 dark:text-gray-400 mb-6">
-						{searchTerm
+				<EmptyState
+					icon={searchTerm ? Search : Folder}
+					title={searchTerm ? 'No categories found' : 'No categories yet'}
+					description={
+						searchTerm
 							? 'Try adjusting your search or filters'
-							: 'Get started by creating your first category'}
-					</p>
-					{!searchTerm && (
-						<Button onClick={handleCreateCategory}>
-							<Plus className="h-4 w-4 mr-2" />
-							Create Category
-						</Button>
-					)}
-				</div>
+							: 'Get started by creating your first category'
+					}
+					action={
+						!searchTerm
+							? {
+									label: 'Create Category',
+									onClick: handleCreateCategory,
+								}
+							: undefined
+					}
+					className="mt-6"
+				/>
 			)}
 
 			{/* Pagination */}

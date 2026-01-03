@@ -485,6 +485,7 @@ export const ExpensesPage = () => {
 
 			{isModalOpen && (
 				<ExpenseModal
+					isOpen={isModalOpen}
 					expense={editingExpense}
 					categories={categories}
 					onClose={closeModal}

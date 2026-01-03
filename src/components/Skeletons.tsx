@@ -1,17 +1,5 @@
 import { Card, CardContent, CardHeader } from './ui/card';
-
-interface SkeletonProps {
-	className?: string;
-}
-
-export const Skeleton = ({ className = '' }: SkeletonProps) => (
-	<div
-		className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] rounded ${className}`}
-		style={{
-			animation: 'shimmer 1.5s ease-in-out infinite',
-		}}
-	/>
-);
+import { Skeleton } from './ui/skeleton';
 
 // Enhanced skeleton for expense cards
 export const ExpenseCardSkeleton = () => (

@@ -7,25 +7,51 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleButton from '@/components/GoogleButton';
 import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
+
+const loginFormSchema = z.object({
+	email: z.string().email('Please enter a valid email address'),
+	password: z.string().min(1, 'Password is required'),
+	rememberMe: z.boolean(),
+});
+
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export const LoginPage = () => {
 	const { toast } = useToast();
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	const [rememberMe, setRememberMe] = useState(false);
 	const { login } = useAuth();
 	const navigate = useNavigate();
+
+	const form = useForm<LoginFormValues>({
+		resolver: zodResolver(loginFormSchema),
+		defaultValues: {
+			email: '',
+			password: '',
+			rememberMe: false,
+		},
+	});
+
+	const isLoading = form.formState.isSubmitting;
 
 	useEffect(() => {
 		// Set document title and meta description
@@ -46,26 +72,20 @@ export const LoginPage = () => {
 
 		const savedEmail = localStorage.getItem('rememberedEmail');
 		if (savedEmail) {
-			setEmail(savedEmail);
-			setRememberMe(true);
+			form.setValue('email', savedEmail);
+			form.setValue('rememberMe', true);
 		}
-	}, []);
+	}, [form]);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const onSubmit = async (values: LoginFormValues) => {
 		setError('');
-		setIsLoading(true);
-
-		// Auto-trim whitespace
-		const trimmedEmail = email.trim();
-		const trimmedPassword = password.trim();
 
 		try {
-			await login(trimmedEmail, trimmedPassword);
+			await login(values.email.trim(), values.password.trim());
 
 			// Save email if Remember Me is checked
-			if (rememberMe) {
-				localStorage.setItem('rememberedEmail', email);
+			if (values.rememberMe) {
+				localStorage.setItem('rememberedEmail', values.email.trim());
 			} else {
 				localStorage.removeItem('rememberedEmail');
 			}
@@ -96,13 +116,11 @@ export const LoginPage = () => {
 				title: '✗ Login failed',
 				description: errorMessage,
 			});
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
 			<Card
 				id="login-form"
 				className="w-full max-w-md animate-in fade-in duration-300"
@@ -119,115 +137,129 @@ export const LoginPage = () => {
 					</p>
 				</CardHeader>
 				<CardContent>
-					<form onSubmit={handleSubmit} className="space-y-4">
-						{error && (
-							<div
-								role="alert"
-								aria-live="assertive"
-								className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm"
-							>
-								{error}
-							</div>
-						)}
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+							{error && (
+								<Alert variant="destructive">
+									<AlertDescription>{error}</AlertDescription>
+								</Alert>
+							)}
 
-						<GoogleButton />
+							<GoogleButton />
 
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<span className="w-full border-t" />
-							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-white px-2 text-muted-foreground">
-									Or continue with email
-								</span>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="email" className="text-sm">
-								Email
-							</Label>
-							<Input
-								id="email"
-								type="email"
-								placeholder="you@example.com"
-								value={email}
-								onChange={e => setEmail(e.target.value)}
-								required
-								disabled={isLoading}
-								className="h-10"
-								autoFocus
-								autoComplete="email"
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="password" className="text-sm">
-								Password
-							</Label>
 							<div className="relative">
-								<Input
-									id="password"
-									type={showPassword ? 'text' : 'password'}
-									placeholder="••••••••"
-									value={password}
-									onChange={e => setPassword(e.target.value)}
-									required
-									disabled={isLoading}
-									className="h-10 pr-10"
-								/>
-								<button
-									type="button"
-									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-									disabled={isLoading}
-								>
-									{showPassword ? (
-										<EyeOff className="h-4 w-4" />
-									) : (
-										<Eye className="h-4 w-4" />
+								<div className="absolute inset-0 flex items-center">
+									<span className="w-full border-t" />
+								</div>
+								<div className="relative flex justify-center text-xs uppercase">
+									<span className="bg-white px-2 text-muted-foreground">
+										Or continue with email
+									</span>
+								</div>
+							</div>
+
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email</FormLabel>
+										<FormControl>
+											<Input
+												type="email"
+												placeholder="you@example.com"
+												autoComplete="email"
+												autoFocus
+												disabled={isLoading}
+												className="h-10"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="password"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Password</FormLabel>
+										<FormControl>
+											<div className="relative">
+												<Input
+													type={showPassword ? 'text' : 'password'}
+													placeholder="••••••••"
+													disabled={isLoading}
+													className="h-10 pr-10"
+													{...field}
+												/>
+												<button
+													type="button"
+													onClick={() => setShowPassword(!showPassword)}
+													className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+													disabled={isLoading}
+												>
+													{showPassword ? (
+														<EyeOff className="h-4 w-4" />
+													) : (
+														<Eye className="h-4 w-4" />
+													)}
+												</button>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<div className="flex items-center justify-between">
+								<FormField
+									control={form.control}
+									name="rememberMe"
+									render={({ field }) => (
+										<FormItem className="flex items-center space-x-2 space-y-0">
+											<FormControl>
+												<Checkbox
+													checked={field.value}
+													onCheckedChange={field.onChange}
+													disabled={isLoading}
+												/>
+											</FormControl>
+											<FormLabel className="text-sm font-medium cursor-pointer">
+												Remember me
+											</FormLabel>
+										</FormItem>
 									)}
-								</button>
-							</div>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<div className="flex items-center space-x-2">
-								<Checkbox
-									id="remember"
-									checked={rememberMe}
-									onCheckedChange={checked => setRememberMe(checked as boolean)}
-									disabled={isLoading}
 								/>
-								<label
-									htmlFor="remember"
-									className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+								<Link
+									to="/forgot-password"
+									className="text-sm text-primary font-medium hover:underline"
 								>
-									Remember me
-								</label>
+									Forgot password?
+								</Link>
 							</div>
-							<Link
-								to="/forgot-password"
-								className="text-sm text-primary font-medium hover:underline"
-							>
-								Forgot password?
-							</Link>
-						</div>
 
-						<Button type="submit" className="w-full h-10" disabled={isLoading}>
-							{isLoading ? 'Logging in...' : 'Log In'}
-						</Button>
-
-						<p className="text-center text-sm text-gray-600">
-							Don't have an account?{' '}
-							<Link
-								to="/register"
-								className="text-primary font-medium hover:underline"
+							<Button
+								type="submit"
+								className="w-full h-10"
+								disabled={isLoading}
 							>
-								Sign up
-							</Link>
-						</p>
-					</form>
+								{isLoading ? 'Logging in...' : 'Log In'}
+							</Button>
+
+							<p className="text-center text-sm text-gray-600">
+								Don't have an account?{' '}
+								<Link
+									to="/register"
+									className="text-primary font-medium hover:underline"
+								>
+									Sign up
+								</Link>
+							</p>
+						</form>
+					</Form>
 				</CardContent>
 			</Card>
 		</div>

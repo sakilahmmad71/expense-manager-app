@@ -6,6 +6,12 @@ import { Category } from '@/lib/services';
 import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
 import { Check, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import {
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+} from '@/components/ui/drawer';
 
 interface CategoryModalProps {
 	category: Category | null;
@@ -105,31 +111,6 @@ export const CategoryModal = ({
 		}
 	}, [category, isOpen]);
 
-	useEffect(() => {
-		if (isOpen) {
-			// Calculate scrollbar width before hiding
-			const scrollbarWidth =
-				window.innerWidth - document.documentElement.clientWidth;
-			document.documentElement.style.setProperty(
-				'--scrollbar-width',
-				`${scrollbarWidth}px`
-			);
-
-			// Add modal-open class instead of inline style
-			document.body.classList.add('modal-open');
-
-			const handleEscape = (e: KeyboardEvent) => {
-				if (e.key === 'Escape') onClose();
-			};
-			window.addEventListener('keydown', handleEscape);
-			return () => {
-				document.body.classList.remove('modal-open');
-				document.documentElement.style.removeProperty('--scrollbar-width');
-				window.removeEventListener('keydown', handleEscape);
-			};
-		}
-	}, [isOpen, onClose]);
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
@@ -168,23 +149,14 @@ export const CategoryModal = ({
 		}
 	};
 
-	const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (e.target === e.currentTarget) onClose();
-	};
-
-	if (!isOpen) return null;
-
 	return (
-		<div
-			className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-200"
-			onClick={handleBackdropClick}
-		>
-			<div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
-				<div className="p-6 border-b sticky top-0 bg-white z-10">
-					<h2 className="text-2xl font-bold">
+		<Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
+				<DrawerHeader className="border-b">
+					<DrawerTitle className="text-2xl font-bold">
 						{category ? 'Edit Category' : 'Add New Category'}
-					</h2>
-				</div>
+					</DrawerTitle>
+				</DrawerHeader>
 
 				<form onSubmit={handleSubmit} className="p-6 space-y-4">
 					{error && (
@@ -291,24 +263,7 @@ export const CategoryModal = ({
 						</Button>
 					</div>
 				</form>
-			</div>
-
-			<style>{`
-				@keyframes fadeIn {
-					from { opacity: 0; }
-					to { opacity: 1; }
-				}
-				@keyframes slideUp {
-					from {
-						opacity: 0;
-						transform: translateY(20px);
-					}
-					to {
-						opacity: 1;
-						transform: translateY(0);
-					}
-				}
-			`}</style>
-		</div>
+			</DrawerContent>
+		</Drawer>
 	);
 };

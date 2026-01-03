@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Expense } from '@/lib/services';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -14,7 +14,7 @@ import {
 import { ExpenseInfoCard } from './ExpenseInfoCard';
 
 interface ExpenseDetailModalProps {
-	expense: Expense;
+	expense: Expense | null;
 	onClose: () => void;
 	onEdit: (expense: Expense) => void;
 	onDelete: (expense: Expense) => void;
@@ -26,40 +26,12 @@ export const ExpenseDetailModal = ({
 	onEdit,
 	onDelete,
 }: ExpenseDetailModalProps) => {
-	// Prevent background scroll when modal is open
-	useEffect(() => {
-		// Calculate scrollbar width before hiding
-		const scrollbarWidth =
-			window.innerWidth - document.documentElement.clientWidth;
-		document.documentElement.style.setProperty(
-			'--scrollbar-width',
-			`${scrollbarWidth}px`
-		);
+	if (!expense) return null;
 
-		// Add modal-open class instead of inline style
-		document.body.classList.add('modal-open');
-
-		// Close modal on Escape key
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				onClose();
-			}
-		};
-
-		window.addEventListener('keydown', handleEscape);
-
-		return () => {
-			document.body.classList.remove('modal-open');
-			document.documentElement.style.removeProperty('--scrollbar-width');
-			window.removeEventListener('keydown', handleEscape);
-		};
-	}, [onClose]);
-
-	return (
+	const modalContent = (
 		<div
-			className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-lg h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
+			className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full overflow-hidden flex flex-col"
 			onClick={e => e.stopPropagation()}
-			style={{ animation: 'slideUp 0.2s ease-out' }}
 		>
 			{/* Modal Header with Gradient */}
 			<div className="relative overflow-hidden">
@@ -105,68 +77,70 @@ export const ExpenseDetailModal = ({
 			</div>
 
 			{/* Modal Content */}
-			<div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 bg-gray-50">
-				{/* Date Card */}
-				<ExpenseInfoCard
-					icon={Calendar}
-					iconColor="text-blue-600"
-					iconBgColor="bg-blue-50"
-					label="Expense Date"
-				>
-					<p className="text-sm font-semibold text-gray-900 mt-0.5">
-						{new Date(expense.date).toLocaleDateString('en-US', {
-							weekday: 'long',
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric',
-						})}
-					</p>
-				</ExpenseInfoCard>
-
-				{/* Currency Card */}
-				<ExpenseInfoCard
-					icon={DollarSign}
-					iconColor="text-green-600"
-					iconBgColor="bg-green-50"
-					label="Currency"
-				>
-					<p className="text-sm font-semibold text-gray-900 mt-0.5">
-						{expense.currency}
-					</p>
-				</ExpenseInfoCard>
-
-				{/* Created At Card */}
-				<ExpenseInfoCard
-					icon={Clock}
-					iconColor="text-purple-600"
-					iconBgColor="bg-purple-50"
-					label="Created At"
-				>
-					<p className="text-sm font-semibold text-gray-900 mt-0.5">
-						{new Date(expense.createdAt).toLocaleDateString('en-US', {
-							month: 'short',
-							day: 'numeric',
-							year: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-						})}
-					</p>
-				</ExpenseInfoCard>
-
-				{/* Description Card */}
-				{expense.description && (
+			<div className="p-4 sm:p-6 bg-gray-50">
+				<div className="space-y-3 sm:space-y-4">
+					{/* Date Card */}
 					<ExpenseInfoCard
-						icon={FileText}
-						iconColor="text-amber-600"
-						iconBgColor="bg-amber-50"
-						label="Description"
-						scrollable
+						icon={Calendar}
+						iconColor="text-blue-600"
+						iconBgColor="bg-blue-50"
+						label="Expense Date"
 					>
-						<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
-							{expense.description}
+						<p className="text-sm font-semibold text-gray-900 mt-0.5">
+							{new Date(expense.date).toLocaleDateString('en-US', {
+								weekday: 'long',
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							})}
 						</p>
 					</ExpenseInfoCard>
-				)}
+
+					{/* Currency Card */}
+					<ExpenseInfoCard
+						icon={DollarSign}
+						iconColor="text-green-600"
+						iconBgColor="bg-green-50"
+						label="Currency"
+					>
+						<p className="text-sm font-semibold text-gray-900 mt-0.5">
+							{expense.currency}
+						</p>
+					</ExpenseInfoCard>
+
+					{/* Created At Card */}
+					<ExpenseInfoCard
+						icon={Clock}
+						iconColor="text-purple-600"
+						iconBgColor="bg-purple-50"
+						label="Created At"
+					>
+						<p className="text-sm font-semibold text-gray-900 mt-0.5">
+							{new Date(expense.createdAt).toLocaleDateString('en-US', {
+								month: 'short',
+								day: 'numeric',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+							})}
+						</p>
+					</ExpenseInfoCard>
+
+					{/* Description Card */}
+					{expense.description && (
+						<ExpenseInfoCard
+							icon={FileText}
+							iconColor="text-amber-600"
+							iconBgColor="bg-amber-50"
+							label="Description"
+							scrollable
+						>
+							<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+								{expense.description}
+							</p>
+						</ExpenseInfoCard>
+					)}
+				</div>
 			</div>
 
 			{/* Modal Footer with Actions */}
@@ -179,7 +153,7 @@ export const ExpenseDetailModal = ({
 							onDelete(expense);
 							onClose();
 						}}
-						className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
 						title="Delete expense"
 					>
 						<Trash2 className="h-11 w-11" strokeWidth={3} />
@@ -192,7 +166,7 @@ export const ExpenseDetailModal = ({
 							onEdit(expense);
 							onClose();
 						}}
-						className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
 						title="Edit expense"
 					>
 						<Edit className="h-11 w-11" strokeWidth={3} />
@@ -202,7 +176,7 @@ export const ExpenseDetailModal = ({
 					<Button
 						type="button"
 						onClick={onClose}
-						className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
+						className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 shadow-xl transition-all hover:scale-110"
 						title="Close modal"
 					>
 						<X className="h-11 w-11" strokeWidth={3} />
@@ -210,5 +184,18 @@ export const ExpenseDetailModal = ({
 				</div>
 			</div>
 		</div>
+	);
+
+	// Render Drawer for all screen sizes
+	return (
+		<Drawer
+			open={!!expense}
+			onOpenChange={onClose}
+			shouldScaleBackground={false}
+		>
+			<DrawerContent className="max-h-[90vh] overflow-auto mx-auto w-full sm:max-w-lg md:max-w-xl">
+				{modalContent}
+			</DrawerContent>
+		</Drawer>
 	);
 };

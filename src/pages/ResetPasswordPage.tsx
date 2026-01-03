@@ -181,7 +181,7 @@ export const ResetPasswordPage = () => {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
 			<Card
 				id="reset-password-form"
 				className="w-full max-w-md animate-in fade-in duration-300"

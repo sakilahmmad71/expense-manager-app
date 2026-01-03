@@ -1,4 +1,5 @@
 import { Category } from '@/lib/services';
+import { Badge } from '@/components/ui/badge';
 
 interface CategoryCardProps {
 	category: Category;
@@ -30,7 +31,7 @@ export const CategoryCard = ({
 						{category.name}
 					</h3>
 				</div>
-				<div className="space-y-1">
+				<div className="space-y-2">
 					{category.color && (
 						<div className="flex items-center gap-2 text-xs text-gray-500">
 							<div
@@ -42,10 +43,10 @@ export const CategoryCard = ({
 							</span>
 						</div>
 					)}
-					<p className="text-xs text-gray-500">
-						Used in {category._count?.expenses ?? 0} expense
+					<Badge variant="secondary" className="text-[10px] sm:text-xs">
+						{category._count?.expenses ?? 0} expense
 						{category._count?.expenses !== 1 ? 's' : ''}
-					</p>
+					</Badge>
 				</div>
 			</div>
 		</div>

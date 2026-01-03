@@ -1,8 +1,11 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GlobalLoadingBar } from '@/components/GlobalLoadingBar';
+import { CommandPalette } from '@/components/ui/command-palette';
 import { usePrefetchOnHover, usePrefetchData } from '@/hooks/usePrefetch';
+import { useState } from 'react';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -29,6 +32,7 @@ export const Layout = () => {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const [commandOpen, setCommandOpen] = useState(false);
 	const { prefetchDashboard, prefetchExpenses, prefetchCategories } =
 		usePrefetchOnHover();
 
@@ -76,7 +80,7 @@ export const Layout = () => {
 							to="/dashboard"
 							className="flex items-center gap-3 group transition-all duration-200"
 						>
-							<div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
+							<div className="h-10 w-10 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
 								<Wallet className="h-6 w-6 text-white" />
 							</div>
 							<div className="hidden sm:block">
@@ -118,9 +122,12 @@ export const Layout = () => {
 										className="flex items-center gap-3 hover:bg-gray-100 transition-colors px-3 py-2 rounded-lg"
 									>
 										<div className="flex items-center gap-3">
-											<div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-												{user?.name?.charAt(0).toUpperCase()}
-											</div>
+											<Avatar className="h-8 w-8">
+												<AvatarImage src="" alt={user?.name || 'User'} />
+												<AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-800 text-white text-sm">
+													{user?.name?.charAt(0).toUpperCase() || 'U'}
+												</AvatarFallback>
+											</Avatar>
 											<span className="text-sm font-medium text-gray-900">
 												{user?.name}
 											</span>
@@ -131,9 +138,12 @@ export const Layout = () => {
 								<DropdownMenuContent align="end" className="w-64">
 									<div className="px-3 py-3 border-b">
 										<div className="flex items-center gap-3">
-											<div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
-												{user?.name?.charAt(0).toUpperCase()}
-											</div>
+											<Avatar className="h-10 w-10">
+												<AvatarImage src="" alt={user?.name || 'User'} />
+												<AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+													{user?.name?.charAt(0).toUpperCase() || 'U'}
+												</AvatarFallback>
+											</Avatar>
 											<div className="flex-1 min-w-0">
 												<p className="text-sm font-semibold text-gray-900 truncate">
 													{user?.name}
@@ -186,17 +196,23 @@ export const Layout = () => {
 										size="sm"
 										className="flex items-center gap-1.5 hover:bg-gray-100 rounded-full p-1.5"
 									>
-										<div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-											{user?.name?.charAt(0).toUpperCase()}
-										</div>
+										<Avatar className="h-8 w-8">
+											<AvatarImage src="" alt={user?.name || 'User'} />
+											<AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-800 text-white text-sm">
+												{user?.name?.charAt(0).toUpperCase() || 'U'}
+											</AvatarFallback>
+										</Avatar>
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="w-72">
 									<div className="px-3 py-3 border-b">
 										<div className="flex items-center gap-3">
-											<div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
-												{user?.name?.charAt(0).toUpperCase()}
-											</div>
+											<Avatar className="h-12 w-12">
+												<AvatarImage src="" alt={user?.name || 'User'} />
+												<AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-800 text-white text-lg">
+													{user?.name?.charAt(0).toUpperCase() || 'U'}
+												</AvatarFallback>
+											</Avatar>
 											<div className="flex-1 min-w-0">
 												<p className="text-sm font-semibold text-gray-900 truncate">
 													{user?.name}
@@ -371,6 +387,8 @@ export const Layout = () => {
 					</div>
 				</div>
 			</nav>
+			{/* Command Palette */}
+			<CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
 		</div>
 	);
 };

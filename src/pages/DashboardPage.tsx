@@ -11,6 +11,8 @@ import {
 	TopCategoriesChart,
 } from '@/components/dashboard';
 import { ExpenseModal } from '@/components/expenses';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
+import { Button } from '@/components/ui/button';
 import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { formatNumberWithTooltip } from '@/lib/formatNumber';
@@ -223,6 +225,9 @@ export const DashboardPage = () => {
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6">
+				{/* Breadcrumb Navigation */}
+				<PageBreadcrumb items={[{ label: 'Dashboard' }]} />
+
 				{/* Header */}
 				<div
 					className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300"
@@ -234,9 +239,9 @@ export const DashboardPage = () => {
 							Overview of your expenses
 						</p>
 					</div>
-					<button
+					<Button
 						onClick={() => setIsModalOpen(true)}
-						className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 rounded-lg transition-colors duration-200"
+						className="flex items-center gap-2 px-3 py-2 sm:px-4"
 					>
 						<svg
 							className="w-4 h-4 sm:w-5 sm:h-5"
@@ -252,7 +257,7 @@ export const DashboardPage = () => {
 							/>
 						</svg>
 						<span className="text-sm sm:text-base">Add Expense</span>
-					</button>
+					</Button>
 				</div>
 
 				{/* Mixed Currency Warning */}
@@ -364,6 +369,7 @@ export const DashboardPage = () => {
 				{/* Expense Modal */}
 				{isModalOpen && (
 					<ExpenseModal
+						isOpen={isModalOpen}
 						expense={null}
 						categories={categories}
 						onClose={() => setIsModalOpen(false)}

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Category } from '@/lib/services';
 import { Edit, Trash2, X, Calendar, Clock, Package } from 'lucide-react';
 
@@ -46,219 +46,176 @@ export const CategoryDetailModal = ({
 	onEdit,
 	onDelete,
 }: CategoryDetailModalProps) => {
-	// Prevent background scroll when modal is open
-	useEffect(() => {
-		if (!isOpen) return;
-
-		// Calculate scrollbar width before hiding
-		const scrollbarWidth =
-			window.innerWidth - document.documentElement.clientWidth;
-		document.documentElement.style.setProperty(
-			'--scrollbar-width',
-			`${scrollbarWidth}px`
-		);
-
-		// Add modal-open class instead of inline style
-		document.body.classList.add('modal-open');
-
-		// Close modal on Escape key
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				onClose();
-			}
-		};
-
-		window.addEventListener('keydown', handleEscape);
-
-		return () => {
-			document.body.classList.remove('modal-open');
-			document.documentElement.style.removeProperty('--scrollbar-width');
-			window.removeEventListener('keydown', handleEscape);
-		};
-	}, [isOpen, onClose]);
-
-	if (!isOpen || !category) return null;
+	if (!category) return null;
 
 	const expenseCount = category._count?.expenses ?? 0;
 
-	return (
-		<div
-			className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-			onClick={onClose}
-		>
-			<div
-				className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
-				onClick={e => e.stopPropagation()}
-			>
-				{/* Modal Header with Gradient */}
-				<div className="relative overflow-hidden">
-					<div
-						className="absolute inset-0 opacity-10"
-						style={{
-							background: `linear-gradient(135deg, ${category.color || '#3b82f6'} 0%, ${category.color || '#3b82f6'}dd 100%)`,
-						}}
-					/>
-					<div className="relative px-4 sm:px-6 py-6 sm:py-8">
-						<div className="flex items-start justify-between mb-3 sm:mb-4">
-							<div
-								className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg"
-								style={{
-									backgroundColor: category.color
-										? `${category.color}30`
-										: '#dbeafe',
-								}}
-							>
-								{category.icon || '📁'}
-							</div>
-							<div
-								className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm"
-								style={{
-									backgroundColor: category.color
-										? `${category.color}20`
-										: '#dbeafe',
-									color: category.color || '#1e40af',
-								}}
-							>
-								Category
-							</div>
+	const modalContent = (
+		<div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl shadow-xl w-full overflow-hidden flex flex-col">
+			{/* Modal Header with Gradient */}
+			<div className="relative overflow-hidden">
+				<div
+					className="absolute inset-0 opacity-10"
+					style={{
+						background: `linear-gradient(135deg, ${category?.color || '#3b82f6'} 0%, ${category?.color || '#3b82f6'}dd 100%)`,
+					}}
+				/>
+				<div className="relative px-4 sm:px-6 py-6 sm:py-8">
+					<div className="flex items-start justify-between mb-3 sm:mb-4">
+						<div
+							className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg"
+							style={{
+								backgroundColor: category?.color
+									? `${category?.color}30`
+									: '#dbeafe',
+							}}
+						>
+							{category?.icon || '📁'}
 						</div>
-						<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">
-							{category.name}
-						</h2>
-						<div className="flex items-baseline gap-2">
-							<span className="text-3xl sm:text-4xl font-bold text-gray-900">
-								{expenseCount}
-							</span>
-							<span className="text-sm text-gray-600">
-								{expenseCount === 1 ? 'expense' : 'expenses'}
-							</span>
+						<div
+							className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm"
+							style={{
+								backgroundColor: category?.color
+									? `${category?.color}20`
+									: '#dbeafe',
+								color: category?.color || '#1e40af',
+							}}
+						>
+							Category
 						</div>
 					</div>
-				</div>
-
-				{/* Modal Content */}
-				<div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 bg-gray-50">
-					{/* Color Card */}
-					<CategoryInfoCard
-						icon={Package}
-						iconColor="text-purple-600"
-						iconBgColor="bg-purple-50"
-						label="Color"
-					>
-						<div className="flex items-center gap-2 mt-0.5">
-							<div
-								className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
-								style={{ backgroundColor: category.color }}
-							/>
-							<p className="text-sm font-semibold text-gray-900">
-								{category.color}
-							</p>
-						</div>
-					</CategoryInfoCard>
-
-					{/* Created At Card */}
-					<CategoryInfoCard
-						icon={Calendar}
-						iconColor="text-blue-600"
-						iconBgColor="bg-blue-50"
-						label="Created At"
-					>
-						<p className="text-sm font-semibold text-gray-900 mt-0.5">
-							{new Date(category.createdAt).toLocaleDateString('en-US', {
-								weekday: 'long',
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric',
-							})}
-						</p>
-					</CategoryInfoCard>
-
-					{/* Updated At Card */}
-					<CategoryInfoCard
-						icon={Clock}
-						iconColor="text-green-600"
-						iconBgColor="bg-green-50"
-						label="Last Updated"
-					>
-						<p className="text-sm font-semibold text-gray-900 mt-0.5">
-							{new Date(category.updatedAt).toLocaleDateString('en-US', {
-								month: 'short',
-								day: 'numeric',
-								year: 'numeric',
-								hour: '2-digit',
-								minute: '2-digit',
-							})}
-						</p>
-					</CategoryInfoCard>
-
-					{/* Expense Count Card */}
-					<CategoryInfoCard
-						icon={Package}
-						iconColor="text-amber-600"
-						iconBgColor="bg-amber-50"
-						label="Total Expenses"
-					>
-						<p className="text-sm font-semibold text-gray-900 mt-0.5">
-							{expenseCount} {expenseCount === 1 ? 'expense' : 'expenses'} in
-							this category
-						</p>
-					</CategoryInfoCard>
-				</div>
-
-				{/* Modal Footer with Actions */}
-				<div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-6 -mt-2">
-					<div className="flex justify-between items-center">
-						{/* Delete Button - Left */}
-						<Button
-							type="button"
-							onClick={() => {
-								onDelete(category);
-								onClose();
-							}}
-							className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
-							title="Delete category"
-						>
-							<Trash2 className="h-11 w-11" strokeWidth={3} />
-						</Button>
-
-						{/* Edit Button - Center */}
-						<Button
-							type="button"
-							onClick={() => {
-								onEdit(category);
-								onClose();
-							}}
-							className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
-							title="Edit category"
-						>
-							<Edit className="h-11 w-11" strokeWidth={3} />
-						</Button>
-
-						{/* Close Button - Right */}
-						<Button
-							type="button"
-							onClick={onClose}
-							className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110"
-							title="Close modal"
-						>
-							<X className="h-11 w-11" strokeWidth={3} />
-						</Button>
+					<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">
+						{category?.name}
+					</h2>
+					<div className="flex items-baseline gap-2">
+						<span className="text-3xl sm:text-4xl font-bold text-gray-900">
+							{expenseCount}
+						</span>
+						<span className="text-sm text-gray-600">
+							{expenseCount === 1 ? 'expense' : 'expenses'}
+						</span>
 					</div>
 				</div>
 			</div>
 
-			<style>{`
-				@keyframes slideUp {
-					from {
-						opacity: 0;
-						transform: translateY(20px);
-					}
-					to {
-						opacity: 1;
-						transform: translateY(0);
-					}
-				}
-			`}</style>
+			{/* Modal Content */}
+			<div className="p-4 sm:p-6 space-y-3 sm:space-y-4 bg-gray-50">
+				{/* Color Card */}
+				<CategoryInfoCard
+					icon={Package}
+					iconColor="text-purple-600"
+					iconBgColor="bg-purple-50"
+					label="Color"
+				>
+					<div className="flex items-center gap-2 mt-0.5">
+						<div
+							className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
+							style={{ backgroundColor: category?.color }}
+						/>
+						<p className="text-sm font-semibold text-gray-900">
+							{category?.color}
+						</p>
+					</div>
+				</CategoryInfoCard>
+
+				{/* Created At Card */}
+				<CategoryInfoCard
+					icon={Calendar}
+					iconColor="text-blue-600"
+					iconBgColor="bg-blue-50"
+					label="Created At"
+				>
+					<p className="text-sm font-semibold text-gray-900 mt-0.5">
+						{new Date(category.createdAt).toLocaleDateString('en-US', {
+							weekday: 'long',
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric',
+						})}
+					</p>
+				</CategoryInfoCard>
+
+				{/* Updated At Card */}
+				<CategoryInfoCard
+					icon={Clock}
+					iconColor="text-green-600"
+					iconBgColor="bg-green-50"
+					label="Last Updated"
+				>
+					<p className="text-sm font-semibold text-gray-900 mt-0.5">
+						{new Date(category.updatedAt).toLocaleDateString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
+					</p>
+				</CategoryInfoCard>
+
+				{/* Expense Count Card */}
+				<CategoryInfoCard
+					icon={Package}
+					iconColor="text-amber-600"
+					iconBgColor="bg-amber-50"
+					label="Total Expenses"
+				>
+					<p className="text-sm font-semibold text-gray-900 mt-0.5">
+						{expenseCount} {expenseCount === 1 ? 'expense' : 'expenses'} in this
+						category
+					</p>
+				</CategoryInfoCard>
+			</div>
+
+			{/* Modal Footer with Actions */}
+			<div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-6 -mt-2">
+				<div className="flex justify-between items-center">
+					{/* Delete Button - Left */}
+					<Button
+						type="button"
+						onClick={() => {
+							onDelete(category);
+							onClose();
+						}}
+						className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
+						title="Delete category"
+					>
+						<Trash2 className="h-11 w-11" strokeWidth={3} />
+					</Button>
+
+					{/* Edit Button - Center */}
+					<Button
+						type="button"
+						onClick={() => {
+							onEdit(category);
+							onClose();
+						}}
+						className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
+						title="Edit category"
+					>
+						<Edit className="h-11 w-11" strokeWidth={3} />
+					</Button>
+
+					{/* Close Button - Right */}
+					<Button
+						type="button"
+						onClick={onClose}
+						className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 shadow-xl transition-all hover:scale-110"
+						title="Close modal"
+					>
+						<X className="h-11 w-11" strokeWidth={3} />
+					</Button>
+				</div>
+			</div>
 		</div>
+	);
+
+	// Render Drawer for all screen sizes
+	return (
+		<Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+			<DrawerContent className="max-h-[90vh] overflow-auto mx-auto w-full sm:max-w-lg md:max-w-xl">
+				{modalContent}
+			</DrawerContent>
+		</Drawer>
 	);
 };

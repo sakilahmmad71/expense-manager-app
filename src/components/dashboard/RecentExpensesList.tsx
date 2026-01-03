@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Expense } from '@/lib/services';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Receipt } from 'lucide-react';
 
 interface RecentExpensesListProps {
 	expenses: Expense[];
@@ -20,9 +22,11 @@ export const RecentExpensesList = ({
 			<CardContent>
 				<div className="space-y-3">
 					{expenses.length === 0 ? (
-						<p className="text-center text-gray-500 py-8 text-sm sm:text-base">
-							No expenses yet
-						</p>
+						<EmptyState
+							icon={Receipt}
+							title="No expenses yet"
+							description="Start tracking your expenses by adding your first one"
+						/>
 					) : (
 						expenses.map((expense, index) => (
 							<div

@@ -67,9 +67,8 @@
 		scrollbar-gutter: stable;
 	}
 
-	/* Prevent layout shift when modal opens */
-	body.modal-open {
-		overflow: hidden;
-		padding-right: var(--scrollbar-width, 0);
+	/* Fix vaul drawer height issue */
+	[data-vaul-drawer][data-vaul-drawer-direction='bottom']::after {
+		height: auto !important;
 	}
 }
