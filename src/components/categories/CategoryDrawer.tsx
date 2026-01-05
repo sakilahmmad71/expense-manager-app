@@ -1,11 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { Category } from '@/lib/services';
-import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
-import { Check, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import {
 	Drawer,
 	DrawerContent,
@@ -13,12 +6,19 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
+import { Category } from '@/lib/services';
+import { Check, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface CategoryDrawerProps {
 	category: Category | null;
@@ -164,93 +164,99 @@ export const CategoryDrawer = ({
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
-			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
-				<DrawerHeader className="border-b">
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] flex flex-col">
+				<DrawerHeader className="border-b flex-shrink-0">
 					<DrawerTitle className="text-2xl font-bold">
 						{category ? 'Edit Category' : 'Add New Category'}
 					</DrawerTitle>
 				</DrawerHeader>
 
-				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{error && (
-						<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-							{error}
-						</div>
-					)}
+				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+					<div className="overflow-y-auto flex-1 p-6 space-y-4">
+						{error && (
+							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+								{error}
+							</div>
+						)}
 
-					<div className="space-y-2">
-						<Label htmlFor="name">
-							Category Name <span className="text-red-500">*</span>
-						</Label>
-						<Input
-							id="name"
-							value={formData.name}
-							onChange={e => setFormData({ ...formData, name: e.target.value })}
-							placeholder="e.g., Food, Transport, Entertainment"
-							required
-							disabled={isSubmitting}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="color">
-							Color <span className="text-red-500">*</span>
-						</Label>
-						<div className="flex gap-2">
+						<div className="space-y-2">
+							<Label htmlFor="name">
+								Category Name <span className="text-red-500">*</span>
+							</Label>
 							<Input
-								id="color"
-								type="color"
-								value={formData.color}
+								id="name"
+								value={formData.name}
 								onChange={e =>
-									setFormData({ ...formData, color: e.target.value })
+									setFormData({ ...formData, name: e.target.value })
 								}
-								className="w-20 h-10 cursor-pointer"
-								disabled={isSubmitting}
-							/>
-							<Input
-								type="text"
-								value={formData.color}
-								onChange={e =>
-									setFormData({ ...formData, color: e.target.value })
-								}
-								placeholder="#3b82f6"
-								className="flex-1"
+								placeholder="e.g., Food, Transport, Entertainment"
+								required
 								disabled={isSubmitting}
 							/>
 						</div>
-					</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="icon">Icon (Emoji)</Label>
-						<Input
-							id="icon"
-							value={formData.icon}
-							onChange={e => setFormData({ ...formData, icon: e.target.value })}
-							placeholder="Pick an emoji"
-							className="text-2xl"
-							maxLength={2}
-							disabled={isSubmitting}
-						/>
-						<div className="grid grid-cols-8 gap-2 p-3 bg-gray-50 rounded-md max-h-48 overflow-y-auto">
-							{commonEmojis.map(emoji => (
-								<button
-									key={emoji}
-									type="button"
-									onClick={() => setFormData({ ...formData, icon: emoji })}
-									className={`text-2xl p-2 rounded hover:bg-gray-200 transition ${
-										formData.icon === emoji
-											? 'bg-gray-200 ring-2 ring-blue-500'
-											: ''
-									}`}
+						<div className="space-y-2">
+							<Label htmlFor="color">
+								Color <span className="text-red-500">*</span>
+							</Label>
+							<div className="flex gap-2">
+								<Input
+									id="color"
+									type="color"
+									value={formData.color}
+									onChange={e =>
+										setFormData({ ...formData, color: e.target.value })
+									}
+									className="w-20 h-10 cursor-pointer"
 									disabled={isSubmitting}
-								>
-									{emoji}
-								</button>
-							))}
+								/>
+								<Input
+									type="text"
+									value={formData.color}
+									onChange={e =>
+										setFormData({ ...formData, color: e.target.value })
+									}
+									placeholder="#3b82f6"
+									className="flex-1"
+									disabled={isSubmitting}
+								/>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="icon">Icon (Emoji)</Label>
+							<Input
+								id="icon"
+								value={formData.icon}
+								onChange={e =>
+									setFormData({ ...formData, icon: e.target.value })
+								}
+								placeholder="Pick an emoji"
+								className="text-2xl"
+								maxLength={2}
+								disabled={isSubmitting}
+							/>
+							<div className="grid grid-cols-8 gap-2 p-3 bg-gray-50 rounded-md max-h-48 overflow-y-auto">
+								{commonEmojis.map(emoji => (
+									<button
+										key={emoji}
+										type="button"
+										onClick={() => setFormData({ ...formData, icon: emoji })}
+										className={`text-2xl p-2 rounded hover:bg-gray-200 transition ${
+											formData.icon === emoji
+												? 'bg-gray-200 ring-2 ring-blue-500'
+												: ''
+										}`}
+										disabled={isSubmitting}
+									>
+										{emoji}
+									</button>
+								))}
+							</div>
 						</div>
 					</div>
 
-					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t">
+					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>

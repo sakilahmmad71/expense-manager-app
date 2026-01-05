@@ -1,4 +1,12 @@
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
+import {
+	Drawer,
+	DrawerContent,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -8,26 +16,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Combobox } from '@/components/ui/combobox';
 import { Textarea } from '@/components/ui/textarea';
-import { Category, Expense, ExpenseInput } from '@/lib/services';
-import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
-import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-	Drawer,
-	DrawerContent,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle,
-} from '@/components/ui/drawer';
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
+import { Category, Expense, ExpenseInput } from '@/lib/services';
+import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface ExpenseDrawerProps {
 	isOpen: boolean;
@@ -200,169 +200,171 @@ export const ExpenseDrawer = ({
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
-			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
-				<DrawerHeader className="border-b">
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] flex flex-col">
+				<DrawerHeader className="border-b flex-shrink-0">
 					<DrawerTitle className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}
 					</DrawerTitle>
 				</DrawerHeader>
 
-				<form onSubmit={handleSubmit} className="p-6 space-y-4">
-					{error && (
-						<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-							{error}
-						</div>
-					)}
+				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+					<div className="overflow-y-auto flex-1 p-6 space-y-4">
+						{error && (
+							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+								{error}
+							</div>
+						)}
 
-					<div className="space-y-2">
-						<Label htmlFor="title">
-							Title <span className="text-red-500">*</span>
-						</Label>
-						<Input
-							id="title"
-							placeholder="e.g., Coffee at Starbucks"
-							value={formData.title}
-							onChange={e =>
-								setFormData({ ...formData, title: e.target.value })
-							}
-							required
-							disabled={isSubmitting}
-						/>
-					</div>
-
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="amount" className="text-sm">
-								Amount <span className="text-red-500">*</span>
+							<Label htmlFor="title">
+								Title <span className="text-red-500">*</span>
 							</Label>
 							<Input
-								id="amount"
-								type="number"
-								step="0.01"
-								placeholder="0.00"
-								value={formData.amount || ''}
+								id="title"
+								placeholder="e.g., Coffee at Starbucks"
+								value={formData.title}
 								onChange={e =>
-									setFormData({
-										...formData,
-										amount: parseFloat(e.target.value),
-									})
+									setFormData({ ...formData, title: e.target.value })
 								}
 								required
 								disabled={isSubmitting}
 							/>
 						</div>
 
-						<div className="space-y-2">
-							<Label htmlFor="currency" className="text-sm">
-								Currency <span className="text-red-500">*</span>
-							</Label>
-							<Select
-								value={selectedCurrency}
-								onValueChange={handleCurrencyChange}
-								disabled={isSubmitting}
-							>
-								<SelectTrigger id="currency">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{currencies.map(currency => (
-										<SelectItem key={currency.code} value={currency.code}>
-											{currency.symbol} {currency.code} - {currency.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="category">
-							Category <span className="text-red-500">*</span>
-						</Label>
-						<Combobox
-							options={categoryOptions}
-							value={formData.categoryId}
-							onValueChange={value => {
-								setFormData({ ...formData, categoryId: value });
-							}}
-							placeholder="Select a category"
-							searchPlaceholder="Search categories..."
-							emptyText="No category found."
-							disabled={isSubmitting}
-						/>
-						<Button
-							type="button"
-							variant="ghost"
-							size="sm"
-							onClick={() => navigate('/categories')}
-							className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
-						>
-							<Plus className="h-4 w-4 mr-2" />
-							Add New Category
-						</Button>
-					</div>
-
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="date" className="text-sm font-medium">
-								Date (Optional)
-							</Label>
-							<div className="relative">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="amount" className="text-sm">
+									Amount <span className="text-red-500">*</span>
+								</Label>
 								<Input
-									id="date"
-									type="date"
-									value={formData.date}
+									id="amount"
+									type="number"
+									step="0.01"
+									placeholder="0.00"
+									value={formData.amount || ''}
 									onChange={e =>
-										setFormData({ ...formData, date: e.target.value })
+										setFormData({
+											...formData,
+											amount: parseFloat(e.target.value),
+										})
 									}
+									required
 									disabled={isSubmitting}
-									placeholder="Current date"
-									className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
 								/>
-								<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
 							</div>
-							<p className="text-xs text-muted-foreground">
-								Defaults to current date if not provided
-							</p>
+
+							<div className="space-y-2">
+								<Label htmlFor="currency" className="text-sm">
+									Currency <span className="text-red-500">*</span>
+								</Label>
+								<Select
+									value={selectedCurrency}
+									onValueChange={handleCurrencyChange}
+									disabled={isSubmitting}
+								>
+									<SelectTrigger id="currency">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{currencies.map(currency => (
+											<SelectItem key={currency.code} value={currency.code}>
+												{currency.symbol} {currency.code} - {currency.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="time" className="text-sm font-medium">
-								Time (Optional)
+							<Label htmlFor="category">
+								Category <span className="text-red-500">*</span>
 							</Label>
-							<div className="relative">
-								<Input
-									id="time"
-									type="time"
-									value={time}
-									onChange={e => setTime(e.target.value)}
-									disabled={isSubmitting}
-									placeholder="Current time"
-									className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-								/>
-								<Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							<Combobox
+								options={categoryOptions}
+								value={formData.categoryId}
+								onValueChange={value => {
+									setFormData({ ...formData, categoryId: value });
+								}}
+								placeholder="Select a category"
+								searchPlaceholder="Search categories..."
+								emptyText="No category found."
+								disabled={isSubmitting}
+							/>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								onClick={() => navigate('/categories')}
+								className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
+							>
+								<Plus className="h-4 w-4 mr-2" />
+								Add New Category
+							</Button>
+						</div>
+
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="date" className="text-sm font-medium">
+									Date (Optional)
+								</Label>
+								<div className="relative">
+									<Input
+										id="date"
+										type="date"
+										value={formData.date}
+										onChange={e =>
+											setFormData({ ...formData, date: e.target.value })
+										}
+										disabled={isSubmitting}
+										placeholder="Current date"
+										className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+									/>
+									<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+								</div>
+								<p className="text-xs text-muted-foreground">
+									Defaults to current date if not provided
+								</p>
 							</div>
-							<p className="text-xs text-muted-foreground">
-								Defaults to current time if not provided
-							</p>
+
+							<div className="space-y-2">
+								<Label htmlFor="time" className="text-sm font-medium">
+									Time (Optional)
+								</Label>
+								<div className="relative">
+									<Input
+										id="time"
+										type="time"
+										value={time}
+										onChange={e => setTime(e.target.value)}
+										disabled={isSubmitting}
+										placeholder="Current time"
+										className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+									/>
+									<Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+								</div>
+								<p className="text-xs text-muted-foreground">
+									Defaults to current time if not provided
+								</p>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="description">Description (Optional)</Label>
+							<Textarea
+								id="description"
+								placeholder="Add any additional details..."
+								value={formData.description}
+								onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+									setFormData({ ...formData, description: e.target.value })
+								}
+								rows={3}
+								disabled={isSubmitting}
+							/>
 						</div>
 					</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="description">Description (Optional)</Label>
-						<Textarea
-							id="description"
-							placeholder="Add any additional details..."
-							value={formData.description}
-							onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-								setFormData({ ...formData, description: e.target.value })
-							}
-							rows={3}
-							disabled={isSubmitting}
-						/>
-					</div>
-
-					<DrawerFooter className="flex-row justify-between items-center pt-6">
+					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
