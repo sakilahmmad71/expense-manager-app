@@ -10,7 +10,7 @@ import {
 	StatCard,
 	TopCategoriesChart,
 } from '@/components/dashboard';
-import { ExpenseModal } from '@/components/expenses';
+import { ExpenseDrawer } from '@/components/expenses';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { DashboardSummary, Expense } from '@/lib/services';
@@ -368,7 +368,7 @@ export const DashboardPage = () => {
 
 				{/* Expense Modal */}
 				{isModalOpen && (
-					<ExpenseModal
+					<ExpenseDrawer
 						isOpen={isModalOpen}
 						expense={null}
 						categories={categories}

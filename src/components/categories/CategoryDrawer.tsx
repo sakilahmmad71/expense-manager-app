@@ -9,11 +9,18 @@ import { useEffect, useState } from 'react';
 import {
 	Drawer,
 	DrawerContent,
+	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
-interface CategoryModalProps {
+interface CategoryDrawerProps {
 	category: Category | null;
 	isOpen: boolean;
 	onClose: () => void;
@@ -83,12 +90,12 @@ const commonEmojis = [
 	'🏃', // Sports
 ];
 
-export const CategoryModal = ({
+export const CategoryDrawer = ({
 	category,
 	isOpen,
 	onClose,
 	onSuccess,
-}: CategoryModalProps) => {
+}: CategoryDrawerProps) => {
 	const { toast } = useToast();
 	const createCategory = useCreateCategory();
 	const updateCategory = useUpdateCategory();
@@ -149,8 +156,14 @@ export const CategoryModal = ({
 		}
 	};
 
+	const handleOpenChange = (open: boolean) => {
+		if (!open) {
+			onClose();
+		}
+	};
+
 	return (
-		<Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
 				<DrawerHeader className="border-b">
 					<DrawerTitle className="text-2xl font-bold">
@@ -237,31 +250,45 @@ export const CategoryModal = ({
 						</div>
 					</div>
 
-					<div className="flex justify-between items-center pt-6 sticky bottom-0 bg-white border-t -mx-6 px-6 py-4 mt-6">
-						<Button
-							type="button"
-							onClick={onClose}
-							className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-							disabled={isSubmitting}
-							title="Cancel"
-						>
-							<X className="h-11 w-11" strokeWidth={3} />
-						</Button>
-						<Button
-							type="submit"
-							className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-							disabled={isSubmitting}
-							title={
-								isSubmitting
-									? 'Saving...'
-									: category
-										? 'Update Category'
-										: 'Create Category'
-							}
-						>
-							<Check className="h-11 w-11" strokeWidth={3} />
-						</Button>
-					</div>
+					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t">
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type="button"
+										onClick={onClose}
+										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										disabled={isSubmitting}
+									>
+										<X className="h-11 w-11" strokeWidth={3} />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Cancel</p>
+								</TooltipContent>
+							</Tooltip>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type="submit"
+										className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										disabled={isSubmitting}
+									>
+										<Check className="h-11 w-11" strokeWidth={3} />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>
+										{isSubmitting
+											? 'Saving...'
+											: category
+												? 'Update Category'
+												: 'Create Category'}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</DrawerFooter>
 				</form>
 			</DrawerContent>
 		</Drawer>

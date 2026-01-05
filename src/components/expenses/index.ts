@@ -1,6 +1,6 @@
-export { DeleteDialog } from './DeleteDialog';
+export { ExpenseDeleteDrawer } from './ExpenseDeleteDrawer';
 export { ExpenseFilters } from './ExpenseFilters';
 export { ExpenseHeader } from './ExpenseHeader';
 export { ExpenseList } from './ExpenseList';
-export { ExpenseModal } from './ExpenseModal';
+export { ExpenseDrawer } from './ExpenseDrawer';
 export { ExpenseSearch } from './ExpenseSearch';

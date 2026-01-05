@@ -1,9 +1,9 @@
 import {
-	DeleteDialog,
+	ExpenseDeleteDrawer,
 	ExpenseFilters,
 	ExpenseHeader,
 	ExpenseList,
-	ExpenseModal,
+	ExpenseDrawer,
 	ExpenseSearch,
 } from '@/components/expenses';
 import { ExpenseCardSkeleton } from '@/components/Skeletons';
@@ -484,7 +484,7 @@ export const ExpensesPage = () => {
 			)}
 
 			{isModalOpen && (
-				<ExpenseModal
+				<ExpenseDrawer
 					isOpen={isModalOpen}
 					expense={editingExpense}
 					categories={categories}
@@ -495,16 +495,14 @@ export const ExpensesPage = () => {
 				/>
 			)}
 
-			<DeleteDialog
+			<ExpenseDeleteDrawer
 				open={deleteDialogOpen}
 				expense={expenseToDelete}
 				expenseCount={isBulkDeleteDialog ? selectedExpenses.length : undefined}
-				onOpenChange={open => {
-					setDeleteDialogOpen(open);
-					if (!open) {
-						setIsBulkDeleteDialog(false);
-						setExpenseToDelete(null);
-					}
+				onClose={() => {
+					setDeleteDialogOpen(false);
+					setIsBulkDeleteDialog(false);
+					setExpenseToDelete(null);
 				}}
 				onConfirm={handleDelete}
 			/>

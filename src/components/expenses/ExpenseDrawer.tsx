@@ -18,11 +18,18 @@ import { useNavigate } from 'react-router-dom';
 import {
 	Drawer,
 	DrawerContent,
+	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
-interface ExpenseModalProps {
+interface ExpenseDrawerProps {
 	isOpen: boolean;
 	expense: Expense | null;
 	categories: Category[];
@@ -30,13 +37,13 @@ interface ExpenseModalProps {
 	onSuccess: () => void;
 }
 
-export const ExpenseModal = ({
+export const ExpenseDrawer = ({
 	isOpen,
 	expense,
 	categories,
 	onClose,
 	onSuccess,
-}: ExpenseModalProps) => {
+}: ExpenseDrawerProps) => {
 	const navigate = useNavigate();
 	const createExpense = useCreateExpense();
 	const updateExpense = useUpdateExpense();
@@ -185,8 +192,14 @@ export const ExpenseModal = ({
 		}
 	};
 
+	const handleOpenChange = (open: boolean) => {
+		if (!open) {
+			onClose();
+		}
+	};
+
 	return (
-		<Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto overflow-auto">
 				<DrawerHeader className="border-b">
 					<DrawerTitle className="text-2xl font-bold">
@@ -349,31 +362,45 @@ export const ExpenseModal = ({
 						/>
 					</div>
 
-					<div className="flex justify-between items-center pt-6">
-						<Button
-							type="button"
-							onClick={onClose}
-							className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-							disabled={isSubmitting}
-							title="Cancel"
-						>
-							<X className="h-11 w-11" strokeWidth={3} />
-						</Button>
-						<Button
-							type="submit"
-							className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-							disabled={isSubmitting}
-							title={
-								isSubmitting
-									? 'Saving...'
-									: expense
-										? 'Update Expense'
-										: 'Add Expense'
-							}
-						>
-							<Check className="h-11 w-11" strokeWidth={3} />
-						</Button>
-					</div>
+					<DrawerFooter className="flex-row justify-between items-center pt-6">
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type="button"
+										onClick={onClose}
+										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										disabled={isSubmitting}
+									>
+										<X className="h-11 w-11" strokeWidth={3} />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Cancel</p>
+								</TooltipContent>
+							</Tooltip>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type="submit"
+										className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										disabled={isSubmitting}
+									>
+										<Check className="h-11 w-11" strokeWidth={3} />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>
+										{isSubmitting
+											? 'Saving...'
+											: expense
+												? 'Update Expense'
+												: 'Add Expense'}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</DrawerFooter>
 				</form>
 			</DrawerContent>
 		</Drawer>

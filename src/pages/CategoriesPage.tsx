@@ -15,9 +15,9 @@ import {
 import { ModernPagination } from '@/components/ui/modern-pagination';
 import {
 	CategoryCard,
-	CategoryModal,
-	CategoryDeleteDialog,
-	CategoryDetailModal,
+	CategoryDrawer,
+	CategoryDeleteDrawer,
+	CategoryDetailDrawer,
 } from '@/components/categories';
 import type { Category } from '@/lib/services';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
@@ -112,21 +112,21 @@ export function CategoriesPage() {
 	}, []);
 
 	const handleEditCategory = useCallback((category: Category) => {
-		setIsDetailModalOpen(false); // Close detail modal if open
-		// Small delay to ensure modal state updates properly
+		// Close detail modal first, then open edit modal after animation
+		setIsDetailModalOpen(false);
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsModalOpen(true);
-		}, 50);
+		}, 400); // Vaul default animation is ~300ms, add buffer
 	}, []);
 
 	const handleDeleteCategory = useCallback((category: Category) => {
-		setIsDetailModalOpen(false); // Close detail modal if open
-		// Small delay to ensure modal state updates properly
+		// Close detail drawer first, then open delete drawer after animation
+		setIsDetailModalOpen(false);
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsDeleteDialogOpen(true);
-		}, 50);
+		}, 300); // Vaul default animation is ~300ms
 	}, []);
 
 	const handleModalClose = useCallback(() => {
@@ -341,7 +341,7 @@ export function CategoriesPage() {
 			)}
 
 			{/* Category Modal */}
-			<CategoryModal
+			<CategoryDrawer
 				isOpen={isModalOpen}
 				category={selectedCategory}
 				onClose={handleModalClose}
@@ -349,15 +349,15 @@ export function CategoriesPage() {
 			/>
 
 			{/* Delete Dialog */}
-			<CategoryDeleteDialog
+			<CategoryDeleteDrawer
 				isOpen={isDeleteDialogOpen}
 				category={selectedCategory}
 				onClose={handleDeleteDialogClose}
 				onSuccess={handleDeleteSuccess}
 			/>
 
-			{/* Detail Modal */}
-			<CategoryDetailModal
+			{/* Detail Drawer */}
+			<CategoryDetailDrawer
 				isOpen={isDetailModalOpen}
 				category={selectedCategory}
 				onClose={handleDetailModalClose}

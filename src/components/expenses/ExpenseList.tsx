@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ModernPagination } from '@/components/ui/modern-pagination';
 import { Expense } from '@/lib/services';
 import { Download, Package, Trash2 } from 'lucide-react';
-import { ExpenseDetailModal } from './ExpenseDetailModal';
+import { ExpenseDetailDrawer } from './ExpenseDetailDrawer';
 import { ExpenseCard } from './ExpenseCard';
 
 interface Pagination {
@@ -45,6 +45,13 @@ export const ExpenseList = ({
 }: ExpenseListProps) => {
 	const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
 
+	// Close detail modal if viewing expense was deleted (no longer in list)
+	useEffect(() => {
+		if (viewingExpense && !expenses.find(e => e.id === viewingExpense.id)) {
+			setViewingExpense(null);
+		}
+	}, [expenses, viewingExpense]);
+
 	// Memoize handlers to prevent unnecessary re-renders
 	const handleCloseDetailModal = useCallback(() => {
 		setViewingExpense(null);
@@ -53,6 +60,28 @@ export const ExpenseList = ({
 	const handleViewExpense = useCallback((expense: Expense) => {
 		setViewingExpense(expense);
 	}, []);
+
+	// Wrap edit handler to close detail drawer first
+	const handleEdit = useCallback(
+		(expense: Expense) => {
+			setViewingExpense(null);
+			setTimeout(() => {
+				onEdit(expense);
+			}, 300); // Vaul animation time
+		},
+		[onEdit]
+	);
+
+	// Wrap delete handler to close detail drawer first
+	const handleDelete = useCallback(
+		(expense: Expense) => {
+			setViewingExpense(null);
+			setTimeout(() => {
+				onDelete(expense);
+			}, 300); // Vaul animation time
+		},
+		[onDelete]
+	);
 
 	// Group expenses by month, then by date
 	const groupedExpenses = expenses.reduce(
@@ -275,12 +304,13 @@ export const ExpenseList = ({
 				</CardContent>
 			</Card>
 
-			{/* Expense Detail Modal */}
-			<ExpenseDetailModal
+			{/* Expense Detail Drawer */}
+			<ExpenseDetailDrawer
+				isOpen={!!viewingExpense}
 				expense={viewingExpense}
 				onClose={handleCloseDetailModal}
-				onEdit={onEdit}
-				onDelete={onDelete}
+				onEdit={handleEdit}
+				onDelete={handleDelete}
 			/>
 		</>
 	);
