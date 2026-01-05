@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
+import { CategoryCardSkeleton } from '@/components/Skeletons';
 import {
 	Select,
 	SelectContent,
@@ -19,8 +20,9 @@ import {
 	CategoryDeleteDrawer,
 	CategoryDetailDrawer,
 } from '@/components/categories';
-import type { Category } from '@/lib/services';
+import type { Category, Expense } from '@/lib/services';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
+import { useExpenses } from '@/hooks/useExpenses';
 
 export function CategoriesPage() {
 	const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +42,9 @@ export function CategoriesPage() {
 		null
 	);
 
+	// Currency state
+	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
+
 	// Fetch categories with React Query
 	const { data: categoriesData, isLoading: loading } = useCategories({
 		page: currentPage,
@@ -48,6 +53,9 @@ export function CategoriesPage() {
 		sortBy,
 		sortOrder,
 	});
+
+	// Fetch expenses to detect primary currency
+	const { data: expensesData } = useExpenses({ limit: 100 });
 
 	// Extract data from queries with useMemo to avoid recreating on every render
 	const categories = useMemo(
@@ -105,6 +113,28 @@ export function CategoriesPage() {
 
 		return () => clearTimeout(timer);
 	}, [searchTerm, searchQuery]);
+
+	// Detect primary currency from expenses
+	useEffect(() => {
+		const expenses = (expensesData as { expenses?: Expense[] })?.expenses;
+		if (!expenses || expenses.length === 0) return;
+
+		const currencies = new Set(expenses.map((e: Expense) => e.currency));
+		if (currencies.size > 0) {
+			// Use the most common currency
+			const currencyCount = expenses.reduce(
+				(acc: Record<string, number>, e: Expense) => {
+					acc[e.currency] = (acc[e.currency] || 0) + 1;
+					return acc;
+				},
+				{}
+			);
+			const mostCommon = (
+				Object.entries(currencyCount) as Array<[string, number]>
+			).sort((a: [string, number], b: [string, number]) => b[1] - a[1])[0];
+			setPrimaryCurrency(mostCommon ? String(mostCommon[0]) : 'USD');
+		}
+	}, [expensesData]);
 
 	const handleCreateCategory = useCallback(() => {
 		setSelectedCategory(null);
@@ -278,10 +308,7 @@ export function CategoriesPage() {
 			{loading && (
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
 					{[...Array(8)].map((_, i) => (
-						<div
-							key={i}
-							className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
-						/>
+						<CategoryCardSkeleton key={i} />
 					))}
 				</div>
 			)}
@@ -298,6 +325,7 @@ export function CategoriesPage() {
 							category={category}
 							index={index}
 							onClick={handleViewCategory}
+							primaryCurrency={primaryCurrency}
 						/>
 					))}
 				</div>

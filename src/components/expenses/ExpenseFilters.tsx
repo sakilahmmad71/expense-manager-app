@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/accordion';
 import { Combobox } from '@/components/ui/combobox';
 import { Category } from '@/lib/services';
-import { ChevronDown, ChevronUp, Calendar, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Calendar, Filter, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface MonthFilter {
 	startMonth: string;
@@ -49,9 +50,6 @@ interface ExpenseFiltersProps {
 		order: 'asc' | 'desc'
 	) => void;
 	onClearFilters: () => void;
-	onDateRangeSelect: (
-		range: 'today' | 'week' | 'month' | 'lastMonth' | 'year'
-	) => void;
 }
 
 export const ExpenseFilters = ({
@@ -67,8 +65,22 @@ export const ExpenseFilters = ({
 	onFiltersChange,
 	onSortChange,
 	onClearFilters,
-	onDateRangeSelect,
 }: ExpenseFiltersProps) => {
+	// Track which accordion sections are open
+	const [openSections, setOpenSections] = useState<string[]>(['basic']);
+
+	// Auto-expand custom date range when month filters are selected
+	useEffect(() => {
+		if (monthFilter.startMonth || monthFilter.endMonth) {
+			setOpenSections(prev => {
+				if (!prev.includes('custom')) {
+					return [...prev, 'custom'];
+				}
+				return prev;
+			});
+		}
+	}, [monthFilter.startMonth, monthFilter.endMonth]);
+
 	// Calculate active filter count
 	const activeFilterCount = [
 		filters.category,
@@ -81,41 +93,47 @@ export const ExpenseFilters = ({
 	return (
 		<Card>
 			{/* Collapsible Header - visible on all screen sizes */}
-			<CardHeader className="pb-3 md:pb-0">
-				<div className="flex items-center justify-between">
+			<CardHeader className="pb-3 md:pb-4">
+				<div className="flex items-center justify-between gap-3">
+					{/* Filter Title and Icon */}
 					<button
 						onClick={onToggle}
-						className="flex justify-between items-center gap-2 text-base font-semibold hover:text-primary transition-colors md:cursor-default md:pointer-events-none flex-1"
+						className="flex items-center gap-2 text-base font-semibold hover:text-primary transition-colors md:cursor-default md:pointer-events-none"
 					>
-						<div className="flex items-center gap-2 mb-2 md:mb-5">
-							<Filter className="h-4 w-4" />
-							<span>Filters</span>
-						</div>
-						<div className="flex items-center gap-2">
-							{activeFilterCount > 0 && (
-								<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
-									{activeFilterCount}
-								</span>
-							)}
-							<span className="md:hidden">
-								{isOpen ? (
-									<ChevronUp className="h-4 w-4" />
-								) : (
-									<ChevronDown className="h-4 w-4" />
-								)}
+						<Filter className="h-4 w-4 flex-shrink-0" />
+						<span>Filters</span>
+						{activeFilterCount > 0 && (
+							<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
+								{activeFilterCount}
 							</span>
-						</div>
+						)}
 					</button>
-					{activeFilterCount > 0 && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={onClearFilters}
-							className="h-8 text-xs"
+
+					{/* Action Buttons */}
+					<div className="flex items-center gap-2">
+						{activeFilterCount > 0 && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={onClearFilters}
+								className="h-8 text-xs gap-1 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
+							>
+								<X className="h-3 w-3" />
+								<span className="hidden sm:inline">Clear All</span>
+							</Button>
+						)}
+						<button
+							onClick={onToggle}
+							className="md:hidden p-1.5 hover:bg-accent rounded-md transition-colors"
+							aria-label={isOpen ? 'Collapse filters' : 'Expand filters'}
 						>
-							Clear All
-						</Button>
-					)}
+							{isOpen ? (
+								<ChevronUp className="h-4 w-4" />
+							) : (
+								<ChevronDown className="h-4 w-4" />
+							)}
+						</button>
+					</div>
 				</div>
 			</CardHeader>
 
@@ -130,11 +148,12 @@ export const ExpenseFilters = ({
 				<CardContent className="space-y-3 pt-3 md:pt-0">
 					<Accordion
 						type="multiple"
-						defaultValue={['basic', 'quick']}
+						value={openSections}
+						onValueChange={setOpenSections}
 						className="w-full"
 					>
 						{/* Basic Filters */}
-						<AccordionItem value="basic" className="border-b">
+						<AccordionItem value="basic" className="border-b-0">
 							<AccordionTrigger className="text-sm font-semibold hover:no-underline">
 								Basic Filters
 							</AccordionTrigger>
@@ -259,59 +278,8 @@ export const ExpenseFilters = ({
 							</AccordionContent>
 						</AccordionItem>
 
-						{/* Quick Date Filters */}
-						<AccordionItem value="quick" className="border-b">
-							<AccordionTrigger className="text-sm font-semibold hover:no-underline">
-								Quick Date Filters
-							</AccordionTrigger>
-							<AccordionContent>
-								<div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => onDateRangeSelect('today')}
-										className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
-									>
-										Today
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => onDateRangeSelect('week')}
-										className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
-									>
-										This Week
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => onDateRangeSelect('month')}
-										className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
-									>
-										This Month
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => onDateRangeSelect('lastMonth')}
-										className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm"
-									>
-										Last Month
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => onDateRangeSelect('year')}
-										className="h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors shadow-sm col-span-2 sm:col-span-1"
-									>
-										This Year
-									</Button>
-								</div>
-							</AccordionContent>
-						</AccordionItem>
-
-						{/* Custom Date Range */}
-						{(filters.startDate || filters.endDate) && (
+						{/* Custom Date Range - Only show when month filters are active */}
+						{(monthFilter.startMonth || monthFilter.endMonth) && (
 							<AccordionItem value="custom" className="border-b-0">
 								<AccordionTrigger className="text-sm font-semibold hover:no-underline">
 									Custom Date Range

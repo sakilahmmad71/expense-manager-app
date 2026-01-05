@@ -13,7 +13,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Expense } from '@/lib/services';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatCurrencySymbol } from '@/lib/utils';
 import {
 	Calendar,
 	Clock,
@@ -92,8 +92,17 @@ export const ExpenseDetailDrawer = ({
 								{expense.title}
 							</h2>
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl sm:text-4xl font-bold text-gray-900">
+								{/* Desktop: Full currency format */}
+								<span className="hidden sm:block text-3xl sm:text-4xl font-bold text-gray-900">
 									{formatCurrency(expense.amount, expense.currency)}
+								</span>
+								{/* Mobile: Symbol with amount */}
+								<span className="sm:hidden text-3xl font-bold text-gray-900">
+									{formatCurrencySymbol(expense.currency)}
+									{expense.amount.toLocaleString('en-US', {
+										minimumFractionDigits: 2,
+										maximumFractionDigits: 2,
+									})}
 								</span>
 							</div>
 						</div>

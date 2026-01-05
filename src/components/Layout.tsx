@@ -65,6 +65,11 @@ export const Layout = () => {
 			label: 'Categories',
 			prefetch: prefetchCategories,
 		},
+		{
+			path: '/profile',
+			icon: User,
+			label: 'Profile',
+		},
 	];
 
 	return (
@@ -89,30 +94,30 @@ export const Layout = () => {
 								</h1>
 							</div>
 						</Link>
-
 						{/* Desktop Navigation */}
 						<nav className="hidden md:flex items-center gap-2">
-							{navItems.map(item => (
-								<Link
-									key={item.path}
-									to={item.path}
-									onMouseEnter={() => item.prefetch?.()}
-								>
-									<Button
-										variant={isActive(item.path) ? 'default' : 'ghost'}
-										className={`flex items-center gap-2 transition-all duration-200 ${
-											isActive(item.path)
-												? 'bg-gray-900 text-white shadow-md hover:bg-gray-800'
-												: 'hover:bg-gray-100'
-										}`}
+							{navItems
+								.filter(item => item.path !== '/profile')
+								.map(item => (
+									<Link
+										key={item.path}
+										to={item.path}
+										onMouseEnter={() => item.prefetch?.()}
 									>
-										<item.icon className="h-4 w-4" />
-										<span className="font-medium">{item.label}</span>
-									</Button>
-								</Link>
-							))}
-						</nav>
-
+										<Button
+											variant={isActive(item.path) ? 'default' : 'ghost'}
+											className={`flex items-center gap-2 transition-all duration-200 ${
+												isActive(item.path)
+													? 'bg-gray-900 text-white shadow-md hover:bg-gray-800'
+													: 'hover:bg-gray-100'
+											}`}
+										>
+											<item.icon className="h-4 w-4" />
+											<span className="font-medium">{item.label}</span>
+										</Button>
+									</Link>
+								))}{' '}
+						</nav>{' '}
 						{/* Desktop User Menu */}
 						<div className="hidden md:flex items-center gap-4">
 							<DropdownMenu>
@@ -186,7 +191,6 @@ export const Layout = () => {
 								</DropdownMenuContent>
 							</DropdownMenu>
 						</div>
-
 						{/* Mobile User Menu */}
 						<div className="md:hidden flex items-center">
 							<DropdownMenu>
@@ -257,7 +261,7 @@ export const Layout = () => {
 						</div>
 					</div>
 				</div>
-			</header>{' '}
+			</header>
 			{/* Main Content */}
 			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-24 md:pb-8">
 				<Outlet />
@@ -355,7 +359,7 @@ export const Layout = () => {
 			{/* Mobile Bottom Navigation */}
 			<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 z-50 shadow-2xl">
 				<div className="safe-area-inset-bottom">
-					<div className="grid grid-cols-3 gap-1 px-1.5 py-1">
+					<div className="grid grid-cols-4 gap-1 px-1.5 py-1">
 						{navItems.map(item => (
 							<Link key={item.path} to={item.path}>
 								<button

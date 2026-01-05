@@ -20,7 +20,6 @@ import { FolderKanban, PiggyBank, Receipt, TrendingUp } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
-import { useCategories, CategoriesData } from '@/hooks/useCategories';
 
 interface CategoryAnalytics {
 	categoryId: string;
@@ -67,9 +66,6 @@ export const DashboardPage = () => {
 		isLoading,
 	} = useDashboard(isFiltered ? dateFilter : {});
 
-	// Fetch categories for the modal
-	const { data: categoriesData } = useCategories({ page: 1, limit: 100 });
-
 	// Cast data to proper types with useMemo to avoid recreating on every render
 	const summary = summaryData as DashboardSummary | undefined;
 	const recentExpenses = useMemo(
@@ -86,12 +82,6 @@ export const DashboardPage = () => {
 	const categoryAnalytics = useMemo(
 		() => (categoryAnalyticsData as CategoryAnalytics[] | undefined) || [],
 		[categoryAnalyticsData]
-	);
-
-	// Extract categories for the modal
-	const categories = useMemo(
-		() => (categoriesData as CategoriesData | undefined)?.categories || [],
-		[categoriesData]
 	);
 
 	// Detect mixed currencies and primary currency
@@ -371,7 +361,6 @@ export const DashboardPage = () => {
 					<ExpenseDrawer
 						isOpen={isModalOpen}
 						expense={null}
-						categories={categories}
 						onClose={() => setIsModalOpen(false)}
 						onSuccess={() => {
 							setIsModalOpen(false);

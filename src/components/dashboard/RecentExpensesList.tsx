@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Expense } from '@/lib/services';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Receipt } from 'lucide-react';
+import { formatCurrencySymbol } from '@/lib/utils';
 
 interface RecentExpensesListProps {
 	expenses: Expense[];
@@ -77,8 +78,17 @@ export const RecentExpensesList = ({
 
 								{/* Amount Display */}
 								<div className="text-left sm:text-right pl-4 sm:pl-0">
-									<p className="text-lg sm:text-xl font-bold whitespace-nowrap">
+									{/* Desktop: Full currency format */}
+									<p className="hidden sm:block text-lg sm:text-xl font-bold whitespace-nowrap">
 										{formatCurrency(expense.amount, expense.currency)}
+									</p>
+									{/* Mobile: Symbol with amount */}
+									<p className="sm:hidden text-lg font-bold whitespace-nowrap">
+										{formatCurrencySymbol(expense.currency)}
+										{expense.amount.toLocaleString('en-US', {
+											minimumFractionDigits: 2,
+											maximumFractionDigits: 2,
+										})}
 									</p>
 								</div>
 							</div>

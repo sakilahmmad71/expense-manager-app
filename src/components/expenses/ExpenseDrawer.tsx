@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Combobox } from '@/components/ui/combobox';
 import {
 	Drawer,
@@ -9,6 +10,11 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
 import {
 	Select,
 	SelectContent,
@@ -23,16 +29,19 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { currencies } from '@/constants/currencies';
 import { useCreateExpense, useUpdateExpense } from '@/hooks/useExpenses';
-import { Category, Expense, ExpenseInput } from '@/lib/services';
+import { useCategories, CategoriesData } from '@/hooks/useCategories';
+import { Expense, ExpenseInput } from '@/lib/services';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface ExpenseDrawerProps {
 	isOpen: boolean;
 	expense: Expense | null;
-	categories: Category[];
 	onClose: () => void;
 	onSuccess: () => void;
 }
@@ -40,18 +49,55 @@ interface ExpenseDrawerProps {
 export const ExpenseDrawer = ({
 	isOpen,
 	expense,
-	categories,
 	onClose,
 	onSuccess,
 }: ExpenseDrawerProps) => {
 	const navigate = useNavigate();
 	const createExpense = useCreateExpense();
 	const updateExpense = useUpdateExpense();
+	const [localCategorySearch, setLocalCategorySearch] = useState('');
+	const [debouncedSearch, setDebouncedSearch] = useState('');
+
+	// Debounce server-side search (600ms delay)
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(localCategorySearch);
+		}, 600);
+
+		return () => clearTimeout(timer);
+	}, [localCategorySearch]);
+
+	// Fetch categories with debounced search
+	const { data: categoriesData, isLoading: isLoadingCategories } =
+		useCategories({
+			page: 1,
+			limit: 100,
+			search: debouncedSearch,
+		});
+
+	const categories = useMemo(
+		() => (categoriesData as CategoriesData | undefined)?.categories || [],
+		[categoriesData]
+	);
+
+	// Handle local search change
+	const handleCategorySearch = useCallback((query: string) => {
+		setLocalCategorySearch(query);
+	}, []);
+
 	const [selectedCurrency, setSelectedCurrency] = useState(() => {
 		return (
 			expense?.currency || localStorage.getItem('preferredCurrency') || 'USD'
 		);
 	});
+
+	const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+		if (expense?.date) {
+			return new Date(expense.date);
+		}
+		return new Date();
+	});
+
 	const [formData, setFormData] = useState<ExpenseInput>(() => {
 		const now = new Date();
 		let dateValue = '';
@@ -107,19 +153,6 @@ export const ExpenseDrawer = ({
 		icon: category.icon,
 	}));
 
-	const currencies = [
-		{ code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-		{ code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
-		{ code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-		{ code: 'CHF', symbol: 'Fr', name: 'Swiss Franc' },
-		{ code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
-		{ code: 'EUR', symbol: '€', name: 'Euro' },
-		{ code: 'GBP', symbol: '£', name: 'British Pound' },
-		{ code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-		{ code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-		{ code: 'USD', symbol: '$', name: 'US Dollar' },
-	];
-
 	const handleCurrencyChange = (currency: string) => {
 		setSelectedCurrency(currency);
 		setFormData({ ...formData, currency });
@@ -135,26 +168,17 @@ export const ExpenseDrawer = ({
 			// Combine date and time into ISO string using local timezone
 			let dateTime: string | undefined;
 
-			if (formData.date && time) {
+			if (selectedDate && time) {
 				// Create a date object in local timezone
-				const [year, month, day] = formData.date.split('-').map(Number);
 				const [hours, minutes] = time.split(':').map(Number);
-				const localDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
-				// Convert to ISO string (which will be in UTC)
+				const localDate = new Date(selectedDate);
+				localDate.setHours(hours, minutes, 0, 0);
 				dateTime = localDate.toISOString();
-			} else if (formData.date) {
+			} else if (selectedDate) {
 				// Only date provided, use current time
-				const [year, month, day] = formData.date.split('-').map(Number);
 				const now = new Date();
-				const localDate = new Date(
-					year,
-					month - 1,
-					day,
-					now.getHours(),
-					now.getMinutes(),
-					0,
-					0
-				);
+				const localDate = new Date(selectedDate);
+				localDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
 				dateTime = localDate.toISOString();
 			} else {
 				// No date provided, use current date and time
@@ -290,6 +314,8 @@ export const ExpenseDrawer = ({
 								searchPlaceholder="Search categories..."
 								emptyText="No category found."
 								disabled={isSubmitting}
+								onSearchChange={handleCategorySearch}
+								isLoading={isLoadingCategories}
 							/>
 							<Button
 								type="button"
@@ -308,20 +334,34 @@ export const ExpenseDrawer = ({
 								<Label htmlFor="date" className="text-sm font-medium">
 									Date (Optional)
 								</Label>
-								<div className="relative">
-									<Input
-										id="date"
-										type="date"
-										value={formData.date}
-										onChange={e =>
-											setFormData({ ...formData, date: e.target.value })
-										}
-										disabled={isSubmitting}
-										placeholder="Current date"
-										className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-									/>
-									<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-								</div>
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											id="date"
+											variant="outline"
+											className={cn(
+												'w-full justify-start text-left font-normal',
+												!selectedDate && 'text-muted-foreground'
+											)}
+											disabled={isSubmitting}
+										>
+											<Calendar className="mr-2 h-4 w-4" />
+											{selectedDate ? (
+												format(selectedDate, 'PPP')
+											) : (
+												<span>Pick a date</span>
+											)}
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0" align="start">
+										<CalendarComponent
+											mode="single"
+											selected={selectedDate}
+											onSelect={setSelectedDate}
+											initialFocus
+										/>
+									</PopoverContent>
+								</Popover>
 								<p className="text-xs text-muted-foreground">
 									Defaults to current date if not provided
 								</p>
@@ -331,18 +371,38 @@ export const ExpenseDrawer = ({
 								<Label htmlFor="time" className="text-sm font-medium">
 									Time (Optional)
 								</Label>
-								<div className="relative">
-									<Input
-										id="time"
-										type="time"
-										value={time}
-										onChange={e => setTime(e.target.value)}
-										disabled={isSubmitting}
-										placeholder="Current time"
-										className="pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-									/>
-									<Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-								</div>
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											id="time"
+											variant="outline"
+											className={cn(
+												'w-full justify-start text-left font-normal',
+												!time && 'text-muted-foreground'
+											)}
+											disabled={isSubmitting}
+										>
+											<Clock className="mr-2 h-4 w-4" />
+											{time || 'Pick a time'}
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-4" align="start">
+										<div className="space-y-4">
+											<div className="space-y-2">
+												<Label htmlFor="time-input" className="text-sm">
+													Select Time
+												</Label>
+												<Input
+													id="time-input"
+													type="time"
+													value={time}
+													onChange={e => setTime(e.target.value)}
+													className="w-full"
+												/>
+											</div>
+										</div>
+									</PopoverContent>
+								</Popover>
 								<p className="text-xs text-muted-foreground">
 									Defaults to current time if not provided
 								</p>

@@ -27,6 +27,8 @@ export interface Category {
 	icon?: string;
 	createdAt: string;
 	updatedAt: string;
+	totalAmount?: number;
+	growthPercentage?: number;
 	_count?: {
 		expenses: number;
 	};

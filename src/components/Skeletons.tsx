@@ -57,16 +57,22 @@ export const ChartSkeleton = () => (
 
 // Category grid skeleton
 export const CategoryCardSkeleton = () => (
-	<Card className="hover:shadow-lg transition-shadow duration-200">
-		<CardContent className="p-6">
-			<div className="flex items-center justify-between mb-4">
-				<Skeleton className="h-12 w-12 rounded-xl" />
-				<Skeleton className="h-6 w-6 rounded" />
-			</div>
-			<Skeleton className="h-5 w-32 mb-2" />
-			<Skeleton className="h-4 w-24" />
-		</CardContent>
-	</Card>
+	<div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+		{/* Icon skeleton */}
+		<Skeleton className="h-14 w-14 rounded-2xl mb-4" />
+
+		{/* Category name skeleton */}
+		<Skeleton className="h-5 w-24 mb-3" />
+
+		{/* Amount skeleton */}
+		<Skeleton className="h-8 w-32 mb-4" />
+
+		{/* Footer skeleton */}
+		<div className="flex items-center justify-between">
+			<Skeleton className="h-4 w-12" />
+			<Skeleton className="h-4 w-16" />
+		</div>
+	</div>
 );
 
 // Table row skeleton

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrencySymbol } from '@/lib/utils';
 import {
 	Bar,
 	BarChart,
@@ -61,9 +62,15 @@ export const TopCategoriesChart = ({
 							width={100}
 						/>
 						<Tooltip
-							formatter={value =>
-								formatCurrency(Number(value), primaryCurrency)
-							}
+							formatter={value => {
+								const isMobile = window.innerWidth < 640;
+								if (isMobile) {
+									const amount = Number(value);
+									const symbol = formatCurrencySymbol(primaryCurrency);
+									return `${symbol}${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+								}
+								return formatCurrency(Number(value), primaryCurrency);
+							}}
 						/>
 						<Bar
 							dataKey="totalAmount"

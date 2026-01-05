@@ -173,13 +173,7 @@ export const ProfilePage = () => {
 				{/* Breadcrumb Navigation */}
 				<PageBreadcrumb items={[{ label: 'Profile Settings' }]} />
 
-				<div id="profile-header" className="flex items-center gap-4">
-					<Avatar className="h-16 w-16">
-						<AvatarImage src="" alt={user?.name || 'User'} />
-						<AvatarFallback className="text-lg bg-gray-900 text-white">
-							{user?.name?.charAt(0).toUpperCase() || 'U'}
-						</AvatarFallback>
-					</Avatar>
+				<div id="profile-header" className="space-y-4">
 					<div>
 						<h1 className="text-3xl font-bold tracking-tight">
 							Profile Settings
@@ -187,6 +181,18 @@ export const ProfilePage = () => {
 						<p className="text-muted-foreground mt-1">
 							Manage your account information
 						</p>
+					</div>
+					<div className="flex items-center gap-4">
+						<Avatar className="h-16 w-16">
+							<AvatarImage src="" alt={user?.name || 'User'} />
+							<AvatarFallback className="text-lg bg-gray-900 text-white">
+								{user?.name?.charAt(0).toUpperCase() || 'U'}
+							</AvatarFallback>
+						</Avatar>
+						<div>
+							<p className="text-sm font-medium text-gray-900">{user?.name}</p>
+							<p className="text-sm text-gray-500">{user?.email}</p>
+						</div>
 					</div>
 				</div>
 
@@ -245,10 +251,9 @@ export const ProfilePage = () => {
 								<Button
 									type="submit"
 									disabled={isLoadingProfile}
-									size="sm"
-									className="flex items-center gap-2 text-xs sm:text-sm"
+									className="flex items-center gap-2"
 								>
-									<Save className="h-3 w-3 sm:h-4 sm:w-4" />
+									<Save className="h-4 w-4" />
 									{isLoadingProfile ? 'Saving...' : 'Save Changes'}
 								</Button>
 							</div>
@@ -288,7 +293,6 @@ export const ProfilePage = () => {
 										value={passwordData.currentPassword}
 										onChange={handlePasswordInputChange}
 										placeholder="Enter your current password"
-										className="h-10"
 										required
 									/>
 								</div>
@@ -307,7 +311,6 @@ export const ProfilePage = () => {
 										value={passwordData.newPassword}
 										onChange={handlePasswordInputChange}
 										placeholder="Enter your new password"
-										className="h-10"
 										required
 									/>
 								</div>
@@ -329,7 +332,6 @@ export const ProfilePage = () => {
 										value={passwordData.confirmPassword}
 										onChange={handlePasswordInputChange}
 										placeholder="Confirm your new password"
-										className="h-10"
 										required
 									/>
 								</div>
@@ -338,10 +340,9 @@ export const ProfilePage = () => {
 									<Button
 										type="submit"
 										disabled={isLoadingPassword}
-										size="sm"
-										className="flex items-center gap-2 text-xs sm:text-sm"
+										className="flex items-center gap-2"
 									>
-										<Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+										<Lock className="h-4 w-4" />
 										{isLoadingPassword ? 'Changing...' : 'Change Password'}
 									</Button>
 								</div>

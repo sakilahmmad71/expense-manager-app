@@ -188,7 +188,7 @@ export const ExpenseList = ({
 										variant="destructive"
 										size="sm"
 										disabled={selectedExpenses.length === 0}
-										className="flex-1 h-10 shadow-sm"
+										className="flex-1 shadow-sm"
 									>
 										<Trash2 className="h-4 w-4 mr-2" />
 										<span className="font-medium">
@@ -204,7 +204,7 @@ export const ExpenseList = ({
 										variant="outline"
 										size="sm"
 										disabled={expenses.length === 0}
-										className="flex-1 h-10 shadow-sm"
+										className="flex-1 shadow-sm"
 									>
 										<Download className="h-4 w-4 mr-2" />
 										<span className="font-medium">Export</span>

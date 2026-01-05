@@ -7,6 +7,7 @@ import {
 	ExpenseSearch,
 } from '@/components/expenses';
 import { ExpenseCardSkeleton } from '@/components/Skeletons';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { useToast } from '@/components/ui/use-toast';
 import { Expense } from '@/lib/services';
 import { formatDate } from '@/lib/utils';
@@ -31,7 +32,9 @@ export const ExpensesPage = () => {
 	const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedExpenses, setSelectedExpenses] = useState<string[]>([]);
-	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(
+		() => localStorage.getItem('expenseFiltersOpen') === 'true'
+	);
 	const [filters, setFilters] = useState({
 		category: '',
 		startDate: '',
@@ -96,6 +99,11 @@ export const ExpensesPage = () => {
 			document.head.appendChild(meta);
 		}
 	}, []);
+
+	// Save filter open/closed state to localStorage
+	useEffect(() => {
+		localStorage.setItem('expenseFiltersOpen', String(isFiltersOpen));
+	}, [isFiltersOpen]);
 
 	// Generate month options for the past 12 months and next month
 	const generateMonthOptions = () => {
@@ -355,6 +363,11 @@ export const ExpensesPage = () => {
 		setIsModalOpen(false);
 	};
 
+	const handleDrawerSuccess = () => {
+		closeModal();
+		setSelectedExpenses([]);
+	};
+
 	const handleClearFilters = () => {
 		setMonthFilter({ startMonth: '', endMonth: '' });
 		setSearchQuery('');
@@ -405,6 +418,9 @@ export const ExpensesPage = () => {
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
 			<div className="space-y-6">
+				{/* Breadcrumb Navigation */}
+				<PageBreadcrumb items={[{ label: 'Expenses' }]} />
+
 				<div id="expenses-header">
 					<ExpenseHeader
 						selectedCount={selectedExpenses.length}
@@ -428,7 +444,6 @@ export const ExpensesPage = () => {
 						onFiltersChange={setFilters}
 						onSortChange={handleSortChange}
 						onClearFilters={handleClearFilters}
-						onDateRangeSelect={setDateRange}
 					/>
 				</div>
 
@@ -436,6 +451,7 @@ export const ExpensesPage = () => {
 					<ExpenseSearch
 						searchQuery={searchQuery}
 						onSearchChange={setSearchQuery}
+						onDateRangeSelect={setDateRange}
 					/>
 				</div>
 
@@ -487,11 +503,8 @@ export const ExpensesPage = () => {
 				<ExpenseDrawer
 					isOpen={isModalOpen}
 					expense={editingExpense}
-					categories={categories}
 					onClose={closeModal}
-					onSuccess={() => {
-						closeModal();
-					}}
+					onSuccess={handleDrawerSuccess}
 				/>
 			)}
 

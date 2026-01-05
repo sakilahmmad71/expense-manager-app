@@ -27,7 +27,7 @@ export const ExpenseHeader = ({
 					<Button
 						variant="destructive"
 						onClick={onBulkDelete}
-						className="w-full sm:w-auto h-11 sm:h-10"
+						className="w-full sm:w-auto"
 						disabled={selectedCount === 0}
 					>
 						<Trash2 className="h-4 w-4 mr-2" />
@@ -36,15 +36,12 @@ export const ExpenseHeader = ({
 					<Button
 						variant="outline"
 						onClick={onExport}
-						className="flex-1 sm:flex-none h-11 sm:h-10"
+						className="flex-1 sm:flex-none "
 					>
 						<Download className="h-4 w-4 mr-2" />
 						Export
 					</Button>
-					<Button
-						onClick={onAddExpense}
-						className="flex-1 sm:flex-none h-11 sm:h-10"
-					>
+					<Button onClick={onAddExpense} className="flex-1 sm:flex-none ">
 						<Plus className="h-4 w-4 mr-2" />
 						Add Expense
 					</Button>

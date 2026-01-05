@@ -64,9 +64,13 @@ export const ExpenseCard = memo(
 						<p className="hidden sm:block text-lg font-bold text-gray-900">
 							{formatCurrency(expense.amount, expense.currency)}
 						</p>
-						{/* Mobile: Symbol only */}
+						{/* Mobile: Symbol with amount */}
 						<p className="sm:hidden text-base font-bold text-gray-900">
 							{formatCurrencySymbol(expense.currency)}
+							{expense.amount.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+							})}
 						</p>
 					</div>
 				</div>
