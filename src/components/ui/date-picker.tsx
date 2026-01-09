@@ -15,9 +15,14 @@ import {
 interface DatePickerProps {
 	date?: Date;
 	onSelect?: (date: Date | undefined) => void;
-	disabled?: boolean;
+	disabled?: boolean | ((date: Date) => boolean);
 	placeholder?: string;
 	className?: string;
+	fromDate?: Date;
+	toDate?: Date;
+	captionLayout?: 'label' | 'dropdown' | 'dropdown-months' | 'dropdown-years';
+	fromYear?: number;
+	toYear?: number;
 }
 
 export function DatePicker({
@@ -26,6 +31,11 @@ export function DatePicker({
 	disabled,
 	placeholder = 'Pick a date',
 	className,
+	fromDate,
+	toDate,
+	captionLayout = 'dropdown',
+	fromYear = 2020,
+	toYear = new Date().getFullYear() + 1,
 }: DatePickerProps) {
 	return (
 		<Popover>
@@ -37,7 +47,7 @@ export function DatePicker({
 						!date && 'text-muted-foreground',
 						className
 					)}
-					disabled={disabled}
+					disabled={typeof disabled === 'boolean' ? disabled : false}
 				>
 					<CalendarIcon className="mr-2 h-4 w-4" />
 					{date ? format(date, 'PPP') : <span>{placeholder}</span>}
@@ -50,6 +60,11 @@ export function DatePicker({
 					onSelect={onSelect}
 					initialFocus
 					disabled={disabled}
+					captionLayout={captionLayout}
+					fromDate={fromDate}
+					toDate={toDate}
+					fromYear={fromYear}
+					toYear={toYear}
 				/>
 			</PopoverContent>
 		</Popover>

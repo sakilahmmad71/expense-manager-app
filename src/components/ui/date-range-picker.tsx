@@ -63,6 +63,9 @@ export function DateRangePicker({
 					initialFocus
 					numberOfMonths={2}
 					disabled={disabled}
+					captionLayout="dropdown"
+					fromYear={2020}
+					toYear={new Date().getFullYear() + 1}
 				/>
 			</PopoverContent>
 		</Popover>

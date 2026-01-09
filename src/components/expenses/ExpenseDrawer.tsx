@@ -203,11 +203,11 @@ export const ExpenseDrawer = ({
 			// Only set local error for display purposes
 			if (err && typeof err === 'object' && 'response' in err) {
 				const axiosError = err as {
-					response?: { data?: { message?: string } };
+					response?: { data?: { error?: string } };
 				};
-				if (axiosError.response?.data?.message !== 'Unauthorized') {
+				if (axiosError.response?.data?.error !== 'Unauthorized') {
 					setError(
-						axiosError.response?.data?.message || 'Failed to save expense'
+						axiosError.response?.data?.error || 'Failed to save expense'
 					);
 				}
 			}
@@ -250,9 +250,13 @@ export const ExpenseDrawer = ({
 								onChange={e =>
 									setFormData({ ...formData, title: e.target.value })
 								}
+								maxLength={255}
 								required
 								disabled={isSubmitting}
 							/>
+							<p className="text-xs text-muted-foreground">
+								{formData.title.length}/255 characters
+							</p>
 						</div>
 
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -264,6 +268,8 @@ export const ExpenseDrawer = ({
 									id="amount"
 									type="number"
 									step="0.01"
+									min="0"
+									max="999999999.99"
 									placeholder="0.00"
 									value={formData.amount || ''}
 									onChange={e =>
@@ -418,12 +424,15 @@ export const ExpenseDrawer = ({
 								onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
 									setFormData({ ...formData, description: e.target.value })
 								}
+								maxLength={1000}
 								rows={3}
 								disabled={isSubmitting}
 							/>
+							<p className="text-xs text-muted-foreground">
+								{formData.description?.length || 0}/1000 characters
+							</p>
 						</div>
 					</div>
-
 					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
 						<TooltipProvider>
 							<Tooltip>

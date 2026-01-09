@@ -1,15 +1,15 @@
 import {
 	CategoryAnalyticsTable,
-	CategoryBreakdownChart,
 	DashboardSkeleton,
 	DateRangeFilter,
-	ExpenseTrendChart,
 	MixedCurrencyWarning,
-	MonthlyTrendsChart,
 	RecentExpensesList,
 	StatCard,
-	TopCategoriesChart,
 } from '@/components/dashboard';
+import { MonthlyTrendsChart } from '@/components/dashboard/MonthlyTrendsChart';
+import { ExpenseTrendChart } from '@/components/dashboard/ExpenseTrendChart';
+import { CategoryBreakdownChart } from '@/components/dashboard/CategoryBreakdownChart';
+import { TopCategoriesChart } from '@/components/dashboard/TopCategoriesChart';
 import { ExpenseDrawer } from '@/components/expenses';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
@@ -67,20 +67,41 @@ export const DashboardPage = () => {
 	} = useDashboard(isFiltered ? dateFilter : {});
 
 	// Cast data to proper types with useMemo to avoid recreating on every render
-	const summary = summaryData as DashboardSummary | undefined;
-	const recentExpenses = useMemo(
-		() => (recentExpensesData as Expense[] | undefined) || [],
-		[recentExpensesData]
-	);
-	const monthlyTrends = useMemo(
-		() =>
-			(monthlyTrendsData as
-				| Array<{ month: string; total: number }>
-				| undefined) || [],
-		[monthlyTrendsData]
-	);
+	const summary = (summaryData as { summary?: DashboardSummary })?.summary;
+	const recentExpenses = useMemo(() => {
+		const expenses =
+			(recentExpensesData as { expenses?: Expense[] })?.expenses || [];
+		return expenses;
+	}, [recentExpensesData]);
+	const monthlyTrends = useMemo(() => {
+		const trends =
+			(
+				monthlyTrendsData as {
+					trends?: Array<{ month: string; total: number }>;
+				}
+			)?.trends || [];
+		// Transform the data to match chart expectations and format month names
+		return trends.map(trend => {
+			// Parse YYYY-MM format to readable month name
+			const [year, monthNum] = trend.month.split('-');
+			const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+			const monthName = date.toLocaleDateString('en-US', {
+				month: 'short',
+				year: 'numeric',
+			});
+
+			return {
+				month: trend.month,
+				monthName: monthName, // e.g., "Jan 2025"
+				total: trend.total,
+				totalAmount: trend.total,
+			};
+		});
+	}, [monthlyTrendsData]);
 	const categoryAnalytics = useMemo(
-		() => (categoryAnalyticsData as CategoryAnalytics[] | undefined) || [],
+		() =>
+			(categoryAnalyticsData as { categoryAnalytics?: CategoryAnalytics[] })
+				?.categoryAnalytics || [],
 		[categoryAnalyticsData]
 	);
 
@@ -293,9 +314,9 @@ export const DashboardPage = () => {
 					{stats.map((stat, index) => (
 						<StatCard key={stat.title} {...stat} index={index} />
 					))}
-					{/* Primary Charts */}
 				</div>
 
+				{/* Primary Charts */}
 				<div
 					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
 					style={{ animationDelay: '200ms' }}
@@ -304,12 +325,10 @@ export const DashboardPage = () => {
 					<MonthlyTrendsChart
 						data={monthlyTrends}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 					<CategoryBreakdownChart
 						data={categoryData}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 
@@ -322,12 +341,10 @@ export const DashboardPage = () => {
 					<ExpenseTrendChart
 						data={monthlyTrends}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 					<TopCategoriesChart
 						data={topCategories}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 
@@ -335,7 +352,7 @@ export const DashboardPage = () => {
 				<div
 					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
 					id="category-analytics"
-					style={{ animationDelay: '300ms' }}
+					style={{ animationDelay: '400ms' }}
 				>
 					<CategoryAnalyticsTable
 						data={categoryAnalytics}
@@ -346,7 +363,7 @@ export const DashboardPage = () => {
 				{/* Recent Expenses */}
 				<div
 					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '350ms' }}
+					style={{ animationDelay: '450ms' }}
 					id="recent-expenses"
 				>
 					<RecentExpensesList

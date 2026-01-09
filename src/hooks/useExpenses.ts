@@ -19,6 +19,11 @@ export interface ExpensesData {
 		page: number;
 		limit: number;
 	};
+	_links?: Array<{
+		rel: string;
+		href: string;
+		method?: string;
+	}>;
 }
 
 // Query keys for better organization and type safety
@@ -55,6 +60,7 @@ export const useExpenses = (
 		queryKey: expenseKeys.list(filters),
 		queryFn: async () => {
 			const response = await expenseAPI.getAll(filters);
+			// Backend returns { expenses: [...], pagination: {...}, _links: [...] }
 			return response.data;
 		},
 		...options,
@@ -160,8 +166,8 @@ export const useCreateExpense = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -173,7 +179,7 @@ export const useCreateExpense = () => {
 					variant: 'destructive',
 					title: '✗ Failed to create expense',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
@@ -264,8 +270,8 @@ export const useUpdateExpense = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -277,7 +283,7 @@ export const useUpdateExpense = () => {
 					variant: 'destructive',
 					title: '✗ Failed to update expense',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
@@ -347,8 +353,8 @@ export const useDeleteExpense = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -360,7 +366,7 @@ export const useDeleteExpense = () => {
 					variant: 'destructive',
 					title: '✗ Failed to delete expense',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
@@ -388,8 +394,8 @@ export const useBulkDeleteExpenses = () => {
 
 	return useMutation({
 		mutationFn: async (ids: string[]) => {
-			await Promise.all(ids.map(id => expenseAPI.delete(id)));
-			return ids;
+			const response = await expenseAPI.bulkDelete(ids);
+			return response.data;
 		},
 		onMutate: async ids => {
 			// Cancel outgoing refetches
@@ -429,8 +435,8 @@ export const useBulkDeleteExpenses = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -442,15 +448,31 @@ export const useBulkDeleteExpenses = () => {
 					variant: 'destructive',
 					title: '✗ Failed to delete expenses',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
-		onSuccess: (_data, ids) => {
-			toast({
-				title: '✓ Expenses deleted',
-				description: `${ids.length} expense(s) deleted successfully.`,
-			});
+		onSuccess: data => {
+			const { deletedCount, requestedCount } = data;
+			if (deletedCount === 0) {
+				toast({
+					variant: 'destructive',
+					title: '⚠ No expenses deleted',
+					description:
+						'The selected expenses may not exist or do not belong to you.',
+				});
+			} else if (deletedCount < requestedCount) {
+				toast({
+					variant: 'default',
+					title: '✓ Partially deleted',
+					description: `${deletedCount} of ${requestedCount} expense(s) deleted. Some may not exist or belong to you.`,
+				});
+			} else {
+				toast({
+					title: '✓ Expenses deleted',
+					description: `${deletedCount} expense(s) deleted successfully.`,
+				});
+			}
 		},
 		onSettled: () => {
 			// Invalidate and refetch

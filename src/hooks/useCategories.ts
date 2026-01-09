@@ -18,6 +18,11 @@ export interface CategoriesData {
 		page: number;
 		limit: number;
 	};
+	_links?: Array<{
+		rel: string;
+		href: string;
+		method?: string;
+	}>;
 }
 
 // Query keys for better organization and type safety
@@ -49,6 +54,7 @@ export const useCategories = (
 		queryKey: categoryKeys.list(filters),
 		queryFn: async () => {
 			const response = await categoryAPI.getAll(filters);
+			// Backend returns { categories: [...], pagination: {...}, _links: [...] }
 			return response.data;
 		},
 		...options,
@@ -130,8 +136,8 @@ export const useCreateCategory = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -143,7 +149,7 @@ export const useCreateCategory = () => {
 					variant: 'destructive',
 					title: '✗ Failed to create category',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
@@ -236,8 +242,8 @@ export const useUpdateCategory = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -249,7 +255,7 @@ export const useUpdateCategory = () => {
 					variant: 'destructive',
 					title: '✗ Failed to update category',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
@@ -279,11 +285,17 @@ export const useDeleteCategory = () => {
 	const navigate = useNavigate();
 
 	return useMutation({
-		mutationFn: async (id: string) => {
-			await categoryAPI.delete(id);
-			return id;
+		mutationFn: async ({
+			id,
+			reassignToCategoryId,
+		}: {
+			id: string;
+			reassignToCategoryId?: string;
+		}) => {
+			const response = await categoryAPI.delete(id, reassignToCategoryId);
+			return { id, ...response.data };
 		},
-		onMutate: async id => {
+		onMutate: async ({ id }) => {
 			// Cancel outgoing refetches
 			await queryClient.cancelQueries({ queryKey: categoryKeys.lists() });
 
@@ -313,7 +325,7 @@ export const useDeleteCategory = () => {
 
 			return { previousCategories };
 		},
-		onError: (error, _id, context) => {
+		onError: (error, _vars, context) => {
 			// Rollback on error
 			if (context?.previousCategories) {
 				context.previousCategories.forEach(([queryKey, data]) => {
@@ -321,8 +333,8 @@ export const useDeleteCategory = () => {
 				});
 			}
 
-			const axiosError = error as AxiosError<{ message: string }>;
-			if (axiosError.response?.data?.message === 'Unauthorized') {
+			const axiosError = error as AxiosError<{ error: string }>;
+			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast({
 					variant: 'destructive',
 					title: '✗ Session expired',
@@ -334,15 +346,23 @@ export const useDeleteCategory = () => {
 					variant: 'destructive',
 					title: '✗ Failed to delete category',
 					description:
-						axiosError.response?.data?.message || 'Something went wrong',
+						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
-		onSuccess: () => {
-			toast({
-				title: '✓ Category deleted',
-				description: 'Your category has been deleted successfully.',
-			});
+		onSuccess: data => {
+			const { reassignedExpenses } = data;
+			if (reassignedExpenses && reassignedExpenses > 0) {
+				toast({
+					title: '✓ Category deleted',
+					description: `Category deleted and ${reassignedExpenses} expense(s) reassigned successfully.`,
+				});
+			} else {
+				toast({
+					title: '✓ Category deleted',
+					description: 'Your category has been deleted successfully.',
+				});
+			}
 		},
 		onSettled: () => {
 			// Invalidate and refetch

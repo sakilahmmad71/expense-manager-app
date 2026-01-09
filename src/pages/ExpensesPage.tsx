@@ -32,9 +32,7 @@ export const ExpensesPage = () => {
 	const [sortBy, setSortBy] = useState<'date' | 'amount' | 'category'>('date');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 	const [selectedExpenses, setSelectedExpenses] = useState<string[]>([]);
-	const [isFiltersOpen, setIsFiltersOpen] = useState(
-		() => localStorage.getItem('expenseFiltersOpen') === 'true'
-	);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [filters, setFilters] = useState({
 		category: '',
 		startDate: '',

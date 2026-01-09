@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Calendar, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { DateRange } from 'react-day-picker';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Calendar, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface DateRangeFilterProps {
@@ -31,28 +30,26 @@ export const DateRangeFilter = ({
 	onApplyFilter,
 	onClearFilter,
 }: DateRangeFilterProps) => {
-	// Calculate active filter count
-	const activeFilterCount = [startDate, endDate].filter(Boolean).length;
+	// Get today's date
+	const today = new Date();
 
-	// Convert string dates to Date objects for DateRangePicker
-	const dateRange: DateRange | undefined =
-		startDate || endDate
-			? {
-					from: startDate ? new Date(startDate) : undefined,
-					to: endDate ? new Date(endDate) : undefined,
-				}
-			: undefined;
+	// Convert string dates to Date objects
+	const startDateObj = startDate ? new Date(startDate) : undefined;
+	const endDateObj = endDate ? new Date(endDate) : undefined;
 
-	// Handle date range selection
-	const handleDateRangeChange = (range: DateRange | undefined) => {
-		if (range?.from) {
-			onStartDateChange(format(range.from, 'yyyy-MM-dd'));
+	// Handler for start date
+	const handleStartDateChange = (date: Date | undefined) => {
+		if (date) {
+			onStartDateChange(format(date, 'yyyy-MM-dd'));
 		} else {
 			onStartDateChange('');
 		}
+	};
 
-		if (range?.to) {
-			onEndDateChange(format(range.to, 'yyyy-MM-dd'));
+	// Handler for end date
+	const handleEndDateChange = (date: Date | undefined) => {
+		if (date) {
+			onEndDateChange(format(date, 'yyyy-MM-dd'));
 		} else {
 			onEndDateChange('');
 		}
@@ -72,11 +69,6 @@ export const DateRangeFilter = ({
 							<span>Date Range Filter</span>
 						</div>
 						<div className="flex items-center gap-2">
-							{activeFilterCount > 0 && (
-								<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
-									{activeFilterCount}
-								</span>
-							)}
 							<span className="md:hidden">
 								{isOpen ? (
 									<ChevronUp className="h-4 w-4" />
@@ -86,16 +78,6 @@ export const DateRangeFilter = ({
 							</span>
 						</div>
 					</button>
-					{isFiltered && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={onClearFilter}
-							className="h-8 text-xs"
-						>
-							Clear
-						</Button>
-					)}
 				</div>
 			</CardHeader>
 
@@ -110,21 +92,33 @@ export const DateRangeFilter = ({
 				<CardContent className="space-y-3 pt-3 md:pt-0">
 					<div className="flex flex-col sm:flex-row gap-4">
 						<div className="flex-1 space-y-2">
-							<Label className="text-sm font-medium">Date Range</Label>
-							<DateRangePicker
-								dateRange={dateRange}
-								onSelect={handleDateRangeChange}
+							<Label className="text-sm font-medium">Start Date</Label>
+							<DatePicker
+								date={startDateObj}
+								onSelect={handleStartDateChange}
 								disabled={isLoading}
-								placeholder="Select date range"
+								placeholder="Select start date"
 								className="h-10"
+								toDate={endDateObj || today}
+							/>
+						</div>
+						<div className="flex-1 space-y-2">
+							<Label className="text-sm font-medium">End Date</Label>
+							<DatePicker
+								date={endDateObj}
+								onSelect={handleEndDateChange}
+								disabled={isLoading}
+								placeholder="Select end date"
+								className="h-10"
+								fromDate={startDateObj}
+								toDate={today}
 							/>
 						</div>
 						<div className="flex items-end gap-2">
 							<Button
 								onClick={onApplyFilter}
 								disabled={isLoading}
-								size="sm"
-								className="text-xs sm:text-sm"
+								className="h-10 text-xs sm:text-sm"
 							>
 								Apply Filter
 							</Button>
@@ -133,10 +127,9 @@ export const DateRangeFilter = ({
 									onClick={onClearFilter}
 									variant="outline"
 									disabled={isLoading}
-									size="sm"
-									className="h-9 w-9 p-0"
+									className="h-10 w-10 p-0 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
 								>
-									<RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+									<X className="h-4 w-4" />
 								</Button>
 							)}
 						</div>

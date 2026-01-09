@@ -60,6 +60,32 @@ export function formatDate(
 }
 
 /**
+ * Format large numbers with K, M, B suffixes for better readability
+ * @param value Number to format
+ * @param decimals Number of decimal places (default: 1)
+ * @returns Formatted string (e.g., "10K", "1.5M", "2.3B")
+ */
+export function formatNumberAbbreviation(
+	value: number,
+	decimals: number = 1
+): string {
+	if (value === 0) return '0';
+
+	const absValue = Math.abs(value);
+	const sign = value < 0 ? '-' : '';
+
+	if (absValue >= 1_000_000_000) {
+		return sign + (absValue / 1_000_000_000).toFixed(decimals) + 'B';
+	} else if (absValue >= 1_000_000) {
+		return sign + (absValue / 1_000_000).toFixed(decimals) + 'M';
+	} else if (absValue >= 10_000) {
+		return sign + (absValue / 1_000).toFixed(decimals) + 'K';
+	}
+
+	return sign + absValue.toFixed(0);
+}
+
+/**
  * Throttle function - executes immediately on first call, then limits subsequent calls
  * @param func Function to throttle
  * @param limit Time limit in milliseconds

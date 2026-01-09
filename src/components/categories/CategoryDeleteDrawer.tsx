@@ -33,7 +33,7 @@ export const CategoryDeleteDrawer = ({
 
 		setIsDeleting(true);
 		try {
-			await deleteCategory.mutateAsync(category.id);
+			await deleteCategory.mutateAsync({ id: category.id });
 			// Close dialog after successful mutation
 			onClose();
 			onSuccess();

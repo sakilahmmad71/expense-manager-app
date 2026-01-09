@@ -190,19 +190,23 @@ export const CategoryDrawer = ({
 									setFormData({ ...formData, name: e.target.value })
 								}
 								placeholder="e.g., Food, Transport, Entertainment"
+								maxLength={100}
 								required
 								disabled={isSubmitting}
 							/>
+							<p className="text-xs text-muted-foreground">
+								{formData.name.length}/100 characters
+							</p>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="color">
 								Color <span className="text-red-500">*</span>
 							</Label>
-							<div className="flex gap-2">
+							<div className="flex gap-3 items-center">
 								<Input
-									id="color"
 									type="color"
+									id="color"
 									value={formData.color}
 									onChange={e =>
 										setFormData({ ...formData, color: e.target.value })
@@ -255,7 +259,6 @@ export const CategoryDrawer = ({
 							</div>
 						</div>
 					</div>
-
 					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
 						<TooltipProvider>
 							<Tooltip>

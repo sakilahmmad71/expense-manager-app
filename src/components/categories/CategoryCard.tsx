@@ -21,7 +21,7 @@ export const CategoryCard = ({
 
 	return (
 		<div
-			className="group relative bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg border border-gray-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
+			className="group relative bg-white rounded-2xl p-3 sm:p-5 shadow-sm hover:shadow-lg border border-gray-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 cursor-pointer h-full flex flex-col"
 			style={{
 				animationDelay: `${index * 50}ms`,
 				animationFillMode: 'backwards',
@@ -30,7 +30,7 @@ export const CategoryCard = ({
 		>
 			{/* Icon */}
 			<div
-				className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4"
+				className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4"
 				style={{
 					backgroundColor: category.color ? `${category.color}15` : '#f3f4f6',
 				}}
@@ -39,12 +39,12 @@ export const CategoryCard = ({
 			</div>
 
 			{/* Category Name */}
-			<h3 className="text-base font-semibold text-gray-900 mb-3 truncate">
+			<h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3 truncate">
 				{category.name}
 			</h3>
 
 			{/* Total Amount */}
-			<p className="text-2xl font-bold text-gray-900 mb-4">
+			<p className="text-lg sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
 				{/* Desktop */}
 				<span className="hidden sm:inline">
 					{formatCurrency(category.totalAmount ?? 0, primaryCurrency)}
@@ -60,25 +60,28 @@ export const CategoryCard = ({
 			</p>
 
 			{/* Footer: Expense Count & Growth */}
-			<div className="flex items-center justify-between text-sm">
+			<div className="flex items-center justify-between text-xs sm:text-sm mt-auto">
 				{/* Expense Count */}
-				<div className="flex items-center gap-1.5 text-gray-600">
-					<HandCoins className="h-4 w-4" />
-					<span>{category._count?.expenses ?? 0} expenses</span>
+				<div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
+					<HandCoins className="h-3 w-3 sm:h-4 sm:w-4" />
+					<span className="hidden sm:inline">
+						{category._count?.expenses ?? 0} expenses
+					</span>
+					<span className="sm:hidden">{category._count?.expenses ?? 0}</span>
 				</div>
 
 				{/* Growth Percentage */}
 				{hasGrowth && (
 					<div
-						className="flex items-center gap-1"
+						className="flex items-center gap-0.5 sm:gap-1"
 						style={{
 							color: isPositiveGrowth ? '#10b981' : '#ef4444',
 						}}
 					>
 						{isPositiveGrowth ? (
-							<TrendingUp className="h-4 w-4" />
+							<TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
 						) : (
-							<TrendingDown className="h-4 w-4" />
+							<TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />
 						)}
 						<span className="font-semibold">
 							{Math.abs(category.growthPercentage ?? 0).toFixed(0)}%

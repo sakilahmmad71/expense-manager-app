@@ -306,7 +306,7 @@ export function CategoriesPage() {
 
 			{/* Loading State */}
 			{loading && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
+				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6">
 					{[...Array(8)].map((_, i) => (
 						<CategoryCardSkeleton key={i} />
 					))}
@@ -317,7 +317,7 @@ export function CategoriesPage() {
 			{!loading && filteredCategories && filteredCategories.length > 0 && (
 				<div
 					id="categories-grid"
-					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6"
+					className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6"
 				>
 					{filteredCategories.map((category: Category, index: number) => (
 						<CategoryCard

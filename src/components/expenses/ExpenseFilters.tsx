@@ -102,11 +102,6 @@ export const ExpenseFilters = ({
 					>
 						<Filter className="h-4 w-4 flex-shrink-0" />
 						<span>Filters</span>
-						{activeFilterCount > 0 && (
-							<span className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-bold text-white bg-primary rounded-full">
-								{activeFilterCount}
-							</span>
-						)}
 					</button>
 
 					{/* Action Buttons */}

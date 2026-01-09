@@ -1,4 +1,5 @@
 import api from '@lib/api';
+import { HateoasLink } from '@/lib/hateoas';
 
 export interface User {
 	id: string;
@@ -7,6 +8,7 @@ export interface User {
 	avatar?: string;
 	authProvider?: string;
 	createdAt: string;
+	_links?: HateoasLink[];
 }
 
 export interface LoginData {
@@ -32,6 +34,7 @@ export interface Category {
 	_count?: {
 		expenses: number;
 	};
+	_links?: HateoasLink[];
 }
 
 export interface Expense {
@@ -45,6 +48,7 @@ export interface Expense {
 	userId: string;
 	createdAt: string;
 	updatedAt: string;
+	_links?: HateoasLink[];
 }
 
 export interface ExpenseInput {
@@ -67,6 +71,7 @@ export interface DashboardSummary {
 	totalCount: number;
 	averageExpense: number;
 	categoryBreakdown: Record<string, number>;
+	_links?: HateoasLink[];
 }
 
 // Auth API
@@ -99,11 +104,13 @@ export const expenseAPI = {
 	update: (id: string, data: Partial<ExpenseInput>) =>
 		api.put(`/expenses/${id}`, data),
 	delete: (id: string) => api.delete(`/expenses/${id}`),
+	bulkDelete: (expenseIds: string[]) =>
+		api.post('/expenses/bulk-delete', { expenseIds }),
 };
 
 // Category API
 export const categoryAPI = {
-	getAll: (params?: { page?: number; limit?: number }) =>
+	getAll: (params?: { page?: number; limit?: number; search?: string }) =>
 		api.get('/categories', { params }),
 	getById: (id: string) => api.get(`/categories/${id}`),
 	create: (data: { name: string; color?: string; icon?: string }) =>
@@ -112,7 +119,10 @@ export const categoryAPI = {
 		id: string,
 		data: { name?: string; color?: string; icon?: string }
 	) => api.put(`/categories/${id}`, data),
-	delete: (id: string) => api.delete(`/categories/${id}`),
+	delete: (id: string, reassignToCategoryId?: string) => {
+		const params = reassignToCategoryId ? { reassignToCategoryId } : undefined;
+		return api.delete(`/categories/${id}`, { params });
+	},
 };
 
 // Dashboard API
