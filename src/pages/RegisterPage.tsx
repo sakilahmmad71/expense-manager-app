@@ -420,11 +420,16 @@ export const RegisterPage = () => {
 								I agree to the{' '}
 								<Link to="/terms" className="text-primary hover:underline">
 									Terms of Service
-								</Link>{' '}
-								and{' '}
+								</Link>
+								,{' '}
 								<Link to="/privacy" className="text-primary hover:underline">
 									Privacy Policy
 								</Link>
+								, and{' '}
+								<Link to="/security" className="text-primary hover:underline">
+									Security Practices
+								</Link>
+								.
 							</label>
 						</div>
 

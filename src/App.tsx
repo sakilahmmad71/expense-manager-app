@@ -124,6 +124,14 @@ function App() {
 									</Suspense>
 								}
 							/>
+							<Route
+								path="/security"
+								element={
+									<Suspense fallback={<PageLoader />}>
+										<SecurityPage />
+									</Suspense>
+								}
+							/>
 
 							<Route
 								path="/"
@@ -163,14 +171,6 @@ function App() {
 									element={
 										<Suspense fallback={<PageLoader />}>
 											<ProfilePage />
-										</Suspense>
-									}
-								/>
-								<Route
-									path="security"
-									element={
-										<Suspense fallback={<PageLoader />}>
-											<SecurityPage />
 										</Suspense>
 									}
 								/>

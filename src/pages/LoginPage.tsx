@@ -258,6 +258,24 @@ export const LoginPage = () => {
 									Sign up
 								</Link>
 							</p>
+
+							<div className="pt-4 border-t">
+								<p className="text-center text-xs text-gray-500">
+									By signing in, you agree to our{' '}
+									<Link to="/terms" className="text-primary hover:underline">
+										Terms
+									</Link>
+									,{' '}
+									<Link to="/privacy" className="text-primary hover:underline">
+										Privacy Policy
+									</Link>
+									, and{' '}
+									<Link to="/security" className="text-primary hover:underline">
+										Security Practices
+									</Link>
+									.
+								</p>
+							</div>
 						</form>
 					</Form>
 				</CardContent>
