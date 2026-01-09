@@ -90,7 +90,7 @@ export function Combobox({
 	const selectedOption = options.find(option => option.value === value);
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover open={open} onOpenChange={setOpen} modal={false}>
 			<PopoverTrigger asChild>
 				<Button
 					ref={triggerRef}
@@ -112,9 +112,12 @@ export function Combobox({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="p-0"
+				className="p-0 z-[200]"
 				align="start"
 				style={{ width: triggerWidth > 0 ? `${triggerWidth}px` : 'auto' }}
+				onOpenAutoFocus={e => e.preventDefault()}
+				onCloseAutoFocus={e => e.preventDefault()}
+				sideOffset={8}
 			>
 				<Command shouldFilter={true}>
 					<CommandInput
@@ -122,7 +125,7 @@ export function Combobox({
 						value={localSearch}
 						onValueChange={handleSearchChange}
 					/>
-					<CommandList className="max-h-[300px] overflow-y-auto">
+					<CommandList>
 						{isLoading && (
 							<div className="py-6 text-center text-sm text-muted-foreground">
 								Searching...

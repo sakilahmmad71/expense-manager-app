@@ -1,5 +1,9 @@
 import { dashboardAPI } from '@/lib/services';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import {
+	useQuery,
+	UseQueryOptions,
+	keepPreviousData,
+} from '@tanstack/react-query';
 
 // Query keys for better organization and type safety
 export const dashboardKeys = {
@@ -36,6 +40,7 @@ export const useDashboardSummary = (
 			// Backend returns { summary: {...}, _links: [...] }
 			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -54,6 +59,7 @@ export const useRecentExpenses = (
 			// Backend returns { expenses: [...], _links: [...] }
 			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -71,6 +77,7 @@ export const useMonthlyTrends = (
 			// Backend returns { trends: [...], _links: [...] }
 			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -89,6 +96,7 @@ export const useCategoryAnalytics = (
 			// Backend returns { categoryAnalytics: [...], _links: [...] }
 			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -113,6 +121,11 @@ export const useDashboard = (filters?: DateFilters) => {
 			recentExpenses.isLoading ||
 			monthlyTrends.isLoading ||
 			categoryAnalytics.isLoading,
+		isFetching:
+			summary.isFetching ||
+			recentExpenses.isFetching ||
+			monthlyTrends.isFetching ||
+			categoryAnalytics.isFetching,
 		isError:
 			summary.isError ||
 			recentExpenses.isError ||

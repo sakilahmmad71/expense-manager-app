@@ -46,7 +46,11 @@ export function CategoriesPage() {
 	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
 
 	// Fetch categories with React Query
-	const { data: categoriesData, isLoading: loading } = useCategories({
+	const {
+		data: categoriesData,
+		isLoading: loading,
+		isFetching,
+	} = useCategories({
 		page: currentPage,
 		limit,
 		search: searchQuery,
@@ -244,6 +248,33 @@ export function CategoriesPage() {
 			<Card id="categories-filters">
 				<CardContent className="p-3 sm:p-4">
 					<div className="flex flex-col sm:flex-row gap-3">
+						{isFetching && (
+							<div className="absolute top-2 right-2 z-10">
+								<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+									<svg
+										className="animate-spin h-4 w-4"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											className="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="4"
+										/>
+										<path
+											className="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										/>
+									</svg>
+									<span>Updating...</span>
+								</div>
+							</div>
+						)}
 						{/* Search Bar */}
 						<div className="relative flex-1">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -280,7 +311,7 @@ export function CategoriesPage() {
 							</Select>
 
 							<Select value={sortOrder} onValueChange={handleSortOrderChange}>
-								<SelectTrigger className="w-[100px] sm:w-[120px] h-10">
+								<SelectTrigger className="w-[140px] sm:w-[160px] h-10">
 									<SelectValue placeholder="Order" />
 								</SelectTrigger>
 								<SelectContent>
@@ -305,7 +336,7 @@ export function CategoriesPage() {
 			)}
 
 			{/* Loading State */}
-			{loading && (
+			{loading && !categories.length && (
 				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6">
 					{[...Array(8)].map((_, i) => (
 						<CategoryCardSkeleton key={i} />

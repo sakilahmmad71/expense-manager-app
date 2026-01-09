@@ -4,6 +4,7 @@ import {
 	useQuery,
 	useQueryClient,
 	UseQueryOptions,
+	keepPreviousData,
 } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -63,6 +64,7 @@ export const useExpenses = (
 			// Backend returns { expenses: [...], pagination: {...}, _links: [...] }
 			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };

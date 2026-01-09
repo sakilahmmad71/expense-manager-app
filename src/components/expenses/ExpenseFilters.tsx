@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
+import { format } from 'date-fns';
 import {
 	Select,
 	SelectContent,
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui/accordion';
 import { Combobox } from '@/components/ui/combobox';
 import { Category } from '@/lib/services';
-import { ChevronDown, ChevronUp, Calendar, Filter, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface MonthFilter {
@@ -282,52 +283,73 @@ export const ExpenseFilters = ({
 								<AccordionContent>
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
 										<div className="space-y-1.5">
-											<Label
-												htmlFor="startDate"
-												className="text-xs sm:text-sm text-muted-foreground font-medium"
-											>
+											<Label className="text-xs sm:text-sm text-muted-foreground font-medium">
 												Start Date
 											</Label>
-											<div className="relative">
-												<Input
-													id="startDate"
-													type="date"
-													value={filters.startDate}
-													onChange={e => {
+											<DatePicker
+												date={
+													filters.startDate
+														? new Date(filters.startDate)
+														: undefined
+												}
+												onSelect={date => {
+													if (date) {
 														onFiltersChange({
 															...filters,
-															startDate: e.target.value,
+															startDate: format(date, 'yyyy-MM-dd'),
 															page: 1,
 														});
-													}}
-													className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-												/>
-												<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-											</div>
+													} else {
+														onFiltersChange({
+															...filters,
+															startDate: '',
+															page: 1,
+														});
+													}
+												}}
+												placeholder="Select start date"
+												className="h-10"
+												toDate={
+													filters.endDate
+														? new Date(filters.endDate)
+														: new Date()
+												}
+											/>
 										</div>
 										<div className="space-y-1.5">
-											<Label
-												htmlFor="endDate"
-												className="text-xs sm:text-sm text-muted-foreground font-medium"
-											>
+											<Label className="text-xs sm:text-sm text-muted-foreground font-medium">
 												End Date
 											</Label>
-											<div className="relative">
-												<Input
-													id="endDate"
-													type="date"
-													value={filters.endDate}
-													onChange={e => {
+											<DatePicker
+												date={
+													filters.endDate
+														? new Date(filters.endDate)
+														: undefined
+												}
+												onSelect={date => {
+													if (date) {
 														onFiltersChange({
 															...filters,
-															endDate: e.target.value,
+															endDate: format(date, 'yyyy-MM-dd'),
 															page: 1,
 														});
-													}}
-													className="h-10 pr-10 cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-												/>
-												<Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-											</div>
+													} else {
+														onFiltersChange({
+															...filters,
+															endDate: '',
+															page: 1,
+														});
+													}
+												}}
+												placeholder="Select end date"
+												className="h-10"
+												fromDate={
+													filters.startDate
+														? new Date(filters.startDate)
+														: undefined
+												}
+												toDate={new Date()}
+											/>
 										</div>
 									</div>
 								</AccordionContent>
