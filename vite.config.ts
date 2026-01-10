@@ -23,35 +23,20 @@ export default defineConfig(({ mode }) => ({
 		// Optimize for production builds
 		rollupOptions: {
 			output: {
-				// Manual chunk splitting for optimal loading
+				// Simplified chunk splitting for low-memory builds
 				manualChunks: {
-					// Core React libraries
-					'react-vendor': ['react', 'react-dom'],
-
-					// Router and navigation
-					router: ['react-router-dom'],
-
-					// UI Framework (Radix UI + shadcn/ui components)
-					'ui-vendor': [
+					// Combine all vendors into fewer chunks to reduce memory overhead
+					vendor: ['react', 'react-dom', 'react-router-dom'],
+					ui: [
 						'@radix-ui/react-dialog',
 						'@radix-ui/react-dropdown-menu',
 						'@radix-ui/react-select',
 						'@radix-ui/react-toast',
 						'@radix-ui/react-slot',
 						'@radix-ui/react-label',
+						'lucide-react',
 					],
-
-					// Icons
-					icons: ['lucide-react'],
-
-					// Charts and data visualization
 					charts: ['echarts', 'echarts-for-react'],
-					utils: [
-						'clsx',
-						'tailwind-merge',
-						'date-fns',
-						'class-variance-authority',
-					],
 				},
 
 				// Optimize chunk naming for caching
@@ -63,29 +48,20 @@ export default defineConfig(({ mode }) => ({
 		},
 
 		// Chunk size warning threshold
-		chunkSizeWarningLimit: 600,
+		chunkSizeWarningLimit: 1000,
 
 		// Enable source maps for better debugging in development
 		sourcemap: mode === 'development',
 
-		// Minification options
-		minify: 'terser',
-		terserOptions: {
-			compress: {
-				// Remove console.logs in production
-				drop_console: mode === 'production',
-				drop_debugger: mode === 'production',
-				// Remove pure function annotations
-				pure_funcs:
-					mode === 'production'
-						? ['console.log', 'console.info', 'console.debug', 'console.trace']
-						: [],
+		// Minification options (esbuild is faster and uses less memory than terser)
+		minify: 'esbuild',
+
+		// Drop console statements in production with esbuild
+		...(mode === 'production' && {
+			esbuild: {
+				drop: ['console', 'debugger'],
 			},
-			format: {
-				// Remove comments in production
-				comments: false,
-			},
-		},
+		}),
 
 		// CSS code splitting
 		cssCodeSplit: true,

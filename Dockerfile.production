@@ -42,6 +42,9 @@ ENV VITE_APP_ENV=${VITE_APP_ENV}
 ENV VITE_ENABLE_DEBUG=${VITE_ENABLE_DEBUG}
 ENV VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS}
 
+# Optimize Node.js heap size for 1GB server (leave room for OS)
+ENV NODE_OPTIONS="--max-old-space-size=768"
+
 # Build the application
 RUN pnpm build
 
