@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import ReactECharts from 'echarts-for-react';
+import echarts from '@/lib/echarts';
 import { useMemo } from 'react';
 
 const GRADIENT_COLORS = [
@@ -194,6 +195,7 @@ export const TopCategoriesChart = ({
 			</CardHeader>
 			<CardContent>
 				<ReactECharts
+					echarts={echarts}
 					option={option}
 					style={{ height: '300px', width: '100%' }}
 					opts={{ renderer: 'canvas' }}
