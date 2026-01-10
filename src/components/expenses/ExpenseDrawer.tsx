@@ -253,7 +253,6 @@ export const ExpenseDrawer = ({
 								maxLength={255}
 								required
 								disabled={isSubmitting}
-								autoFocus
 							/>
 							<p className="text-xs text-muted-foreground">
 								{formData.title.length}/255 characters
