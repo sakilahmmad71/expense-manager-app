@@ -193,7 +193,6 @@ export const CategoryDrawer = ({
 								maxLength={100}
 								required
 								disabled={isSubmitting}
-								autoFocus
 							/>
 							<p className="text-xs text-muted-foreground">
 								{formData.name.length}/100 characters
