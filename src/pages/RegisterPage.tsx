@@ -13,7 +13,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleButton from '@/components/GoogleButton';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';
 
@@ -29,6 +30,8 @@ export const RegisterPage = () => {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [passwordStrength, setPasswordStrength] =
 		useState<PasswordStrength | null>(null);
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
+	const [showEmailVerification, setShowEmailVerification] = useState(false);
 	const { register } = useAuth();
 	const navigate = useNavigate();
 
@@ -72,9 +75,31 @@ export const RegisterPage = () => {
 		}
 	};
 
+	// Auto-capitalize name
+	const handleNameChange = (value: string) => {
+		const capitalized = value
+			.split(' ')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(' ');
+		setName(capitalized);
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
+
+		// Validate terms acceptance
+		if (!acceptedTerms) {
+			const errorMsg =
+				'You must accept the Terms of Service and Privacy Policy';
+			setError(errorMsg);
+			toast({
+				variant: 'destructive',
+				title: '✗ Validation error',
+				description: errorMsg,
+			});
+			return;
+		}
 
 		if (password !== confirmPassword) {
 			const errorMsg = 'Passwords do not match';
@@ -100,16 +125,23 @@ export const RegisterPage = () => {
 
 		setIsLoading(true);
 
+		// Auto-trim whitespace
+		const trimmedName = name.trim();
+		const trimmedEmail = email.trim();
+
 		try {
-			await register(name, email, password);
+			await register(trimmedName, trimmedEmail, password);
+
+			// Show email verification notice
+			setShowEmailVerification(true);
 			toast({
 				variant: 'success',
 				title: '✓ Account created',
-				description: 'Welcome! Redirecting to dashboard...',
+				description: 'Welcome! Check your email for important updates.',
 			});
-			setTimeout(() => navigate('/dashboard'), 500);
+			setTimeout(() => navigate('/dashboard'), 1500);
 		} catch (err: unknown) {
-			const errorMessage =
+			let errorMessage =
 				typeof err === 'object' &&
 				err !== null &&
 				'response' in err &&
@@ -121,6 +153,16 @@ export const RegisterPage = () => {
 				'error' in err.response.data
 					? String(err.response.data.error)
 					: 'Failed to register. Please try again.';
+
+			// Better rate limiting feedback
+			if (
+				errorMessage.toLowerCase().includes('too many') ||
+				errorMessage.toLowerCase().includes('rate limit')
+			) {
+				errorMessage =
+					'Too many registration attempts. Please try again in a few minutes.';
+			}
+
 			setError(errorMessage);
 			toast({
 				variant: 'destructive',
@@ -133,7 +175,7 @@ export const RegisterPage = () => {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
 			<Card
 				id="register-form"
 				className="w-full max-w-md animate-in fade-in duration-300"
@@ -145,14 +187,47 @@ export const RegisterPage = () => {
 					<CardDescription className="text-center">
 						Enter your details to get started
 					</CardDescription>
+					<p className="text-xs text-center text-gray-500 mt-2">
+						Join thousands tracking expenses smarter
+					</p>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-4">
+						{showEmailVerification && (
+							<div
+								role="status"
+								aria-live="polite"
+								className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md text-sm"
+							>
+								<p className="font-medium mb-1">📧 Check your email</p>
+								<p>
+									We've sent you important account information and tips to get
+									started.
+								</p>
+							</div>
+						)}
 						{error && (
-							<div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+							<div
+								role="alert"
+								aria-live="assertive"
+								className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm"
+							>
 								{error}
 							</div>
 						)}
+
+						<GoogleButton text="Sign up with Google" />
+
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-white px-2 text-muted-foreground">
+									Or sign up with email
+								</span>
+							</div>
+						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="name" className="text-sm">
@@ -163,10 +238,12 @@ export const RegisterPage = () => {
 								type="text"
 								placeholder="John Doe"
 								value={name}
-								onChange={e => setName(e.target.value)}
+								onChange={e => handleNameChange(e.target.value)}
 								required
 								disabled={isLoading}
 								className="h-10"
+								autoFocus
+								autoComplete="name"
 							/>
 						</div>
 
@@ -183,6 +260,7 @@ export const RegisterPage = () => {
 								required
 								disabled={isLoading}
 								className="h-10"
+								autoComplete="email"
 							/>
 						</div>
 
@@ -200,6 +278,8 @@ export const RegisterPage = () => {
 									required
 									disabled={isLoading}
 									className="h-10 pr-10"
+									aria-describedby="password-requirements"
+									autoComplete="new-password"
 								/>
 								<button
 									type="button"
@@ -214,8 +294,21 @@ export const RegisterPage = () => {
 									)}
 								</button>
 							</div>
+							<div
+								id="password-requirements"
+								className="text-xs text-gray-600 space-y-0.5"
+							>
+								<p>• At least 6 characters (8+ recommended)</p>
+								<p>
+									• Mix of uppercase and lowercase letters for better security
+								</p>
+								<p>
+									• Include numbers and special characters for strongest
+									protection
+								</p>
+							</div>
 							{passwordStrength && (
-								<div className="space-y-1">
+								<div className="space-y-1" aria-live="polite">
 									<div className="flex gap-1">
 										<div
 											className={`h-1 flex-1 rounded ${
@@ -286,24 +379,67 @@ export const RegisterPage = () => {
 									)}
 								</button>
 							</div>
+							{confirmPassword && (
+								<div
+									className="flex items-center gap-1.5 text-xs"
+									aria-live="polite"
+								>
+									{confirmPassword === password ? (
+										<>
+											<CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+											<span className="text-green-600">Passwords match</span>
+										</>
+									) : (
+										<>
+											<XCircle className="h-3.5 w-3.5 text-red-600" />
+											<span className="text-red-600">
+												Passwords don't match
+											</span>
+										</>
+									)}
+								</div>
+							)}
 						</div>
 
-						<Button type="submit" className="w-full h-10" disabled={isLoading}>
+						<div className="flex items-start space-x-2">
+							<Checkbox
+								id="terms"
+								checked={acceptedTerms}
+								onCheckedChange={checked =>
+									setAcceptedTerms(checked as boolean)
+								}
+								disabled={isLoading}
+								required
+								aria-describedby="terms-description"
+							/>
+							<label
+								id="terms-description"
+								htmlFor="terms"
+								className="text-xs text-gray-600 leading-relaxed cursor-pointer"
+							>
+								I agree to the{' '}
+								<Link to="/terms" className="text-primary hover:underline">
+									Terms of Service
+								</Link>
+								,{' '}
+								<Link to="/privacy" className="text-primary hover:underline">
+									Privacy Policy
+								</Link>
+								, and{' '}
+								<Link to="/security" className="text-primary hover:underline">
+									Security Practices
+								</Link>
+								.
+							</label>
+						</div>
+
+						<Button
+							type="submit"
+							className="w-full h-10"
+							disabled={isLoading || !acceptedTerms}
+						>
 							{isLoading ? 'Creating account...' : 'Sign Up'}
 						</Button>
-
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<span className="w-full border-t" />
-							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-white px-2 text-muted-foreground">
-									Or continue with
-								</span>
-							</div>
-						</div>
-
-						<GoogleButton text="Sign up with Google" />
 
 						<p className="text-center text-sm text-gray-600">
 							Already have an account?{' '}

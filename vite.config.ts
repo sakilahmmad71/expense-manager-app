@@ -45,16 +45,13 @@ export default defineConfig(({ mode }) => ({
 					icons: ['lucide-react'],
 
 					// Charts and data visualization
-					charts: ['recharts'],
-
-					// Form handling
-					forms: ['react-hook-form'],
-
-					// HTTP client
-					api: ['axios'],
-
-					// Utility libraries
-					utils: ['clsx', 'tailwind-merge', 'date-fns', 'class-variance-authority'],
+					charts: ['echarts', 'echarts-for-react'],
+					utils: [
+						'clsx',
+						'tailwind-merge',
+						'date-fns',
+						'class-variance-authority',
+					],
 				},
 
 				// Optimize chunk naming for caching

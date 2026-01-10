@@ -1,4 +1,4 @@
 export { CategoryCard } from './CategoryCard';
-export { CategoryModal } from './CategoryModal';
-export { CategoryDeleteDialog } from './CategoryDeleteDialog';
-export { CategoryDetailModal } from './CategoryDetailModal';
+export { CategoryDrawer } from './CategoryDrawer';
+export { CategoryDeleteDrawer } from './CategoryDeleteDrawer';
+export { CategoryDetailDrawer } from './CategoryDetailDrawer';

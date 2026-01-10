@@ -7,25 +7,51 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleButton from '@/components/GoogleButton';
 import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
+
+const loginFormSchema = z.object({
+	email: z.string().email('Please enter a valid email address'),
+	password: z.string().min(1, 'Password is required'),
+	rememberMe: z.boolean(),
+});
+
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export const LoginPage = () => {
 	const { toast } = useToast();
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	const [rememberMe, setRememberMe] = useState(false);
 	const { login } = useAuth();
 	const navigate = useNavigate();
+
+	const form = useForm<LoginFormValues>({
+		resolver: zodResolver(loginFormSchema),
+		defaultValues: {
+			email: '',
+			password: '',
+			rememberMe: false,
+		},
+	});
+
+	const isLoading = form.formState.isSubmitting;
 
 	useEffect(() => {
 		// Set document title and meta description
@@ -46,22 +72,20 @@ export const LoginPage = () => {
 
 		const savedEmail = localStorage.getItem('rememberedEmail');
 		if (savedEmail) {
-			setEmail(savedEmail);
-			setRememberMe(true);
+			form.setValue('email', savedEmail);
+			form.setValue('rememberMe', true);
 		}
-	}, []);
+	}, [form]);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const onSubmit = async (values: LoginFormValues) => {
 		setError('');
-		setIsLoading(true);
 
 		try {
-			await login(email, password);
+			await login(values.email.trim(), values.password.trim());
 
 			// Save email if Remember Me is checked
-			if (rememberMe) {
-				localStorage.setItem('rememberedEmail', email);
+			if (values.rememberMe) {
+				localStorage.setItem('rememberedEmail', values.email.trim());
 			} else {
 				localStorage.removeItem('rememberedEmail');
 			}
@@ -73,22 +97,30 @@ export const LoginPage = () => {
 			});
 			setTimeout(() => navigate('/dashboard'), 500);
 		} catch (err: unknown) {
-			const errorMessage =
+			let errorMessage =
 				(err as { response?: { data?: { error?: string } } }).response?.data
 					?.error || 'Failed to login. Please try again.';
+
+			// Better rate limiting feedback
+			if (
+				errorMessage.toLowerCase().includes('too many') ||
+				errorMessage.toLowerCase().includes('rate limit')
+			) {
+				errorMessage =
+					'Too many login attempts. Please try again in a few minutes.';
+			}
+
 			setError(errorMessage);
 			toast({
 				variant: 'destructive',
 				title: '✗ Login failed',
 				description: errorMessage,
 			});
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
 			<Card
 				id="login-form"
 				className="w-full max-w-md animate-in fade-in duration-300"
@@ -100,103 +132,152 @@ export const LoginPage = () => {
 					<CardDescription className="text-center">
 						Enter your credentials to access your account
 					</CardDescription>
+					<p className="text-xs text-center text-gray-500 mt-2">
+						Join thousands managing their finances with Expenser
+					</p>
 				</CardHeader>
 				<CardContent>
-					<form onSubmit={handleSubmit} className="space-y-4">
-						{error && (
-							<div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-								{error}
-							</div>
-						)}
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+							{error && (
+								<Alert variant="destructive">
+									<AlertDescription>{error}</AlertDescription>
+								</Alert>
+							)}
 
-						<div className="space-y-2">
-							<Label htmlFor="email" className="text-sm">
-								Email
-							</Label>
-							<Input
-								id="email"
-								type="email"
-								placeholder="you@example.com"
-								value={email}
-								onChange={e => setEmail(e.target.value)}
-								required
-								disabled={isLoading}
-								className="h-10"
-							/>
-						</div>
+							<GoogleButton />
 
-						<div className="space-y-2">
-							<Label htmlFor="password" className="text-sm">
-								Password
-							</Label>
 							<div className="relative">
-								<Input
-									id="password"
-									type={showPassword ? 'text' : 'password'}
-									placeholder="••••••••"
-									value={password}
-									onChange={e => setPassword(e.target.value)}
-									required
-									disabled={isLoading}
-									className="h-10 pr-10"
-								/>
-								<button
-									type="button"
-									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-									disabled={isLoading}
-								>
-									{showPassword ? (
-										<EyeOff className="h-4 w-4" />
-									) : (
-										<Eye className="h-4 w-4" />
-									)}
-								</button>
+								<div className="absolute inset-0 flex items-center">
+									<span className="w-full border-t" />
+								</div>
+								<div className="relative flex justify-center text-xs uppercase">
+									<span className="bg-white px-2 text-muted-foreground">
+										Or continue with email
+									</span>
+								</div>
 							</div>
-						</div>
 
-						<div className="flex items-center space-x-2">
-							<Checkbox
-								id="remember"
-								checked={rememberMe}
-								onCheckedChange={checked => setRememberMe(checked as boolean)}
-								disabled={isLoading}
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email</FormLabel>
+										<FormControl>
+											<Input
+												type="email"
+												placeholder="you@example.com"
+												autoComplete="email"
+												autoFocus
+												disabled={isLoading}
+												className="h-10"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-							<label
-								htmlFor="remember"
-								className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-							>
-								Remember me
-							</label>
-						</div>
 
-						<Button type="submit" className="w-full h-10" disabled={isLoading}>
-							{isLoading ? 'Logging in...' : 'Log In'}
-						</Button>
+							<FormField
+								control={form.control}
+								name="password"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Password</FormLabel>
+										<FormControl>
+											<div className="relative">
+												<Input
+													type={showPassword ? 'text' : 'password'}
+													placeholder="••••••••"
+													disabled={isLoading}
+													className="h-10 pr-10"
+													{...field}
+												/>
+												<button
+													type="button"
+													onClick={() => setShowPassword(!showPassword)}
+													className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+													disabled={isLoading}
+												>
+													{showPassword ? (
+														<EyeOff className="h-4 w-4" />
+													) : (
+														<Eye className="h-4 w-4" />
+													)}
+												</button>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<span className="w-full border-t" />
+							<div className="flex items-center justify-between">
+								<FormField
+									control={form.control}
+									name="rememberMe"
+									render={({ field }) => (
+										<FormItem className="flex items-center space-x-2 space-y-0">
+											<FormControl>
+												<Checkbox
+													checked={field.value}
+													onCheckedChange={field.onChange}
+													disabled={isLoading}
+												/>
+											</FormControl>
+											<FormLabel className="text-sm font-medium cursor-pointer">
+												Remember me
+											</FormLabel>
+										</FormItem>
+									)}
+								/>
+								<Link
+									to="/forgot-password"
+									className="text-sm text-primary font-medium hover:underline"
+								>
+									Forgot password?
+								</Link>
 							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-white px-2 text-muted-foreground">
-									Or continue with
-								</span>
-							</div>
-						</div>
 
-						<GoogleButton />
-
-						<p className="text-center text-sm text-gray-600">
-							Don't have an account?{' '}
-							<Link
-								to="/register"
-								className="text-primary font-medium hover:underline"
+							<Button
+								type="submit"
+								className="w-full h-10"
+								disabled={isLoading}
 							>
-								Sign up
-							</Link>
-						</p>
-					</form>
+								{isLoading ? 'Logging in...' : 'Log In'}
+							</Button>
+
+							<p className="text-center text-sm text-gray-600">
+								Don't have an account?{' '}
+								<Link
+									to="/register"
+									className="text-primary font-medium hover:underline"
+								>
+									Sign up
+								</Link>
+							</p>
+
+							<div className="pt-4 border-t">
+								<p className="text-center text-xs text-gray-500">
+									By signing in, you agree to our{' '}
+									<Link to="/terms" className="text-primary hover:underline">
+										Terms
+									</Link>
+									,{' '}
+									<Link to="/privacy" className="text-primary hover:underline">
+										Privacy Policy
+									</Link>
+									, and{' '}
+									<Link to="/security" className="text-primary hover:underline">
+										Security Practices
+									</Link>
+									.
+								</p>
+							</div>
+						</form>
+					</Form>
 				</CardContent>
 			</Card>
 		</div>

@@ -1,15 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
-import {
-	Plus,
-	Search,
-	Filter,
-	ChevronLeft,
-	ChevronRight,
-	X,
-} from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, Search, Filter, X, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
+import { CategoryCardSkeleton } from '@/components/Skeletons';
 import {
 	Select,
 	SelectContent,
@@ -17,14 +13,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { ModernPagination } from '@/components/ui/modern-pagination';
 import {
 	CategoryCard,
-	CategoryModal,
-	CategoryDeleteDialog,
-	CategoryDetailModal,
+	CategoryDrawer,
+	CategoryDeleteDrawer,
+	CategoryDetailDrawer,
 } from '@/components/categories';
-import type { Category } from '@/lib/services';
+import type { Category, Expense } from '@/lib/services';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
+import { useExpenses } from '@/hooks/useExpenses';
 
 export function CategoriesPage() {
 	const [searchTerm, setSearchTerm] = useState('');
@@ -44,14 +42,24 @@ export function CategoriesPage() {
 		null
 	);
 
+	// Currency state
+	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
+
 	// Fetch categories with React Query
-	const { data: categoriesData, isLoading: loading } = useCategories({
+	const {
+		data: categoriesData,
+		isLoading: loading,
+		isFetching,
+	} = useCategories({
 		page: currentPage,
 		limit,
 		search: searchQuery,
 		sortBy,
 		sortOrder,
 	});
+
+	// Fetch expenses to detect primary currency
+	const { data: expensesData } = useExpenses({ limit: 100 });
 
 	// Extract data from queries with useMemo to avoid recreating on every render
 	const categories = useMemo(
@@ -110,91 +118,119 @@ export function CategoriesPage() {
 		return () => clearTimeout(timer);
 	}, [searchTerm, searchQuery]);
 
-	const handleCreateCategory = () => {
+	// Detect primary currency from expenses
+	useEffect(() => {
+		const expenses = (expensesData as { expenses?: Expense[] })?.expenses;
+		if (!expenses || expenses.length === 0) return;
+
+		const currencies = new Set(expenses.map((e: Expense) => e.currency));
+		if (currencies.size > 0) {
+			// Use the most common currency
+			const currencyCount = expenses.reduce(
+				(acc: Record<string, number>, e: Expense) => {
+					acc[e.currency] = (acc[e.currency] || 0) + 1;
+					return acc;
+				},
+				{}
+			);
+			const mostCommon = (
+				Object.entries(currencyCount) as Array<[string, number]>
+			).sort((a: [string, number], b: [string, number]) => b[1] - a[1])[0];
+			setPrimaryCurrency(mostCommon ? String(mostCommon[0]) : 'USD');
+		}
+	}, [expensesData]);
+
+	const handleCreateCategory = useCallback(() => {
 		setSelectedCategory(null);
 		setIsModalOpen(true);
-	};
+	}, []);
 
-	const handleEditCategory = (category: Category) => {
-		setIsDetailModalOpen(false); // Close detail modal if open
-		// Small delay to ensure modal state updates properly
+	const handleEditCategory = useCallback((category: Category) => {
+		// Close detail modal first, then open edit modal after animation
+		setIsDetailModalOpen(false);
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsModalOpen(true);
-		}, 50);
-	};
+		}, 400); // Vaul default animation is ~300ms, add buffer
+	}, []);
 
-	const handleDeleteCategory = (category: Category) => {
-		setIsDetailModalOpen(false); // Close detail modal if open
-		// Small delay to ensure modal state updates properly
+	const handleDeleteCategory = useCallback((category: Category) => {
+		// Close detail drawer first, then open delete drawer after animation
+		setIsDetailModalOpen(false);
 		setTimeout(() => {
 			setSelectedCategory(category);
 			setIsDeleteDialogOpen(true);
-		}, 50);
-	};
+		}, 300); // Vaul default animation is ~300ms
+	}, []);
 
-	const handleModalClose = () => {
+	const handleModalClose = useCallback(() => {
 		setIsModalOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleModalSuccess = () => {
+	const handleModalSuccess = useCallback(() => {
 		// React Query will automatically refetch after mutation
 		handleModalClose();
-	};
+	}, [handleModalClose]);
 
-	const handleDeleteDialogClose = () => {
+	const handleDeleteDialogClose = useCallback(() => {
 		setIsDeleteDialogOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleDeleteSuccess = () => {
+	const handleDeleteSuccess = useCallback(() => {
 		// React Query will automatically refetch after mutation
 		handleDeleteDialogClose();
-	};
+	}, [handleDeleteDialogClose]);
 
-	const handleViewCategory = (category: Category) => {
+	const handleViewCategory = useCallback((category: Category) => {
 		setSelectedCategory(category);
 		setIsDetailModalOpen(true);
-	};
+	}, []);
 
-	const handleDetailModalClose = () => {
+	const handleDetailModalClose = useCallback(() => {
 		setIsDetailModalOpen(false);
 		setSelectedCategory(null);
-	};
+	}, []);
 
-	const handleLimitChange = (newLimit: number) => {
+	const handleLimitChange = useCallback((newLimit: number) => {
 		localStorage.setItem('categoriesPerPage', newLimit.toString());
 		setLimit(newLimit);
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSearchTerm(e.target.value);
-	};
+	const handleSearchChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			setSearchTerm(e.target.value);
+		},
+		[]
+	);
 
-	const handleClearSearch = () => {
+	const handleClearSearch = useCallback(() => {
 		setSearchTerm('');
 		setSearchQuery('');
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSortChange = (value: string) => {
+	const handleSortChange = useCallback((value: string) => {
 		setSortBy(value);
 		setCurrentPage(1);
-	};
+	}, []);
 
-	const handleSortOrderChange = (value: string) => {
+	const handleSortOrderChange = useCallback((value: string) => {
 		setSortOrder(value as 'asc' | 'desc');
 		setCurrentPage(1);
-	};
+	}, []);
 
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen animate-in fade-in duration-300">
+			{/* Breadcrumb Navigation */}
+			<PageBreadcrumb items={[{ label: 'Categories' }]} />
+
 			{/* Header */}
 			<div
 				id="categories-header"
-				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"
+				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 mt-6"
 			>
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
@@ -212,6 +248,33 @@ export function CategoriesPage() {
 			<Card id="categories-filters">
 				<CardContent className="p-3 sm:p-4">
 					<div className="flex flex-col sm:flex-row gap-3">
+						{isFetching && (
+							<div className="absolute top-2 right-2 z-10">
+								<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+									<svg
+										className="animate-spin h-4 w-4"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											className="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="4"
+										/>
+										<path
+											className="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										/>
+									</svg>
+									<span>Updating...</span>
+								</div>
+							</div>
+						)}
 						{/* Search Bar */}
 						<div className="relative flex-1">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -248,7 +311,7 @@ export function CategoriesPage() {
 							</Select>
 
 							<Select value={sortOrder} onValueChange={handleSortOrderChange}>
-								<SelectTrigger className="w-[100px] sm:w-[120px] h-10">
+								<SelectTrigger className="w-[140px] sm:w-[160px] h-10">
 									<SelectValue placeholder="Order" />
 								</SelectTrigger>
 								<SelectContent>
@@ -273,13 +336,10 @@ export function CategoriesPage() {
 			)}
 
 			{/* Loading State */}
-			{loading && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
+			{loading && !categories.length && (
+				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6">
 					{[...Array(8)].map((_, i) => (
-						<div
-							key={i}
-							className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
-						/>
+						<CategoryCardSkeleton key={i} />
 					))}
 				</div>
 			)}
@@ -288,7 +348,7 @@ export function CategoriesPage() {
 			{!loading && filteredCategories && filteredCategories.length > 0 && (
 				<div
 					id="categories-grid"
-					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6"
+					className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6"
 				>
 					{filteredCategories.map((category: Category, index: number) => (
 						<CategoryCard
@@ -296,6 +356,7 @@ export function CategoriesPage() {
 							category={category}
 							index={index}
 							onClick={handleViewCategory}
+							primaryCurrency={primaryCurrency}
 						/>
 					))}
 				</div>
@@ -303,76 +364,43 @@ export function CategoriesPage() {
 
 			{/* Empty State */}
 			{!loading && (!filteredCategories || filteredCategories.length === 0) && (
-				<div className="text-center py-12 mt-6">
-					<div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-						<Filter className="h-8 w-8 text-gray-400" />
-					</div>
-					<h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-						{searchTerm ? 'No categories found' : 'No categories yet'}
-					</h3>
-					<p className="text-gray-600 dark:text-gray-400 mb-6">
-						{searchTerm
+				<EmptyState
+					icon={searchTerm ? Search : Folder}
+					title={searchTerm ? 'No categories found' : 'No categories yet'}
+					description={
+						searchTerm
 							? 'Try adjusting your search or filters'
-							: 'Get started by creating your first category'}
-					</p>
-					{!searchTerm && (
-						<Button onClick={handleCreateCategory}>
-							<Plus className="h-4 w-4 mr-2" />
-							Create Category
-						</Button>
-					)}
-				</div>
+							: 'Get started by creating your first category'
+					}
+					action={
+						!searchTerm
+							? {
+									label: 'Create Category',
+									onClick: handleCreateCategory,
+								}
+							: undefined
+					}
+					className="mt-6"
+				/>
 			)}
 
 			{/* Pagination */}
 			{!loading && categories && categories.length > 0 && totalPages > 1 && (
-				<div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-					<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-						<span>Items per page:</span>
-						<Select
-							value={limit.toString()}
-							onValueChange={value => handleLimitChange(parseInt(value))}
-						>
-							<SelectTrigger className="h-8 w-[70px]">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="10">10</SelectItem>
-								<SelectItem value="20">20</SelectItem>
-								<SelectItem value="25">25</SelectItem>
-								<SelectItem value="50">50</SelectItem>
-								<SelectItem value="100">100</SelectItem>
-							</SelectContent>
-						</Select>
-						<span className="hidden sm:inline">
-							| Page {currentPage} of {totalPages} | Total: {totalCount}
-						</span>
-					</div>
-					<div className="flex gap-2">
-						<Button
-							onClick={() => setCurrentPage(currentPage - 1)}
-							disabled={currentPage === 1}
-							variant="outline"
-							size="sm"
-						>
-							<ChevronLeft className="h-4 w-4" />
-							<span className="hidden sm:inline ml-1">Previous</span>
-						</Button>
-						<Button
-							onClick={() => setCurrentPage(currentPage + 1)}
-							disabled={currentPage === totalPages}
-							variant="outline"
-							size="sm"
-						>
-							<span className="hidden sm:inline mr-1">Next</span>
-							<ChevronRight className="h-4 w-4" />
-						</Button>
-					</div>
+				<div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-4">
+					<ModernPagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						totalItems={totalCount}
+						itemsPerPage={limit}
+						onPageChange={setCurrentPage}
+						onItemsPerPageChange={handleLimitChange}
+						itemsPerPageOptions={[10, 20, 25, 50, 100]}
+					/>
 				</div>
 			)}
 
 			{/* Category Modal */}
-			<CategoryModal
+			<CategoryDrawer
 				isOpen={isModalOpen}
 				category={selectedCategory}
 				onClose={handleModalClose}
@@ -380,15 +408,15 @@ export function CategoriesPage() {
 			/>
 
 			{/* Delete Dialog */}
-			<CategoryDeleteDialog
+			<CategoryDeleteDrawer
 				isOpen={isDeleteDialogOpen}
 				category={selectedCategory}
 				onClose={handleDeleteDialogClose}
 				onSuccess={handleDeleteSuccess}
 			/>
 
-			{/* Detail Modal */}
-			<CategoryDetailModal
+			{/* Detail Drawer */}
+			<CategoryDetailDrawer
 				isOpen={isDetailModalOpen}
 				category={selectedCategory}
 				onClose={handleDetailModalClose}

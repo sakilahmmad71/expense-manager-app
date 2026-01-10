@@ -1,9 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
 	title: string;
 	value: string | number;
+	fullValue?: string; // Optional full value for tooltip
 	icon: LucideIcon;
 	iconBg: string;
 	iconColor: string;
@@ -15,6 +22,7 @@ interface StatCardProps {
 export const StatCard = ({
 	title,
 	value,
+	fullValue,
 	icon: Icon,
 	iconBg,
 	iconColor,
@@ -22,6 +30,15 @@ export const StatCard = ({
 	trendColor,
 	index = 0,
 }: StatCardProps) => {
+	const displayValue = typeof value === 'string' ? value : value.toString();
+	const hasTooltip = fullValue && fullValue !== displayValue;
+
+	const valueElement = (
+		<div className="text-xl sm:text-2xl font-bold text-gray-900 truncate max-w-full">
+			{displayValue}
+		</div>
+	);
+
 	return (
 		<Card
 			className="hover:shadow-lg transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-2"
@@ -39,9 +56,18 @@ export const StatCard = ({
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="text-xl sm:text-2xl font-bold text-gray-900">
-					{value}
-				</div>
+				{hasTooltip ? (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>{valueElement}</TooltipTrigger>
+							<TooltipContent>
+								<p className="font-semibold">{fullValue}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				) : (
+					valueElement
+				)}
 				{trend && (
 					<p className={`text-xs sm:text-sm font-medium mt-1 ${trendColor}`}>
 						{trend} vs last month

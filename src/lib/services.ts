@@ -1,10 +1,14 @@
 import api from '@lib/api';
+import { HateoasLink } from '@/lib/hateoas';
 
 export interface User {
 	id: string;
 	email: string;
 	name: string;
+	avatar?: string;
+	authProvider?: string;
 	createdAt: string;
+	_links?: HateoasLink[];
 }
 
 export interface LoginData {
@@ -25,9 +29,12 @@ export interface Category {
 	icon?: string;
 	createdAt: string;
 	updatedAt: string;
+	totalAmount?: number;
+	growthPercentage?: number;
 	_count?: {
 		expenses: number;
 	};
+	_links?: HateoasLink[];
 }
 
 export interface Expense {
@@ -41,6 +48,7 @@ export interface Expense {
 	userId: string;
 	createdAt: string;
 	updatedAt: string;
+	_links?: HateoasLink[];
 }
 
 export interface ExpenseInput {
@@ -63,6 +71,7 @@ export interface DashboardSummary {
 	totalCount: number;
 	averageExpense: number;
 	categoryBreakdown: Record<string, number>;
+	_links?: HateoasLink[];
 }
 
 // Auth API
@@ -70,8 +79,14 @@ export const authAPI = {
 	register: (data: RegisterData) => api.post('/auth/register', data),
 	login: (data: LoginData) => api.post('/auth/login', data),
 	getProfile: () => api.get('/auth/profile'),
-	updateProfile: (data: { name?: string; email?: string; password?: string }) =>
+	updateProfile: (data: { name?: string; avatar?: string }) =>
 		api.put('/auth/profile', data),
+	changePassword: (data: { currentPassword: string; newPassword: string }) =>
+		api.post('/auth/change-password', data),
+	forgotPassword: (data: { email: string }) =>
+		api.post('/auth/forgot-password', data),
+	resetPassword: (data: { token: string; newPassword: string }) =>
+		api.post('/auth/reset-password', data),
 };
 
 // Expense API
@@ -89,11 +104,13 @@ export const expenseAPI = {
 	update: (id: string, data: Partial<ExpenseInput>) =>
 		api.put(`/expenses/${id}`, data),
 	delete: (id: string) => api.delete(`/expenses/${id}`),
+	bulkDelete: (expenseIds: string[]) =>
+		api.post('/expenses/bulk-delete', { expenseIds }),
 };
 
 // Category API
 export const categoryAPI = {
-	getAll: (params?: { page?: number; limit?: number }) =>
+	getAll: (params?: { page?: number; limit?: number; search?: string }) =>
 		api.get('/categories', { params }),
 	getById: (id: string) => api.get(`/categories/${id}`),
 	create: (data: { name: string; color?: string; icon?: string }) =>
@@ -102,7 +119,10 @@ export const categoryAPI = {
 		id: string,
 		data: { name?: string; color?: string; icon?: string }
 	) => api.put(`/categories/${id}`, data),
-	delete: (id: string) => api.delete(`/categories/${id}`),
+	delete: (id: string, reassignToCategoryId?: string) => {
+		const params = reassignToCategoryId ? { reassignToCategoryId } : undefined;
+		return api.delete(`/categories/${id}`, { params });
+	},
 };
 
 // Dashboard API
