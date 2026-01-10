@@ -152,7 +152,7 @@ export function useSlowRenderDetection(
  * Reports imported module sizes in development
  */
 export function reportBundleSize() {
-	if (process.env.NODE_ENV === 'development') {
+	if (import.meta.env.MODE === 'development') {
 		// Get all loaded modules
 		const scripts = Array.from(document.scripts);
 		const totalSize = scripts.reduce((acc, script) => {
