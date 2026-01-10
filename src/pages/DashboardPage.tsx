@@ -1,23 +1,25 @@
 import {
 	CategoryAnalyticsTable,
-	CategoryBreakdownChart,
 	DashboardSkeleton,
 	DateRangeFilter,
-	ExpenseTrendChart,
 	MixedCurrencyWarning,
-	MonthlyTrendsChart,
 	RecentExpensesList,
 	StatCard,
-	TopCategoriesChart,
 } from '@/components/dashboard';
-import { ExpenseModal } from '@/components/expenses';
+import { MonthlyTrendsChart } from '@/components/dashboard/MonthlyTrendsChart';
+import { ExpenseTrendChart } from '@/components/dashboard/ExpenseTrendChart';
+import { CategoryBreakdownChart } from '@/components/dashboard/CategoryBreakdownChart';
+import { TopCategoriesChart } from '@/components/dashboard/TopCategoriesChart';
+import { ExpenseDrawer } from '@/components/expenses';
+import { PageBreadcrumb } from '@/components/PageBreadcrumb';
+import { Button } from '@/components/ui/button';
 import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { FolderKanban, PiggyBank, Receipt, TrendingUp } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { formatNumberWithTooltip } from '@/lib/formatNumber';
+import { Wallet, Calculator, BarChart3, Tags } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
-import { useCategories, CategoriesData } from '@/hooks/useCategories';
 
 interface CategoryAnalytics {
 	categoryId: string;
@@ -62,33 +64,46 @@ export const DashboardPage = () => {
 		monthlyTrends: monthlyTrendsData,
 		categoryAnalytics: categoryAnalyticsData,
 		isLoading,
+		isFetching,
 	} = useDashboard(isFiltered ? dateFilter : {});
 
-	// Fetch categories for the modal
-	const { data: categoriesData } = useCategories({ page: 1, limit: 100 });
-
 	// Cast data to proper types with useMemo to avoid recreating on every render
-	const summary = summaryData as DashboardSummary | undefined;
-	const recentExpenses = useMemo(
-		() => (recentExpensesData as Expense[] | undefined) || [],
-		[recentExpensesData]
-	);
-	const monthlyTrends = useMemo(
-		() =>
-			(monthlyTrendsData as
-				| Array<{ month: string; total: number }>
-				| undefined) || [],
-		[monthlyTrendsData]
-	);
-	const categoryAnalytics = useMemo(
-		() => (categoryAnalyticsData as CategoryAnalytics[] | undefined) || [],
-		[categoryAnalyticsData]
-	);
+	const summary = (summaryData as { summary?: DashboardSummary })?.summary;
+	const recentExpenses = useMemo(() => {
+		const expenses =
+			(recentExpensesData as { expenses?: Expense[] })?.expenses || [];
+		return expenses;
+	}, [recentExpensesData]);
+	const monthlyTrends = useMemo(() => {
+		const trends =
+			(
+				monthlyTrendsData as {
+					trends?: Array<{ month: string; total: number }>;
+				}
+			)?.trends || [];
+		// Transform the data to match chart expectations and format month names
+		return trends.map(trend => {
+			// Parse YYYY-MM format to readable month name
+			const [year, monthNum] = trend.month.split('-');
+			const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+			const monthName = date.toLocaleDateString('en-US', {
+				month: 'short',
+				year: 'numeric',
+			});
 
-	// Extract categories for the modal
-	const categories = useMemo(
-		() => (categoriesData as CategoriesData | undefined)?.categories || [],
-		[categoriesData]
+			return {
+				month: trend.month,
+				monthName: monthName, // e.g., "Jan 2025"
+				total: trend.total,
+				totalAmount: trend.total,
+			};
+		});
+	}, [monthlyTrendsData]);
+	const categoryAnalytics = useMemo(
+		() =>
+			(categoryAnalyticsData as { categoryAnalytics?: CategoryAnalytics[] })
+				?.categoryAnalytics || [],
+		[categoryAnalyticsData]
 	);
 
 	// Detect mixed currencies and primary currency
@@ -113,16 +128,16 @@ export const DashboardPage = () => {
 		}
 	}, [recentExpenses]);
 
-	const handleApplyFilter = () => {
+	const handleApplyFilter = useCallback(() => {
 		if (dateFilter.startDate || dateFilter.endDate) {
 			setIsFiltered(true);
 		}
-	};
+	}, [dateFilter]);
 
-	const handleClearFilter = () => {
+	const handleClearFilter = useCallback(() => {
 		setDateFilter({ startDate: '', endDate: '' });
 		setIsFiltered(false);
-	};
+	}, []);
 
 	if (isLoading) {
 		return <DashboardSkeleton />;
@@ -155,13 +170,33 @@ export const DashboardPage = () => {
 		)
 		.slice(0, 5);
 
+	// Format stat values with compact notation for large numbers
+	const totalExpenseFormatted = formatNumberWithTooltip(
+		summary?.totalAmount || 0,
+		{
+			currency: primaryCurrency,
+			threshold: 100000,
+		}
+	);
+	const avgExpenseFormatted = formatNumberWithTooltip(
+		summary?.averageExpense || 0,
+		{
+			currency: primaryCurrency,
+			threshold: 100000,
+		}
+	);
+	const totalCountFormatted = formatNumberWithTooltip(summary?.totalCount || 0);
+
 	const stats = [
 		{
 			title: 'Total Expenses',
 			value: hasMixedCurrencies
-				? `${formatCurrency(summary?.totalAmount || 0, primaryCurrency)} *`
-				: formatCurrency(summary?.totalAmount || 0, primaryCurrency),
-			icon: PiggyBank,
+				? `${totalExpenseFormatted.compact} *`
+				: totalExpenseFormatted.compact,
+			fullValue: hasMixedCurrencies
+				? `${totalExpenseFormatted.full} *`
+				: totalExpenseFormatted.full,
+			icon: Wallet,
 			iconBg: 'bg-blue-100',
 			iconColor: 'text-blue-600',
 			trend:
@@ -172,24 +207,28 @@ export const DashboardPage = () => {
 		},
 		{
 			title: 'Total Count',
-			value: summary?.totalCount || 0,
-			icon: Receipt,
+			value: totalCountFormatted.compact,
+			fullValue: totalCountFormatted.full,
+			icon: Calculator,
 			iconBg: 'bg-green-100',
 			iconColor: 'text-green-600',
 		},
 		{
 			title: 'Average Expense',
 			value: hasMixedCurrencies
-				? `${formatCurrency(summary?.averageExpense || 0, primaryCurrency)} *`
-				: formatCurrency(summary?.averageExpense || 0, primaryCurrency),
-			icon: TrendingUp,
+				? `${avgExpenseFormatted.compact} *`
+				: avgExpenseFormatted.compact,
+			fullValue: hasMixedCurrencies
+				? `${avgExpenseFormatted.full} *`
+				: avgExpenseFormatted.full,
+			icon: BarChart3,
 			iconBg: 'bg-orange-100',
 			iconColor: 'text-orange-600',
 		},
 		{
 			title: 'Categories',
 			value: Object.keys(summary?.categoryBreakdown || {}).length,
-			icon: FolderKanban,
+			icon: Tags,
 			iconBg: 'bg-purple-100',
 			iconColor: 'text-purple-600',
 		},
@@ -198,22 +237,23 @@ export const DashboardPage = () => {
 	return (
 		<div className="py-6 px-2 sm:px-6 md:container md:mx-auto lg:px-8 min-h-screen">
 			<div className="space-y-6">
+				{/* Breadcrumb Navigation */}
+				<PageBreadcrumb items={[{ label: 'Dashboard' }]} />
+
 				{/* Header */}
 				<div
 					className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-300"
 					id="dashboard-header"
 				>
 					<div>
-						<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-							Dashboard
-						</h1>
-						<p className="text-sm sm:text-base text-gray-600">
+						<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+						<p className="text-muted-foreground mt-1">
 							Overview of your expenses
 						</p>
 					</div>
-					<button
+					<Button
 						onClick={() => setIsModalOpen(true)}
-						className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 rounded-lg transition-colors duration-200"
+						className="flex items-center gap-2 px-3 py-2 sm:px-4"
 					>
 						<svg
 							className="w-4 h-4 sm:w-5 sm:h-5"
@@ -229,7 +269,7 @@ export const DashboardPage = () => {
 							/>
 						</svg>
 						<span className="text-sm sm:text-base">Add Expense</span>
-					</button>
+					</Button>
 				</div>
 
 				{/* Mixed Currency Warning */}
@@ -244,10 +284,37 @@ export const DashboardPage = () => {
 
 				{/* Date Filter */}
 				<div
-					className="animate-in fade-in slide-in-from-top-4 duration-300"
+					className="animate-in fade-in slide-in-from-top-4 duration-300 relative"
 					style={{ animationDelay: '100ms' }}
 					id="date-filter"
 				>
+					{isFetching && (
+						<div className="absolute top-2 right-2 z-10">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+								<svg
+									className="animate-spin h-4 w-4"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									/>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									/>
+								</svg>
+								<span>Updating...</span>
+							</div>
+						</div>
+					)}
 					<DateRangeFilter
 						startDate={dateFilter.startDate}
 						endDate={dateFilter.endDate}
@@ -267,71 +334,46 @@ export const DashboardPage = () => {
 				</div>
 
 				{/* Stats Grid */}
-				<div
-					className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '150ms' }}
-					id="stats-overview"
-				>
+				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{stats.map((stat, index) => (
 						<StatCard key={stat.title} {...stat} index={index} />
 					))}
-					{/* Primary Charts */}
 				</div>
 
-				<div
-					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '200ms' }}
-					id="primary-charts"
-				>
+				{/* Primary Charts */}
+				<div className="grid gap-4 md:grid-cols-2" id="primary-charts">
 					<MonthlyTrendsChart
 						data={monthlyTrends}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 					<CategoryBreakdownChart
 						data={categoryData}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 
 				{/* Additional Charts */}
-				<div
-					className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '250ms' }}
-					id="trend-charts"
-				>
+				<div className="grid gap-4 md:grid-cols-2" id="trend-charts">
 					<ExpenseTrendChart
 						data={monthlyTrends}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 					<TopCategoriesChart
 						data={topCategories}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 
 				{/* Category Analytics Table */}
-				<div
-					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-					id="category-analytics"
-					style={{ animationDelay: '300ms' }}
-				>
+				<div id="category-analytics">
 					<CategoryAnalyticsTable
 						data={categoryAnalytics}
 						primaryCurrency={primaryCurrency}
-						formatCurrency={formatCurrency}
 					/>
 				</div>
 
 				{/* Recent Expenses */}
-				<div
-					className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-					style={{ animationDelay: '350ms' }}
-					id="recent-expenses"
-				>
+				<div id="recent-expenses">
 					<RecentExpensesList
 						expenses={recentExpenses}
 						formatCurrency={formatCurrency}
@@ -341,9 +383,9 @@ export const DashboardPage = () => {
 
 				{/* Expense Modal */}
 				{isModalOpen && (
-					<ExpenseModal
+					<ExpenseDrawer
+						isOpen={isModalOpen}
 						expense={null}
-						categories={categories}
 						onClose={() => setIsModalOpen(false)}
 						onSuccess={() => {
 							setIsModalOpen(false);

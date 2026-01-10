@@ -1,5 +1,9 @@
 import { dashboardAPI } from '@/lib/services';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import {
+	useQuery,
+	UseQueryOptions,
+	keepPreviousData,
+} from '@tanstack/react-query';
 
 // Query keys for better organization and type safety
 export const dashboardKeys = {
@@ -33,8 +37,10 @@ export const useDashboardSummary = (
 		queryKey: dashboardKeys.summary(filters),
 		queryFn: async () => {
 			const response = await dashboardAPI.getSummary(filters);
-			return response.data.summary;
+			// Backend returns { summary: {...}, _links: [...] }
+			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -50,8 +56,10 @@ export const useRecentExpenses = (
 		queryKey: dashboardKeys.recentExpenses(params),
 		queryFn: async () => {
 			const response = await dashboardAPI.getRecentExpenses(params);
-			return response.data.expenses;
+			// Backend returns { expenses: [...], _links: [...] }
+			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -66,8 +74,10 @@ export const useMonthlyTrends = (
 		queryKey: dashboardKeys.monthlyTrends(),
 		queryFn: async () => {
 			const response = await dashboardAPI.getMonthlyTrends();
-			return response.data.trends;
+			// Backend returns { trends: [...], _links: [...] }
+			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -83,8 +93,10 @@ export const useCategoryAnalytics = (
 		queryKey: dashboardKeys.categoryAnalytics(filters),
 		queryFn: async () => {
 			const response = await dashboardAPI.getCategoryAnalytics(filters);
-			return response.data.categoryAnalytics;
+			// Backend returns { categoryAnalytics: [...], _links: [...] }
+			return response.data;
 		},
+		placeholderData: keepPreviousData,
 		...options,
 	});
 };
@@ -109,6 +121,11 @@ export const useDashboard = (filters?: DateFilters) => {
 			recentExpenses.isLoading ||
 			monthlyTrends.isLoading ||
 			categoryAnalytics.isLoading,
+		isFetching:
+			summary.isFetching ||
+			recentExpenses.isFetching ||
+			monthlyTrends.isFetching ||
+			categoryAnalytics.isFetching,
 		isError:
 			summary.isError ||
 			recentExpenses.isError ||
