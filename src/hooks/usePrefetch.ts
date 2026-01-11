@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { expenseKeys, categoryKeys, dashboardKeys } from './queryKeys';
+import { expenseKeys } from './useExpenses';
+import { categoryKeys } from './useCategories';
+import { dashboardKeys } from './useDashboard';
 import { expenseAPI, categoryAPI, dashboardAPI } from '@/lib/services';
 
 export const usePrefetchData = () => {

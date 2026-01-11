@@ -14,7 +14,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories';
 import { Category } from '@/lib/services';
 import { Check, X } from 'lucide-react';
@@ -96,7 +96,6 @@ export const CategoryDrawer = ({
 	onClose,
 	onSuccess,
 }: CategoryDrawerProps) => {
-	const { toast } = useToast();
 	const createCategory = useCreateCategory();
 	const updateCategory = useUpdateCategory();
 	const [formData, setFormData] = useState({
@@ -146,9 +145,7 @@ export const CategoryDrawer = ({
 					? String(err.response.data.error)
 					: 'Failed to save category';
 			setError(errorMessage);
-			toast({
-				variant: 'destructive',
-				title: '✗ Failed to save category',
+			toast.error('Failed to save category', {
 				description: errorMessage,
 			});
 		} finally {
@@ -222,7 +219,7 @@ export const CategoryDrawer = ({
 									setFormData({ ...formData, icon: e.target.value })
 								}
 								placeholder="Pick an emoji"
-								className="text-2xl"
+								className={formData.icon ? 'text-2xl' : ''}
 								maxLength={2}
 								disabled={isSubmitting}
 							/>
@@ -252,7 +249,7 @@ export const CategoryDrawer = ({
 									<Button
 										type="button"
 										onClick={onClose}
-										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 										disabled={isSubmitting}
 									>
 										<X className="h-11 w-11" strokeWidth={3} />

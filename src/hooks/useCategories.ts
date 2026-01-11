@@ -6,9 +6,11 @@ import {
 	UseQueryOptions,
 	keepPreviousData,
 } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { expenseKeys } from './useExpenses';
+import { dashboardKeys } from './useDashboard';
 
 // Type for the cached categories data
 export interface CategoriesData {
@@ -59,6 +61,7 @@ export const useCategories = (
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -86,7 +89,6 @@ export const useCategory = (
  */
 export const useCreateCategory = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -140,31 +142,36 @@ export const useCreateCategory = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to create category',
+				toast.error('Failed to create category', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
 		onSuccess: () => {
-			toast({
-				title: '✓ Category created',
+			toast.success('Category created', {
 				description: 'Your category has been added successfully.',
 			});
 		},
 		onSettled: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: categoryKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };
@@ -174,7 +181,6 @@ export const useCreateCategory = () => {
  */
 export const useUpdateCategory = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -246,34 +252,41 @@ export const useUpdateCategory = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to update category',
+				toast.error('Failed to update category', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
 		onSuccess: () => {
-			toast({
-				title: '✓ Category updated',
+			toast.success('Category updated', {
 				description: 'Your category has been updated successfully.',
 			});
 		},
 		onSettled: (_data, _error, { id }) => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: categoryKeys.detail(id) });
-			queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: categoryKeys.detail(id),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: categoryKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 			// Also invalidate expenses since they contain category references
-			queryClient.invalidateQueries({ queryKey: ['expenses'] });
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };
@@ -283,7 +296,6 @@ export const useUpdateCategory = () => {
  */
 export const useDeleteCategory = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -337,16 +349,12 @@ export const useDeleteCategory = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to delete category',
+				toast.error('Failed to delete category', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
@@ -355,23 +363,30 @@ export const useDeleteCategory = () => {
 		onSuccess: data => {
 			const { reassignedExpenses } = data;
 			if (reassignedExpenses && reassignedExpenses > 0) {
-				toast({
-					title: '✓ Category deleted',
+				toast.success('Category deleted', {
 					description: `Category deleted and ${reassignedExpenses} expense(s) reassigned successfully.`,
 				});
 			} else {
-				toast({
-					title: '✓ Category deleted',
+				toast.success('Category deleted', {
 					description: 'Your category has been deleted successfully.',
 				});
 			}
 		},
 		onSettled: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: categoryKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 			// Also invalidate expenses since they contain category references
-			queryClient.invalidateQueries({ queryKey: ['expenses'] });
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };

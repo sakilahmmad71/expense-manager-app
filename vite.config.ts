@@ -23,20 +23,40 @@ export default defineConfig(({ mode }) => ({
 		// Optimize for production builds
 		rollupOptions: {
 			output: {
-				// Simplified chunk splitting for low-memory builds
-				manualChunks: {
-					// Combine all vendors into fewer chunks to reduce memory overhead
-					vendor: ['react', 'react-dom', 'react-router-dom'],
-					ui: [
-						'@radix-ui/react-dialog',
-						'@radix-ui/react-dropdown-menu',
-						'@radix-ui/react-select',
-						'@radix-ui/react-toast',
-						'@radix-ui/react-slot',
-						'@radix-ui/react-label',
-						'lucide-react',
-					],
-					charts: ['echarts', 'echarts-for-react'],
+				// Improved chunk splitting strategy for better code splitting
+				manualChunks(id) {
+					// Vendor chunks
+					if (id.includes('node_modules')) {
+						// React core
+						if (
+							id.includes('react') ||
+							id.includes('react-dom') ||
+							id.includes('react-router')
+						) {
+							return 'vendor';
+						}
+
+						// ECharts - split into separate chunk for lazy loading
+						if (id.includes('echarts') || id.includes('zrender')) {
+							return 'charts';
+						}
+
+						// Radix UI and Lucide icons
+						if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+							return 'ui';
+						}
+
+						// Other dependencies
+						return 'libs';
+					}
+
+					// Split dashboard chart components into individual chunks
+					if (id.includes('/components/dashboard/')) {
+						if (id.includes('MonthlyTrendsChart')) return 'chart-monthly';
+						if (id.includes('ExpenseTrendChart')) return 'chart-trend';
+						if (id.includes('CategoryBreakdownChart')) return 'chart-breakdown';
+						if (id.includes('TopCategoriesChart')) return 'chart-top';
+					}
 				},
 
 				// Optimize chunk naming for caching

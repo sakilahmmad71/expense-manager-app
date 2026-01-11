@@ -2,20 +2,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
-import { authAPI } from '@/lib/services';
+import {
+	useUpdateProfileMutation,
+	useChangePasswordMutation,
+} from '@/hooks/useAuthMutations';
 import { Lock, Mail, Save, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const ProfilePage = () => {
-	const { user, updateUser } = useAuth();
-	const { toast } = useToast();
-	const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-	const [isLoadingPassword, setIsLoadingPassword] = useState(false);
+	const { user } = useAuth();
+	const { mutate: updateProfile, isPending: isLoadingProfile } =
+		useUpdateProfileMutation();
+	const { mutate: changePassword, isPending: isLoadingPassword } =
+		useChangePasswordMutation();
+
 	const [profileData, setProfileData] = useState({
 		name: '',
 	});
@@ -65,106 +69,34 @@ export const ProfilePage = () => {
 		});
 	};
 
-	const handleProfileSubmit = async (e: React.FormEvent) => {
+	const handleProfileSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setIsLoadingProfile(true);
-		try {
-			const response = await authAPI.updateProfile({
-				name: profileData.name,
-			});
-
-			// Update the user in the auth context
-			if (response.data.user) {
-				updateUser(response.data.user);
-			}
-
-			toast({
-				variant: 'success',
-				title: 'Success',
-				description: 'Profile updated successfully',
-			});
-		} catch (error: unknown) {
-			toast({
-				variant: 'destructive',
-				title: 'Error',
-				description:
-					typeof error === 'object' &&
-					error !== null &&
-					'response' in error &&
-					typeof error.response === 'object' &&
-					error.response !== null &&
-					'data' in error.response &&
-					typeof error.response.data === 'object' &&
-					error.response.data !== null &&
-					'error' in error.response.data
-						? String(error.response.data.error)
-						: 'Failed to update profile',
-			});
-		} finally {
-			setIsLoadingProfile(false);
-		}
+		updateProfile({ name: profileData.name });
 	};
 
-	const handlePasswordSubmit = async (e: React.FormEvent) => {
+	const handlePasswordSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
 		if (passwordData.newPassword !== passwordData.confirmPassword) {
-			toast({
-				variant: 'destructive',
-				title: 'Error',
-				description: 'Passwords do not match',
-			});
-			return;
+			return; // Error is handled by form validation
 		}
 
-		if (passwordData.newPassword.length < 6) {
-			toast({
-				variant: 'destructive',
-				title: 'Error',
-				description: 'Password must be at least 6 characters',
-			});
-			return;
-		}
-
-		setIsLoadingPassword(true);
-		try {
-			await authAPI.changePassword({
+		changePassword(
+			{
 				currentPassword: passwordData.currentPassword,
 				newPassword: passwordData.newPassword,
-			});
-
-			toast({
-				variant: 'success',
-				title: 'Success',
-				description: 'Password changed successfully',
-			});
-
-			// Clear password fields
-			setPasswordData({
-				currentPassword: '',
-				newPassword: '',
-				confirmPassword: '',
-			});
-		} catch (error: unknown) {
-			toast({
-				variant: 'destructive',
-				title: 'Error',
-				description:
-					typeof error === 'object' &&
-					error !== null &&
-					'response' in error &&
-					typeof error.response === 'object' &&
-					error.response !== null &&
-					'data' in error.response &&
-					typeof error.response.data === 'object' &&
-					error.response.data !== null &&
-					'error' in error.response.data
-						? String(error.response.data.error)
-						: 'Failed to change password',
-			});
-		} finally {
-			setIsLoadingPassword(false);
-		}
+			},
+			{
+				onSuccess: () => {
+					// Clear password fields on success
+					setPasswordData({
+						currentPassword: '',
+						newPassword: '',
+						confirmPassword: '',
+					});
+				},
+			}
+		);
 	};
 
 	return (

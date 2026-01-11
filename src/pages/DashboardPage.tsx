@@ -6,20 +6,46 @@ import {
 	RecentExpensesList,
 	StatCard,
 } from '@/components/dashboard';
-import { MonthlyTrendsChart } from '@/components/dashboard/MonthlyTrendsChart';
-import { ExpenseTrendChart } from '@/components/dashboard/ExpenseTrendChart';
-import { CategoryBreakdownChart } from '@/components/dashboard/CategoryBreakdownChart';
-import { TopCategoriesChart } from '@/components/dashboard/TopCategoriesChart';
 import { ExpenseDrawer } from '@/components/expenses';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { DashboardSummary, Expense } from '@/lib/services';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { formatNumberWithTooltip } from '@/lib/formatNumber';
-import { Wallet, Calculator, BarChart3, Tags } from 'lucide-react';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Wallet, Calculator, BarChart3, Tags, Plus } from 'lucide-react';
+import {
+	useState,
+	useMemo,
+	useEffect,
+	useCallback,
+	lazy,
+	Suspense,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load chart components to reduce initial bundle size
+const MonthlyTrendsChart = lazy(() =>
+	import('@/components/dashboard/MonthlyTrendsChart').then(module => ({
+		default: module.MonthlyTrendsChart,
+	}))
+);
+const ExpenseTrendChart = lazy(() =>
+	import('@/components/dashboard/ExpenseTrendChart').then(module => ({
+		default: module.ExpenseTrendChart,
+	}))
+);
+const CategoryBreakdownChart = lazy(() =>
+	import('@/components/dashboard/CategoryBreakdownChart').then(module => ({
+		default: module.CategoryBreakdownChart,
+	}))
+);
+const TopCategoriesChart = lazy(() =>
+	import('@/components/dashboard/TopCategoriesChart').then(module => ({
+		default: module.TopCategoriesChart,
+	}))
+);
 
 interface CategoryAnalytics {
 	categoryId: string;
@@ -30,6 +56,14 @@ interface CategoryAnalytics {
 	count: number;
 	averageAmount: number;
 }
+
+// Chart loading skeleton component
+const ChartSkeleton = () => (
+	<div className="rounded-lg border bg-card p-6 space-y-4">
+		<Skeleton className="h-6 w-48" />
+		<Skeleton className="h-[300px] w-full" />
+	</div>
+);
 
 export const DashboardPage = () => {
 	const navigate = useNavigate();
@@ -342,26 +376,34 @@ export const DashboardPage = () => {
 
 				{/* Primary Charts */}
 				<div className="grid gap-4 md:grid-cols-2" id="primary-charts">
-					<MonthlyTrendsChart
-						data={monthlyTrends}
-						primaryCurrency={primaryCurrency}
-					/>
-					<CategoryBreakdownChart
-						data={categoryData}
-						primaryCurrency={primaryCurrency}
-					/>
+					<Suspense fallback={<ChartSkeleton />}>
+						<MonthlyTrendsChart
+							data={monthlyTrends}
+							primaryCurrency={primaryCurrency}
+						/>
+					</Suspense>
+					<Suspense fallback={<ChartSkeleton />}>
+						<CategoryBreakdownChart
+							data={categoryData}
+							primaryCurrency={primaryCurrency}
+						/>
+					</Suspense>
 				</div>
 
 				{/* Additional Charts */}
 				<div className="grid gap-4 md:grid-cols-2" id="trend-charts">
-					<ExpenseTrendChart
-						data={monthlyTrends}
-						primaryCurrency={primaryCurrency}
-					/>
-					<TopCategoriesChart
-						data={topCategories}
-						primaryCurrency={primaryCurrency}
-					/>
+					<Suspense fallback={<ChartSkeleton />}>
+						<ExpenseTrendChart
+							data={monthlyTrends}
+							primaryCurrency={primaryCurrency}
+						/>
+					</Suspense>
+					<Suspense fallback={<ChartSkeleton />}>
+						<TopCategoriesChart
+							data={topCategories}
+							primaryCurrency={primaryCurrency}
+						/>
+					</Suspense>
 				</div>
 
 				{/* Category Analytics Table */}
@@ -393,6 +435,15 @@ export const DashboardPage = () => {
 						}}
 					/>
 				)}
+
+				{/* Floating Action Button - Mobile Only */}
+				<button
+					onClick={() => setIsModalOpen(true)}
+					className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+					aria-label="Add expense"
+				>
+					<Plus className="h-6 w-6" />
+				</button>
 			</div>
 		</div>
 	);

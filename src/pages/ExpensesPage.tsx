@@ -8,7 +8,7 @@ import {
 } from '@/components/expenses';
 import { ExpenseCardSkeleton } from '@/components/Skeletons';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Expense } from '@/lib/services';
 import { formatDate } from '@/lib/utils';
 import { Plus } from 'lucide-react';
@@ -22,7 +22,6 @@ import {
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
 
 export const ExpensesPage = () => {
-	const { toast } = useToast();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -262,9 +261,7 @@ export const ExpensesPage = () => {
 		a.download = `expenses-${new Date().toISOString().split('T')[0]}.csv`;
 		a.click();
 
-		toast({
-			variant: 'success',
-			title: '✓ Expenses exported',
+		toast.success('Expenses exported', {
 			description:
 				selectedExpenses.length > 0
 					? `${selectedExpenses.length} selected expense${selectedExpenses.length > 1 ? 's' : ''} exported to CSV.`
