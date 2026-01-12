@@ -80,9 +80,15 @@ export const useMonthlyTrends = (
 	return useQuery({
 		queryKey: dashboardKeys.monthlyTrends(filters),
 		queryFn: async () => {
-			const response = await dashboardAPI.getMonthlyTrends(
-				filters?.year ? { year: filters.year } : undefined
-			);
+			const params = filters?.year
+				? { year: filters.year }
+				: filters?.startDate || filters?.endDate
+					? {
+							startDate: filters.startDate,
+							endDate: filters.endDate,
+						}
+					: undefined;
+			const response = await dashboardAPI.getMonthlyTrends(params);
 			// Backend returns { trends: [...], _links: [...] }
 			return response.data;
 		},
@@ -118,7 +124,12 @@ export const useCategoryAnalytics = (
  */
 export const useDashboard = (filters?: DateFilters) => {
 	const summary = useDashboardSummary(filters);
-	const recentExpenses = useRecentExpenses({ limit: 5, ...filters });
+	const recentExpenses = useRecentExpenses({
+		limit: 5,
+		...(filters?.startDate || filters?.endDate
+			? { startDate: filters.startDate, endDate: filters.endDate }
+			: {}),
+	});
 	const monthlyTrends = useMonthlyTrends(filters);
 	const categoryAnalytics = useCategoryAnalytics(filters);
 

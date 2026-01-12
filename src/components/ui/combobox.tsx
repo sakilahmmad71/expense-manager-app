@@ -112,20 +112,23 @@ export function Combobox({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="p-0 z-[200]"
+				className="p-0 z-[200] max-h-[70vh]"
 				align="start"
 				style={{ width: triggerWidth > 0 ? `${triggerWidth}px` : 'auto' }}
 				onOpenAutoFocus={e => e.preventDefault()}
 				onCloseAutoFocus={e => e.preventDefault()}
 				sideOffset={8}
+				avoidCollisions={true}
+				collisionPadding={{ top: 16, right: 16, bottom: 16, left: 16 }}
 			>
-				<Command shouldFilter={true}>
+				<Command shouldFilter={true} className="flex flex-col max-h-[70vh]">
 					<CommandInput
 						placeholder={searchPlaceholder}
 						value={localSearch}
 						onValueChange={handleSearchChange}
+						className="sticky top-0 z-10 bg-background"
 					/>
-					<CommandList>
+					<CommandList className="flex-1 overflow-y-auto overscroll-contain">
 						{isLoading && (
 							<div className="py-6 text-center text-sm text-muted-foreground">
 								Searching...

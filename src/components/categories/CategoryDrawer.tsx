@@ -219,7 +219,7 @@ export const CategoryDrawer = ({
 									setFormData({ ...formData, icon: e.target.value })
 								}
 								placeholder="Pick an emoji"
-								className={formData.icon ? 'text-2xl' : ''}
+								className={formData.icon ? 'text-2xl' : 'placeholder:text-sm'}
 								maxLength={2}
 								disabled={isSubmitting}
 							/>

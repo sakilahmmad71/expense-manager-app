@@ -142,7 +142,6 @@ export const LoginPage = () => {
 												type="email"
 												placeholder="you@example.com"
 												autoComplete="email"
-												autoFocus
 												disabled={isPending}
 												className="h-10"
 												{...field}

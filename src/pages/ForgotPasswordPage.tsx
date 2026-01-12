@@ -133,7 +133,6 @@ export const ForgotPasswordPage = () => {
 									required
 									disabled={isPending}
 									className="h-10"
-									autoFocus
 									autoComplete="email"
 								/>
 							</div>

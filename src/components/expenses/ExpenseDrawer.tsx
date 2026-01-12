@@ -249,14 +249,17 @@ export const ExpenseDrawer = ({
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] flex flex-col">
-				<DrawerHeader className="border-b flex-shrink-0">
+				<DrawerHeader className="border-b flex-shrink-0 sticky top-0 bg-background z-10">
 					<DrawerTitle className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}
 					</DrawerTitle>
 				</DrawerHeader>
 
-				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-					<div className="overflow-y-auto flex-1 p-6 space-y-4">
+				<form
+					onSubmit={handleSubmit}
+					className="flex flex-col flex-1 min-h-0 overflow-hidden"
+				>
+					<div className="overflow-y-auto flex-1 p-6 space-y-4 overscroll-contain">
 						{error && (
 							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
 								{error}
@@ -472,17 +475,17 @@ export const ExpenseDrawer = ({
 							</AccordionItem>
 						</Accordion>
 					</div>
-					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
+					<DrawerFooter className="flex-row justify-between items-center pt-6 pb-safe border-t flex-shrink-0 bg-background sticky bottom-0">
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Button
 										type="button"
 										onClick={onClose}
-										className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 										disabled={isSubmitting}
 									>
-										<X className="h-11 w-11" strokeWidth={3} />
+										<X className="h-10 w-10 sm:h-11 sm:w-11" strokeWidth={3} />
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
@@ -493,10 +496,13 @@ export const ExpenseDrawer = ({
 								<TooltipTrigger asChild>
 									<Button
 										type="submit"
-										className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+										className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 										disabled={isSubmitting}
 									>
-										<Check className="h-11 w-11" strokeWidth={3} />
+										<Check
+											className="h-10 w-10 sm:h-11 sm:w-11"
+											strokeWidth={3}
+										/>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
