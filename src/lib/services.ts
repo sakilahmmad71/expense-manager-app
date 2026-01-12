@@ -131,8 +131,14 @@ export const dashboardAPI = {
 		api.get('/dashboard/summary', { params }),
 	getCategoryAnalytics: (params?: { startDate?: string; endDate?: string }) =>
 		api.get('/dashboard/category-analytics', { params }),
-	getMonthlyTrends: (params?: { year?: number }) =>
-		api.get('/dashboard/monthly-trends', { params }),
-	getRecentExpenses: (params?: { limit?: number }) =>
-		api.get('/dashboard/recent-expenses', { params }),
+	getMonthlyTrends: (params?: {
+		year?: number;
+		startDate?: string;
+		endDate?: string;
+	}) => api.get('/dashboard/monthly-trends', { params }),
+	getRecentExpenses: (params?: {
+		limit?: number;
+		startDate?: string;
+		endDate?: string;
+	}) => api.get('/dashboard/recent-expenses', { params }),
 };

@@ -12,7 +12,8 @@ export const dashboardKeys = {
 		[...dashboardKeys.all, 'summary', filters] as const,
 	recentExpenses: (params?: Record<string, unknown>) =>
 		[...dashboardKeys.all, 'recentExpenses', params] as const,
-	monthlyTrends: () => [...dashboardKeys.all, 'monthlyTrends'] as const,
+	monthlyTrends: (filters?: Record<string, unknown>) =>
+		[...dashboardKeys.all, 'monthlyTrends', filters] as const,
 	categoryAnalytics: (filters?: Record<string, unknown>) =>
 		[...dashboardKeys.all, 'categoryAnalytics', filters] as const,
 };
@@ -20,10 +21,13 @@ export const dashboardKeys = {
 interface DateFilters extends Record<string, unknown> {
 	startDate?: string;
 	endDate?: string;
+	year?: number;
 }
 
 interface RecentExpensesParams extends Record<string, unknown> {
 	limit?: number;
+	startDate?: string;
+	endDate?: string;
 }
 
 /**
@@ -41,6 +45,7 @@ export const useDashboardSummary = (
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -60,6 +65,7 @@ export const useRecentExpenses = (
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -68,16 +74,26 @@ export const useRecentExpenses = (
  * Hook to fetch monthly trends data
  */
 export const useMonthlyTrends = (
+	filters?: DateFilters,
 	options?: Omit<UseQueryOptions<unknown, Error>, 'queryKey' | 'queryFn'>
 ) => {
 	return useQuery({
-		queryKey: dashboardKeys.monthlyTrends(),
+		queryKey: dashboardKeys.monthlyTrends(filters),
 		queryFn: async () => {
-			const response = await dashboardAPI.getMonthlyTrends();
+			const params = filters?.year
+				? { year: filters.year }
+				: filters?.startDate || filters?.endDate
+					? {
+							startDate: filters.startDate,
+							endDate: filters.endDate,
+						}
+					: undefined;
+			const response = await dashboardAPI.getMonthlyTrends(params);
 			// Backend returns { trends: [...], _links: [...] }
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -97,6 +113,7 @@ export const useCategoryAnalytics = (
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -107,8 +124,13 @@ export const useCategoryAnalytics = (
  */
 export const useDashboard = (filters?: DateFilters) => {
 	const summary = useDashboardSummary(filters);
-	const recentExpenses = useRecentExpenses({ limit: 5 });
-	const monthlyTrends = useMonthlyTrends();
+	const recentExpenses = useRecentExpenses({
+		limit: 5,
+		...(filters?.startDate || filters?.endDate
+			? { startDate: filters.startDate, endDate: filters.endDate }
+			: {}),
+	});
+	const monthlyTrends = useMonthlyTrends(filters);
 	const categoryAnalytics = useCategoryAnalytics(filters);
 
 	return {

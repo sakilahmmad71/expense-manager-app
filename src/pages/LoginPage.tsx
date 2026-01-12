@@ -7,11 +7,10 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/context/AuthContext';
+import { useLoginMutation } from '@/hooks/useAuthMutations';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import GoogleButton from '@/components/GoogleButton';
 import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,11 +35,13 @@ const loginFormSchema = z.object({
 type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export const LoginPage = () => {
-	const { toast } = useToast();
-	const [error, setError] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
-	const { login } = useAuth();
-	const navigate = useNavigate();
+	const {
+		mutate: loginMutation,
+		isPending,
+		error,
+		isError,
+	} = useLoginMutation();
 
 	const form = useForm<LoginFormValues>({
 		resolver: zodResolver(loginFormSchema),
@@ -50,8 +51,6 @@ export const LoginPage = () => {
 			rememberMe: false,
 		},
 	});
-
-	const isLoading = form.formState.isSubmitting;
 
 	useEffect(() => {
 		// Set document title and meta description
@@ -77,46 +76,12 @@ export const LoginPage = () => {
 		}
 	}, [form]);
 
-	const onSubmit = async (values: LoginFormValues) => {
-		setError('');
-
-		try {
-			await login(values.email.trim(), values.password.trim());
-
-			// Save email if Remember Me is checked
-			if (values.rememberMe) {
-				localStorage.setItem('rememberedEmail', values.email.trim());
-			} else {
-				localStorage.removeItem('rememberedEmail');
-			}
-
-			toast({
-				variant: 'success',
-				title: '✓ Login successful',
-				description: 'Welcome back! Redirecting to dashboard...',
-			});
-			setTimeout(() => navigate('/dashboard'), 500);
-		} catch (err: unknown) {
-			let errorMessage =
-				(err as { response?: { data?: { error?: string } } }).response?.data
-					?.error || 'Failed to login. Please try again.';
-
-			// Better rate limiting feedback
-			if (
-				errorMessage.toLowerCase().includes('too many') ||
-				errorMessage.toLowerCase().includes('rate limit')
-			) {
-				errorMessage =
-					'Too many login attempts. Please try again in a few minutes.';
-			}
-
-			setError(errorMessage);
-			toast({
-				variant: 'destructive',
-				title: '✗ Login failed',
-				description: errorMessage,
-			});
-		}
+	const onSubmit = (values: LoginFormValues) => {
+		loginMutation({
+			email: values.email.trim(),
+			password: values.password.trim(),
+			rememberMe: values.rememberMe,
+		});
 	};
 
 	return (
@@ -139,21 +104,29 @@ export const LoginPage = () => {
 				<CardContent>
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-							{error && (
+							{isError && error ? (
 								<Alert variant="destructive">
-									<AlertDescription>{error}</AlertDescription>
+									<AlertDescription>
+										{String(
+											(
+												error as Error & {
+													response?: { data?: { error?: string } };
+												}
+											)?.response?.data?.error ||
+												(error as Error)?.message ||
+												'An error occurred'
+										)}
+									</AlertDescription>
 								</Alert>
-							)}
-
+							) : null}
 							<GoogleButton />
-
 							<div className="relative">
 								<div className="absolute inset-0 flex items-center">
 									<span className="w-full border-t" />
 								</div>
 								<div className="relative flex justify-center text-xs uppercase">
-									<span className="bg-white px-2 text-muted-foreground">
-										Or continue with email
+									<span className="bg-background px-2 text-muted-foreground">
+										Or continue with
 									</span>
 								</div>
 							</div>
@@ -169,8 +142,7 @@ export const LoginPage = () => {
 												type="email"
 												placeholder="you@example.com"
 												autoComplete="email"
-												autoFocus
-												disabled={isLoading}
+												disabled={isPending}
 												className="h-10"
 												{...field}
 											/>
@@ -191,7 +163,7 @@ export const LoginPage = () => {
 												<Input
 													type={showPassword ? 'text' : 'password'}
 													placeholder="••••••••"
-													disabled={isLoading}
+													disabled={isPending}
 													className="h-10 pr-10"
 													{...field}
 												/>
@@ -199,7 +171,7 @@ export const LoginPage = () => {
 													type="button"
 													onClick={() => setShowPassword(!showPassword)}
 													className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-													disabled={isLoading}
+													disabled={isPending}
 												>
 													{showPassword ? (
 														<EyeOff className="h-4 w-4" />
@@ -224,7 +196,7 @@ export const LoginPage = () => {
 												<Checkbox
 													checked={field.value}
 													onCheckedChange={field.onChange}
-													disabled={isLoading}
+													disabled={isPending}
 												/>
 											</FormControl>
 											<FormLabel className="text-sm font-medium cursor-pointer">
@@ -244,9 +216,9 @@ export const LoginPage = () => {
 							<Button
 								type="submit"
 								className="w-full h-10"
-								disabled={isLoading}
+								disabled={isPending}
 							>
-								{isLoading ? 'Logging in...' : 'Log In'}
+								{isPending ? 'Logging in...' : 'Log In'}
 							</Button>
 
 							<p className="text-center text-sm text-gray-600">

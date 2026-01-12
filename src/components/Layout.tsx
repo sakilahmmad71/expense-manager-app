@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GlobalLoadingBar } from '@/components/GlobalLoadingBar';
 import { CommandPalette } from '@/components/ui/command-palette';
 import { usePrefetchOnHover, usePrefetchData } from '@/hooks/usePrefetch';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useState } from 'react';
 import {
 	DropdownMenu,
@@ -35,6 +36,9 @@ export const Layout = () => {
 	const [commandOpen, setCommandOpen] = useState(false);
 	const { prefetchDashboard, prefetchExpenses, prefetchCategories } =
 		usePrefetchOnHover();
+
+	// Monitor network status
+	useNetworkStatus();
 
 	// Prefetch data in the background for better performance
 	usePrefetchData();

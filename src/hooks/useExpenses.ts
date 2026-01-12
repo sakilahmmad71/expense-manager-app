@@ -6,10 +6,11 @@ import {
 	UseQueryOptions,
 	keepPreviousData,
 } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { CategoriesData } from './useCategories';
+import { dashboardKeys } from './useDashboard';
 
 // Type for the cached expenses data
 export interface ExpensesData {
@@ -65,6 +66,7 @@ export const useExpenses = (
 			return response.data;
 		},
 		placeholderData: keepPreviousData,
+		staleTime: 0, // Mark as stale immediately to ensure fresh data after mutations
 		...options,
 	});
 };
@@ -92,7 +94,6 @@ export const useExpense = (
  */
 export const useCreateExpense = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -170,31 +171,32 @@ export const useCreateExpense = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to create expense',
+				toast.error('Failed to create expense', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
 		onSuccess: () => {
-			toast({
-				title: '✓ Expense created',
+			toast.success('Expense created', {
 				description: 'Your expense has been added successfully.',
 			});
 		},
 		onSettled: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };
@@ -204,7 +206,6 @@ export const useCreateExpense = () => {
  */
 export const useUpdateExpense = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -274,32 +275,36 @@ export const useUpdateExpense = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to update expense',
+				toast.error('Failed to update expense', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
 		onSuccess: () => {
-			toast({
-				title: '✓ Expense updated',
+			toast.success('Expense updated', {
 				description: 'Your expense has been updated successfully.',
 			});
 		},
 		onSettled: (_data, _error, { id }) => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: expenseKeys.detail(id) });
-			queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.detail(id),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };
@@ -309,7 +314,6 @@ export const useUpdateExpense = () => {
  */
 export const useDeleteExpense = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -357,31 +361,32 @@ export const useDeleteExpense = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to delete expense',
+				toast.error('Failed to delete expense', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
 			}
 		},
 		onSuccess: () => {
-			toast({
-				title: '✓ Expense deleted',
+			toast.success('Expense deleted', {
 				description: 'Your expense has been deleted successfully.',
 			});
 		},
 		onSettled: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };
@@ -391,7 +396,6 @@ export const useDeleteExpense = () => {
  */
 export const useBulkDeleteExpenses = () => {
 	const queryClient = useQueryClient();
-	const { toast } = useToast();
 	const navigate = useNavigate();
 
 	return useMutation({
@@ -439,16 +443,12 @@ export const useBulkDeleteExpenses = () => {
 
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
-				toast({
-					variant: 'destructive',
-					title: '✗ Session expired',
+				toast.error('Session expired', {
 					description: 'Please log in again.',
 				});
 				navigate('/login');
 			} else {
-				toast({
-					variant: 'destructive',
-					title: '✗ Failed to delete expenses',
+				toast.error('Failed to delete expenses', {
 					description:
 						axiosError.response?.data?.error || 'Something went wrong',
 				});
@@ -457,29 +457,30 @@ export const useBulkDeleteExpenses = () => {
 		onSuccess: data => {
 			const { deletedCount, requestedCount } = data;
 			if (deletedCount === 0) {
-				toast({
-					variant: 'destructive',
-					title: '⚠ No expenses deleted',
+				toast.error('No expenses deleted', {
 					description:
 						'The selected expenses may not exist or do not belong to you.',
 				});
 			} else if (deletedCount < requestedCount) {
-				toast({
-					variant: 'default',
-					title: '✓ Partially deleted',
+				toast.success('Partially deleted', {
 					description: `${deletedCount} of ${requestedCount} expense(s) deleted. Some may not exist or belong to you.`,
 				});
 			} else {
-				toast({
-					title: '✓ Expenses deleted',
+				toast.success('Expenses deleted', {
 					description: `${deletedCount} expense(s) deleted successfully.`,
 				});
 			}
 		},
 		onSettled: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: expenseKeys.lists() });
-			queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			queryClient.invalidateQueries({
+				queryKey: expenseKeys.lists(),
+				refetchType: 'active',
+			});
+			queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+				refetchType: 'active',
+			});
 		},
 	});
 };

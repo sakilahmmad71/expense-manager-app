@@ -1,7 +1,8 @@
 import { Layout } from '@components/Layout';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { ErrorBoundary } from '@components/ErrorBoundary';
-import { Toaster } from '@components/ui/toaster';
+import { Toaster } from '@components/ui/sonner';
+import { NetworkStatusIndicator } from '@components/NetworkStatusIndicator';
 import { AuthProvider } from '@context/AuthContext';
 import { LoginPage } from '@pages/LoginPage';
 import { RegisterPage } from '@pages/RegisterPage';
@@ -102,6 +103,7 @@ function App() {
 			<QueryClientProvider client={queryClient}>
 				<AuthProvider>
 					<BrowserRouter>
+						<NetworkStatusIndicator />
 						<Routes>
 							<Route path="/login" element={<LoginPage />} />
 							<Route path="/register" element={<RegisterPage />} />

@@ -8,18 +8,20 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { authAPI } from '@/lib/services';
+import { useForgotPasswordMutation } from '@/hooks/usePasswordReset';
 import { Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export const ForgotPasswordPage = () => {
-	const { toast } = useToast();
 	const [email, setEmail] = useState('');
-	const [error, setError] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
-	const [isSuccess, setIsSuccess] = useState(false);
+	const {
+		mutate: forgotPassword,
+		isPending,
+		isSuccess,
+		error,
+		isError,
+	} = useForgotPasswordMutation();
 
 	useEffect(() => {
 		// Set document title and meta description
@@ -39,41 +41,13 @@ export const ForgotPasswordPage = () => {
 		}
 	}, []);
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setError('');
-		setIsLoading(true);
-
-		// Auto-trim whitespace
-		const trimmedEmail = email.trim();
-
-		try {
-			await authAPI.forgotPassword({ email: trimmedEmail });
-
-			setIsSuccess(true);
-			toast({
-				variant: 'success',
-				title: '✓ Email sent',
-				description:
-					'If an account exists with this email, a password reset link has been sent.',
-			});
-		} catch (err: unknown) {
-			const errorMessage =
-				(err as { response?: { data?: { error?: string } } }).response?.data
-					?.error || 'Failed to send reset email. Please try again.';
-			setError(errorMessage);
-			toast({
-				variant: 'destructive',
-				title: '✗ Request failed',
-				description: errorMessage,
-			});
-		} finally {
-			setIsLoading(false);
-		}
+		forgotPassword({ email: email.trim() });
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
 			<Card
 				id="forgot-password-form"
 				className="w-full max-w-md animate-in fade-in duration-300"
@@ -108,12 +82,13 @@ export const ForgotPasswordPage = () => {
 							<div className="text-center space-y-2">
 								<p className="text-sm text-gray-600">
 									Didn't receive the email?{' '}
-									<button
-										onClick={() => setIsSuccess(false)}
+									<Link
+										to="/forgot-password"
 										className="text-primary font-medium hover:underline"
+										onClick={() => window.location.reload()}
 									>
 										Try again
-									</button>
+									</Link>
 								</p>
 								<p className="text-sm text-gray-600">
 									Remember your password?{' '}
@@ -128,16 +103,23 @@ export const ForgotPasswordPage = () => {
 						</div>
 					) : (
 						<form onSubmit={handleSubmit} className="space-y-4">
-							{error && (
+							{isError && error ? (
 								<div
 									role="alert"
 									aria-live="assertive"
 									className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm"
 								>
-									{error}
+									{String(
+										(
+											error as Error & {
+												response?: { data?: { error?: string } };
+											}
+										)?.response?.data?.error ||
+											(error as Error)?.message ||
+											'An error occurred'
+									)}
 								</div>
-							)}
-
+							) : null}
 							<div className="space-y-2">
 								<Label htmlFor="email" className="text-sm">
 									Email Address
@@ -149,9 +131,8 @@ export const ForgotPasswordPage = () => {
 									value={email}
 									onChange={e => setEmail(e.target.value)}
 									required
-									disabled={isLoading}
+									disabled={isPending}
 									className="h-10"
-									autoFocus
 									autoComplete="email"
 								/>
 							</div>
@@ -159,9 +140,9 @@ export const ForgotPasswordPage = () => {
 							<Button
 								type="submit"
 								className="w-full h-10"
-								disabled={isLoading}
+								disabled={isPending}
 							>
-								{isLoading ? 'Sending...' : 'Send Reset Link'}
+								{isPending ? 'Sending...' : 'Send Reset Link'}
 							</Button>
 
 							<div className="text-center space-y-2">

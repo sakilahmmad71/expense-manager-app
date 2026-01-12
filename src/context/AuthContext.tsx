@@ -1,5 +1,6 @@
 import { User, authAPI } from '@/lib/services';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
 	user: User | null;
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [token, setToken] = useState<string | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		// Check for existing token on mount
@@ -63,6 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const logout = () => {
+		// Clear all React Query cache on logout to prevent data leaks
+		queryClient.clear();
+
 		localStorage.removeItem('token');
 		localStorage.removeItem('user');
 		setToken(null);
