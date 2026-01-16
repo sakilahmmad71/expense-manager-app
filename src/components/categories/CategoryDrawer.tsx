@@ -102,6 +102,21 @@ export const CategoryDrawer = ({
 		color: category?.color || '#3b82f6',
 		icon: category?.icon || '',
 	});
+
+	// Keep local copy so close animation can run even if parent clears `category`
+	const [localCategory, setLocalCategory] = useState<Category | null>(
+		category || null
+	);
+
+	useEffect(() => {
+		if (isOpen && category) {
+			setLocalCategory(category);
+		}
+		if (!isOpen) {
+			const t = window.setTimeout(() => setLocalCategory(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, category]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 
@@ -122,8 +137,11 @@ export const CategoryDrawer = ({
 		setIsSubmitting(true);
 
 		try {
-			if (category) {
-				await updateCategory.mutateAsync({ id: category.id, data: formData });
+			if (localCategory) {
+				await updateCategory.mutateAsync({
+					id: localCategory.id,
+					data: formData,
+				});
 			} else {
 				await createCategory.mutateAsync(formData);
 			}
@@ -158,12 +176,14 @@ export const CategoryDrawer = ({
 		}
 	};
 
+	if (!localCategory && !isOpen) return null;
+
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] overflow-hidden flex flex-col">
 				<DrawerHeader className="border-b flex-shrink-0">
 					<DrawerTitle className="text-2xl font-bold">
-						{category ? 'Edit Category' : 'Add New Category'}
+						{localCategory ? 'Edit Category' : 'Add New Category'}
 					</DrawerTitle>
 				</DrawerHeader>
 
@@ -203,6 +223,10 @@ export const CategoryDrawer = ({
 								<Input
 									type="color"
 									id="color"
+									value={formData.color}
+									onChange={e =>
+										setFormData({ ...formData, color: e.target.value })
+									}
 									className="flex-1"
 									disabled={isSubmitting}
 								/>

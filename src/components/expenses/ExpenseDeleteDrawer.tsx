@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Drawer,
@@ -27,7 +28,20 @@ export const ExpenseDeleteDrawer = ({
 }: ExpenseDeleteDrawerProps) => {
 	const isBulkDelete = expenseCount !== undefined && expenseCount > 0;
 
-	if (!expense && !isBulkDelete) return null;
+	// Keep local copy so close animation can run even if parent clears `expense`
+	const [localExpense, setLocalExpense] = useState<Expense | null>(
+		expense || null
+	);
+
+	useEffect(() => {
+		if (open && expense) setLocalExpense(expense);
+		if (!open) {
+			const t = window.setTimeout(() => setLocalExpense(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [open, expense]);
+
+	if (!localExpense && !isBulkDelete && !open) return null;
 
 	const handleOpenChange = (isOpen: boolean) => {
 		if (!isOpen) {
@@ -63,7 +77,7 @@ export const ExpenseDeleteDrawer = ({
 							<>
 								Are you sure you want to delete{' '}
 								<span className="font-semibold text-gray-900">
-									"{expense?.title}"
+									"{localExpense?.title}"
 								</span>
 								? This action cannot be undone.
 							</>

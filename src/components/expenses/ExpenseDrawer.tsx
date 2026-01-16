@@ -152,6 +152,21 @@ export const ExpenseDrawer = ({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 
+	// Keep local copy of expense so closing animation isn't interrupted
+	const [localExpense, setLocalExpense] = useState<Expense | null>(
+		expense || null
+	);
+
+	useEffect(() => {
+		if (isOpen && expense) {
+			setLocalExpense(expense);
+		}
+		if (!isOpen) {
+			const t = window.setTimeout(() => setLocalExpense(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, expense]);
+
 	// Accordion state for mobile/desktop default behavior
 	// On desktop, expand by default; on mobile, collapsed
 	const [accordionValue, setAccordionValue] = useState<string>(() => {
@@ -202,8 +217,11 @@ export const ExpenseDrawer = ({
 				date: dateTime,
 			};
 
-			if (expense) {
-				await updateExpense.mutateAsync({ id: expense.id, data: submitData });
+			if (localExpense) {
+				await updateExpense.mutateAsync({
+					id: localExpense.id,
+					data: submitData,
+				});
 			} else {
 				await createExpense.mutateAsync(submitData);
 			}
@@ -242,7 +260,7 @@ export const ExpenseDrawer = ({
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] overflow-hidden flex flex-col">
 				<DrawerHeader className="border-b flex-shrink-0 sticky top-0 bg-background z-10">
 					<DrawerTitle className="text-2xl font-bold">
-						{expense ? 'Edit Expense' : 'Add New Expense'}
+						{localExpense ? 'Edit Expense' : 'Add New Expense'}
 					</DrawerTitle>
 				</DrawerHeader>
 

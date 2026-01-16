@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Drawer,
@@ -58,9 +59,22 @@ export const CategoryDetailDrawer = ({
 	onEdit,
 	onDelete,
 }: CategoryDetailDrawerProps) => {
-	if (!category) return null;
+	// Keep a local copy to avoid immediate unmount so close animation runs
+	const [localCategory, setLocalCategory] = useState<Category | null>(
+		category || null
+	);
 
-	const expenseCount = category._count?.expenses ?? 0;
+	useEffect(() => {
+		if (isOpen && category) {
+			setLocalCategory(category);
+		}
+		if (!isOpen) {
+			const t = window.setTimeout(() => setLocalCategory(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, category]);
+
+	const expenseCount = localCategory?._count?.expenses ?? 0;
 
 	const handleOpenChange = (open: boolean) => {
 		if (!open) {
@@ -68,11 +82,13 @@ export const CategoryDetailDrawer = ({
 		}
 	};
 
+	if (!localCategory && !isOpen) return null;
+
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="max-h-[95vh] mx-auto w-full sm:max-w-lg md:max-w-xl flex flex-col">
 				<DrawerHeader className="sr-only">
-					<DrawerTitle>{category.name}</DrawerTitle>
+					<DrawerTitle>{localCategory?.name}</DrawerTitle>
 				</DrawerHeader>
 
 				<div className="overflow-y-auto flex-1">
@@ -81,7 +97,7 @@ export const CategoryDetailDrawer = ({
 						<div
 							className="absolute inset-0 opacity-10"
 							style={{
-								background: `linear-gradient(135deg, ${category?.color || '#3b82f6'} 0%, ${category?.color || '#3b82f6'}dd 100%)`,
+								background: `linear-gradient(135deg, ${localCategory?.color || '#3b82f6'} 0%, ${localCategory?.color || '#3b82f6'}dd 100%)`,
 							}}
 						/>
 						<div className="relative px-4 sm:px-6 py-6 sm:py-8">
@@ -89,27 +105,27 @@ export const CategoryDetailDrawer = ({
 								<div
 									className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg"
 									style={{
-										backgroundColor: category?.color
-											? `${category?.color}30`
+										backgroundColor: localCategory?.color
+											? `${localCategory?.color}30`
 											: '#dbeafe',
 									}}
 								>
-									{category?.icon || '📁'}
+									{localCategory?.icon || '📁'}
 								</div>
 								<div
 									className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm"
 									style={{
-										backgroundColor: category?.color
-											? `${category?.color}20`
+										backgroundColor: localCategory?.color
+											? `${localCategory?.color}20`
 											: '#dbeafe',
-										color: category?.color || '#1e40af',
+										color: localCategory?.color || '#1e40af',
 									}}
 								>
 									Category
 								</div>
 							</div>
 							<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">
-								{category?.name}
+								{localCategory?.name}
 							</h2>
 							<div className="flex items-baseline gap-2">
 								<span className="text-3xl sm:text-4xl font-bold text-gray-900">
@@ -134,10 +150,10 @@ export const CategoryDetailDrawer = ({
 							<div className="flex items-center gap-2 mt-0.5">
 								<div
 									className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
-									style={{ backgroundColor: category?.color }}
+									style={{ backgroundColor: localCategory?.color }}
 								/>
 								<p className="text-sm font-semibold text-gray-900">
-									{category?.color}
+									{localCategory?.color}
 								</p>
 							</div>
 						</CategoryInfoCard>
@@ -150,7 +166,9 @@ export const CategoryDetailDrawer = ({
 							label="Created At"
 						>
 							<p className="text-sm font-semibold text-gray-900 mt-0.5">
-								{new Date(category.createdAt).toLocaleDateString('en-US', {
+								{new Date(
+									localCategory?.createdAt || new Date()
+								).toLocaleDateString('en-US', {
 									weekday: 'long',
 									year: 'numeric',
 									month: 'long',
@@ -167,7 +185,9 @@ export const CategoryDetailDrawer = ({
 							label="Last Updated"
 						>
 							<p className="text-sm font-semibold text-gray-900 mt-0.5">
-								{new Date(category.updatedAt).toLocaleDateString('en-US', {
+								{new Date(
+									localCategory?.updatedAt || new Date()
+								).toLocaleDateString('en-US', {
 									month: 'short',
 									day: 'numeric',
 									year: 'numeric',
@@ -201,7 +221,7 @@ export const CategoryDetailDrawer = ({
 								<TooltipTrigger asChild>
 									<Button
 										type="button"
-										onClick={() => onDelete(category)}
+										onClick={() => localCategory && onDelete(localCategory)}
 										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
 									>
 										<Trash2 className="h-11 w-11" strokeWidth={3} />
@@ -217,7 +237,7 @@ export const CategoryDetailDrawer = ({
 								<TooltipTrigger asChild>
 									<Button
 										type="button"
-										onClick={() => onEdit(category)}
+										onClick={() => localCategory && onEdit(localCategory)}
 										className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
 									>
 										<Edit className="h-11 w-11" strokeWidth={3} />
