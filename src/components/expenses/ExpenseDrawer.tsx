@@ -4,7 +4,6 @@ import { Combobox } from '@/components/ui/combobox';
 import {
 	Drawer,
 	DrawerContent,
-	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer';
@@ -154,22 +153,11 @@ export const ExpenseDrawer = ({
 	const [error, setError] = useState('');
 
 	// Accordion state for mobile/desktop default behavior
-	const [accordionValue, setAccordionValue] = useState<string>('');
-
-	// Detect mobile on mount and set accordion default
-	useEffect(() => {
-		const checkMobile = () => {
-			const mobile = window.innerWidth < 768; // md breakpoint
-			// On desktop, expand by default; on mobile, collapsed
-			if (!accordionValue) {
-				setAccordionValue(mobile ? '' : 'additional-details');
-			}
-		};
-
-		checkMobile();
-		window.addEventListener('resize', checkMobile);
-		return () => window.removeEventListener('resize', checkMobile);
-	}, [accordionValue]);
+	// On desktop, expand by default; on mobile, collapsed
+	const [accordionValue, setAccordionValue] = useState<string>(() => {
+		const mobile = window.innerWidth < 768; // md breakpoint
+		return mobile ? '' : 'additional-details';
+	});
 
 	const categoryOptions = categories.map(category => ({
 		value: category.id,
@@ -219,9 +207,12 @@ export const ExpenseDrawer = ({
 			} else {
 				await createExpense.mutateAsync(submitData);
 			}
-			// Close modal after successful mutation
+
+			// Wait for parent to refetch data (this now waits for actual refetch to complete)
+			await onSuccess();
+
+			// Close drawer after data is fully refreshed
 			onClose();
-			onSuccess();
 		} catch (err: unknown) {
 			// Error handling is done in the mutation hooks
 			// Only set local error for display purposes
@@ -248,7 +239,7 @@ export const ExpenseDrawer = ({
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
-			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] flex flex-col">
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] overflow-hidden flex flex-col">
 				<DrawerHeader className="border-b flex-shrink-0 sticky top-0 bg-background z-10">
 					<DrawerTitle className="text-2xl font-bold">
 						{expense ? 'Edit Expense' : 'Add New Expense'}
@@ -259,7 +250,7 @@ export const ExpenseDrawer = ({
 					onSubmit={handleSubmit}
 					className="flex flex-col flex-1 min-h-0 overflow-hidden"
 				>
-					<div className="overflow-y-auto flex-1 p-6 space-y-4 overscroll-contain">
+					<div className="overflow-y-auto flex-1 p-6 space-y-4 overscroll-contain pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
 						{error && (
 							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
 								{error}
@@ -474,49 +465,54 @@ export const ExpenseDrawer = ({
 								</AccordionContent>
 							</AccordionItem>
 						</Accordion>
+
+						{/* Action Buttons */}
+						<div className="flex justify-between items-center pt-6 mt-2 border-t">
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											type="button"
+											onClick={onClose}
+											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+											disabled={isSubmitting}
+										>
+											<X
+												className="h-10 w-10 sm:h-11 sm:w-11"
+												strokeWidth={3}
+											/>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>Cancel</p>
+									</TooltipContent>
+								</Tooltip>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											type="submit"
+											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+											disabled={isSubmitting}
+										>
+											<Check
+												className="h-10 w-10 sm:h-11 sm:w-11"
+												strokeWidth={3}
+											/>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>
+											{isSubmitting
+												? 'Saving...'
+												: expense
+													? 'Update Expense'
+													: 'Add Expense'}
+										</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
 					</div>
-					<DrawerFooter className="flex-row justify-between items-center pt-6 pb-safe border-t flex-shrink-0 bg-background sticky bottom-0">
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										type="button"
-										onClick={onClose}
-										className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-										disabled={isSubmitting}
-									>
-										<X className="h-10 w-10 sm:h-11 sm:w-11" strokeWidth={3} />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Cancel</p>
-								</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										type="submit"
-										className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-										disabled={isSubmitting}
-									>
-										<Check
-											className="h-10 w-10 sm:h-11 sm:w-11"
-											strokeWidth={3}
-										/>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>
-										{isSubmitting
-											? 'Saving...'
-											: expense
-												? 'Update Expense'
-												: 'Add Expense'}
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</DrawerFooter>
 				</form>
 			</DrawerContent>
 		</Drawer>

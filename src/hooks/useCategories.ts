@@ -159,7 +159,7 @@ export const useCreateCategory = () => {
 			});
 		},
 		onSettled: () => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			// Invalidate and refetch all queries immediately
 			queryClient.invalidateQueries({
 				queryKey: categoryKeys.lists(),
 				refetchType: 'active',
@@ -269,7 +269,7 @@ export const useUpdateCategory = () => {
 			});
 		},
 		onSettled: (_data, _error, { id }) => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			// Invalidate and refetch all queries immediately
 			queryClient.invalidateQueries({
 				queryKey: categoryKeys.detail(id),
 				refetchType: 'active',
@@ -373,7 +373,7 @@ export const useDeleteCategory = () => {
 			}
 		},
 		onSettled: () => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+			// Invalidate and refetch all queries immediately
 			queryClient.invalidateQueries({
 				queryKey: categoryKeys.lists(),
 				refetchType: 'active',
