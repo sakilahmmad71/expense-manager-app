@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Drawer,
@@ -40,7 +41,22 @@ export const ExpenseDetailDrawer = ({
 	onEdit,
 	onDelete,
 }: ExpenseDetailDrawerProps) => {
-	if (!expense) return null;
+	// Keep a local copy so we don't unmount content immediately when parent
+	// clears `expense`. This preserves the closing animation.
+	const [localExpense, setLocalExpense] = useState<Expense | null>(
+		expense || null
+	);
+
+	useEffect(() => {
+		if (isOpen && expense) {
+			setLocalExpense(expense);
+		}
+		if (!isOpen) {
+			// wait for close animation to finish before clearing
+			const t = window.setTimeout(() => setLocalExpense(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, expense]);
 
 	const handleOpenChange = (open: boolean) => {
 		if (!open) {
@@ -48,11 +64,14 @@ export const ExpenseDetailDrawer = ({
 		}
 	};
 
+	// If there's no content to show and the drawer isn't open, don't render
+	if (!localExpense && !isOpen) return null;
+
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
 			<DrawerContent className="max-h-[95vh] mx-auto w-full sm:max-w-lg md:max-w-xl flex flex-col">
 				<DrawerHeader className="sr-only">
-					<DrawerTitle>{expense.title}</DrawerTitle>
+					<DrawerTitle>{localExpense?.title}</DrawerTitle>
 				</DrawerHeader>
 
 				<div className="overflow-y-auto flex-1">
@@ -61,7 +80,7 @@ export const ExpenseDetailDrawer = ({
 						<div
 							className="absolute inset-0 opacity-10"
 							style={{
-								background: `linear-gradient(135deg, ${expense.category.color || '#3b82f6'} 0%, ${expense.category.color || '#3b82f6'}dd 100%)`,
+								background: `linear-gradient(135deg, ${localExpense?.category.color || '#3b82f6'} 0%, ${localExpense?.category.color || '#3b82f6'}dd 100%)`,
 							}}
 						/>
 						<div className="relative px-4 sm:px-6 py-6 sm:py-8">
@@ -69,37 +88,40 @@ export const ExpenseDetailDrawer = ({
 								<div
 									className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg"
 									style={{
-										backgroundColor: expense.category.color
-											? `${expense.category.color}30`
+										backgroundColor: localExpense?.category.color
+											? `${localExpense?.category.color}30`
 											: '#dbeafe',
 									}}
 								>
-									{expense.category.icon || '💰'}
+									{localExpense?.category.icon || '💰'}
 								</div>
 								<div
 									className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm"
 									style={{
-										backgroundColor: expense.category.color
-											? `${expense.category.color}20`
+										backgroundColor: localExpense?.category.color
+											? `${localExpense?.category.color}20`
 											: '#dbeafe',
-										color: expense.category.color || '#1e40af',
+										color: localExpense?.category.color || '#1e40af',
 									}}
 								>
-									{expense.category.name}
+									{localExpense?.category.name}
 								</div>
 							</div>
 							<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">
-								{expense.title}
+								{localExpense?.title}
 							</h2>
 							<div className="flex items-baseline gap-2">
 								{/* Desktop: Full currency format */}
 								<span className="hidden sm:block text-3xl sm:text-4xl font-bold text-gray-900">
-									{formatCurrency(expense.amount, expense.currency)}
+									{formatCurrency(
+										localExpense?.amount || 0,
+										localExpense?.currency || 'USD'
+									)}
 								</span>
 								{/* Mobile: Symbol with amount */}
 								<span className="sm:hidden text-3xl font-bold text-gray-900">
-									{formatCurrencySymbol(expense.currency)}
-									{expense.amount.toLocaleString('en-US', {
+									{formatCurrencySymbol(localExpense?.currency || 'USD')}
+									{(localExpense?.amount || 0).toLocaleString('en-US', {
 										minimumFractionDigits: 2,
 										maximumFractionDigits: 2,
 									})}
@@ -119,7 +141,9 @@ export const ExpenseDetailDrawer = ({
 								label="Expense Date"
 							>
 								<p className="text-sm font-semibold text-gray-900 mt-0.5">
-									{new Date(expense.date).toLocaleDateString('en-US', {
+									{new Date(
+										localExpense?.date || new Date()
+									).toLocaleDateString('en-US', {
 										weekday: 'long',
 										year: 'numeric',
 										month: 'long',
@@ -136,7 +160,7 @@ export const ExpenseDetailDrawer = ({
 								label="Currency"
 							>
 								<p className="text-sm font-semibold text-gray-900 mt-0.5">
-									{expense.currency}
+									{localExpense?.currency}
 								</p>
 							</ExpenseInfoCard>
 
@@ -148,7 +172,9 @@ export const ExpenseDetailDrawer = ({
 								label="Created At"
 							>
 								<p className="text-sm font-semibold text-gray-900 mt-0.5">
-									{new Date(expense.createdAt).toLocaleDateString('en-US', {
+									{new Date(
+										localExpense?.createdAt || new Date()
+									).toLocaleDateString('en-US', {
 										month: 'short',
 										day: 'numeric',
 										year: 'numeric',
@@ -159,7 +185,7 @@ export const ExpenseDetailDrawer = ({
 							</ExpenseInfoCard>
 
 							{/* Description Card */}
-							{expense.description && (
+							{localExpense?.description && (
 								<ExpenseInfoCard
 									icon={FileText}
 									iconColor="text-amber-600"
@@ -168,7 +194,7 @@ export const ExpenseDetailDrawer = ({
 									scrollable
 								>
 									<p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
-										{expense.description}
+										{localExpense?.description}
 									</p>
 								</ExpenseInfoCard>
 							)}
@@ -185,7 +211,7 @@ export const ExpenseDetailDrawer = ({
 								<TooltipTrigger asChild>
 									<Button
 										type="button"
-										onClick={() => onDelete(expense)}
+										onClick={() => localExpense && onDelete(localExpense)}
 										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
 									>
 										<Trash2 className="h-11 w-11" strokeWidth={3} />
@@ -201,7 +227,7 @@ export const ExpenseDetailDrawer = ({
 								<TooltipTrigger asChild>
 									<Button
 										type="button"
-										onClick={() => onEdit(expense)}
+										onClick={() => localExpense && onEdit(localExpense)}
 										className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
 									>
 										<Edit className="h-11 w-11" strokeWidth={3} />

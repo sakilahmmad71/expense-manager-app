@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import {
 	Drawer,
 	DrawerContent,
-	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
 } from '@/components/ui/drawer';
@@ -103,6 +102,21 @@ export const CategoryDrawer = ({
 		color: category?.color || '#3b82f6',
 		icon: category?.icon || '',
 	});
+
+	// Keep local copy so close animation can run even if parent clears `category`
+	const [localCategory, setLocalCategory] = useState<Category | null>(
+		category || null
+	);
+
+	useEffect(() => {
+		if (isOpen && category) {
+			setLocalCategory(category);
+		}
+		if (!isOpen) {
+			const t = window.setTimeout(() => setLocalCategory(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, category]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState('');
 
@@ -123,8 +137,11 @@ export const CategoryDrawer = ({
 		setIsSubmitting(true);
 
 		try {
-			if (category) {
-				await updateCategory.mutateAsync({ id: category.id, data: formData });
+			if (localCategory) {
+				await updateCategory.mutateAsync({
+					id: localCategory.id,
+					data: formData,
+				});
 			} else {
 				await createCategory.mutateAsync(formData);
 			}
@@ -159,17 +176,19 @@ export const CategoryDrawer = ({
 		}
 	};
 
+	if (!localCategory && !isOpen) return null;
+
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
-			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] flex flex-col">
+			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] overflow-hidden flex flex-col">
 				<DrawerHeader className="border-b flex-shrink-0">
 					<DrawerTitle className="text-2xl font-bold">
-						{category ? 'Edit Category' : 'Add New Category'}
+						{localCategory ? 'Edit Category' : 'Add New Category'}
 					</DrawerTitle>
 				</DrawerHeader>
 
 				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-					<div className="overflow-y-auto flex-1 p-6 space-y-4">
+					<div className="overflow-y-auto flex-1 p-6 space-y-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
 						{error && (
 							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
 								{error}
@@ -204,6 +223,10 @@ export const CategoryDrawer = ({
 								<Input
 									type="color"
 									id="color"
+									value={formData.color}
+									onChange={e =>
+										setFormData({ ...formData, color: e.target.value })
+									}
 									className="flex-1"
 									disabled={isSubmitting}
 								/>
@@ -241,46 +264,54 @@ export const CategoryDrawer = ({
 								))}
 							</div>
 						</div>
+
+						{/* Action Buttons */}
+						<div className="flex justify-between items-center pt-6 mt-2 border-t">
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											type="button"
+											onClick={onClose}
+											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+											disabled={isSubmitting}
+										>
+											<X
+												className="h-10 w-10 sm:h-11 sm:w-11"
+												strokeWidth={3}
+											/>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>Cancel</p>
+									</TooltipContent>
+								</Tooltip>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											type="submit"
+											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+											disabled={isSubmitting}
+										>
+											<Check
+												className="h-10 w-10 sm:h-11 sm:w-11"
+												strokeWidth={3}
+											/>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>
+											{isSubmitting
+												? 'Saving...'
+												: category
+													? 'Update Category'
+													: 'Create Category'}
+										</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
 					</div>
-					<DrawerFooter className="flex-row justify-between items-center pt-6 border-t flex-shrink-0 bg-background">
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										type="button"
-										onClick={onClose}
-										className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-										disabled={isSubmitting}
-									>
-										<X className="h-11 w-11" strokeWidth={3} />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Cancel</p>
-								</TooltipContent>
-							</Tooltip>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										type="submit"
-										className="h-16 w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-										disabled={isSubmitting}
-									>
-										<Check className="h-11 w-11" strokeWidth={3} />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>
-										{isSubmitting
-											? 'Saving...'
-											: category
-												? 'Update Category'
-												: 'Create Category'}
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</DrawerFooter>
 				</form>
 			</DrawerContent>
 		</Drawer>

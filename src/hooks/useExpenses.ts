@@ -1,4 +1,4 @@
-import { expenseAPI, Expense, ExpenseInput, Category } from '@/lib/services';
+import { expenseAPI, Expense, ExpenseInput } from '@/lib/services';
 import {
 	useMutation,
 	useQuery,
@@ -9,7 +9,6 @@ import {
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { CategoriesData } from './useCategories';
 import { dashboardKeys } from './useDashboard';
 
 // Type for the cached expenses data
@@ -101,74 +100,7 @@ export const useCreateExpense = () => {
 			const response = await expenseAPI.create(data);
 			return response.data.expense;
 		},
-		onMutate: async newExpense => {
-			// Cancel outgoing refetches
-			await queryClient.cancelQueries({ queryKey: expenseKeys.lists() });
-
-			// Snapshot previous value
-			const previousExpenses = queryClient.getQueriesData({
-				queryKey: expenseKeys.lists(),
-			});
-
-			// Optimistically update to show new expense immediately
-			queryClient.setQueriesData(
-				{ queryKey: expenseKeys.lists() },
-				(old: unknown) => {
-					const oldData = old as ExpensesData | undefined;
-					if (!oldData) return old;
-
-					// Find the category for the new expense from category cache
-					// Try to get from any category list query
-					let category: Category | null = null;
-					const categoryQueries = queryClient.getQueriesData<CategoriesData>({
-						queryKey: ['categories', 'list'],
-					});
-
-					for (const [, data] of categoryQueries) {
-						if (data?.categories) {
-							const found = data.categories.find(
-								(c: Category) => c.id === newExpense.categoryId
-							);
-							if (found) {
-								category = found;
-								break;
-							}
-						}
-					}
-
-					return {
-						...oldData,
-						expenses: [
-							{
-								...newExpense,
-								id: 'temp-' + Date.now(),
-								category: category,
-								userId: 'temp-user',
-								currency: newExpense.currency || 'USD',
-								date: newExpense.date || new Date().toISOString(),
-								createdAt: new Date().toISOString(),
-								updatedAt: new Date().toISOString(),
-							} as Expense,
-							...oldData.expenses,
-						],
-						pagination: {
-							...oldData.pagination,
-							total: oldData.pagination.total + 1,
-						},
-					};
-				}
-			);
-
-			return { previousExpenses };
-		},
-		onError: (error, _variables, context) => {
-			// Rollback on error
-			if (context?.previousExpenses) {
-				context.previousExpenses.forEach(([queryKey, data]) => {
-					queryClient.setQueryData(queryKey, data);
-				});
-			}
-
+		onError: error => {
 			const axiosError = error as AxiosError<{ error: string }>;
 			if (axiosError.response?.data?.error === 'Unauthorized') {
 				toast.error('Session expired', {
@@ -182,20 +114,21 @@ export const useCreateExpense = () => {
 				});
 			}
 		},
-		onSuccess: () => {
+		onSuccess: async () => {
+			// Force refetch all expense list queries and wait for them to complete
+			await queryClient.refetchQueries({
+				queryKey: expenseKeys.lists(),
+				type: 'active',
+			});
+
+			// Invalidate dashboard to update summary
+			await queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+			});
+
+			// Show success message
 			toast.success('Expense created', {
 				description: 'Your expense has been added successfully.',
-			});
-		},
-		onSettled: () => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
-			queryClient.invalidateQueries({
-				queryKey: expenseKeys.lists(),
-				refetchType: 'active',
-			});
-			queryClient.invalidateQueries({
-				queryKey: dashboardKeys.all,
-				refetchType: 'active',
 			});
 		},
 	});
@@ -240,6 +173,7 @@ export const useUpdateExpense = () => {
 					updatedAt: new Date().toISOString(),
 				};
 			});
+
 			// Optimistically update lists
 			queryClient.setQueriesData(
 				{ queryKey: expenseKeys.lists() },
@@ -286,24 +220,26 @@ export const useUpdateExpense = () => {
 				});
 			}
 		},
-		onSuccess: () => {
+		onSuccess: async () => {
+			// Force refetch all expense queries and wait for completion
+			await queryClient.refetchQueries({
+				queryKey: expenseKeys.lists(),
+				type: 'active',
+			});
+
+			// Invalidate dashboard
+			await queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+			});
+
 			toast.success('Expense updated', {
 				description: 'Your expense has been updated successfully.',
 			});
 		},
-		onSettled: (_data, _error, { id }) => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
+		onSettled: async (_data, _error, { id }) => {
+			// Invalidate detail query for updated expense
 			queryClient.invalidateQueries({
 				queryKey: expenseKeys.detail(id),
-				refetchType: 'active',
-			});
-			queryClient.invalidateQueries({
-				queryKey: expenseKeys.lists(),
-				refetchType: 'active',
-			});
-			queryClient.invalidateQueries({
-				queryKey: dashboardKeys.all,
-				refetchType: 'active',
 			});
 		},
 	});
@@ -372,27 +308,27 @@ export const useDeleteExpense = () => {
 				});
 			}
 		},
-		onSuccess: () => {
+		onSuccess: async () => {
+			// Force refetch all expense queries
+			await queryClient.refetchQueries({
+				queryKey: expenseKeys.lists(),
+				type: 'active',
+			});
+
+			// Invalidate dashboard
+			await queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+			});
+
 			toast.success('Expense deleted', {
 				description: 'Your expense has been deleted successfully.',
-			});
-		},
-		onSettled: () => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
-			queryClient.invalidateQueries({
-				queryKey: expenseKeys.lists(),
-				refetchType: 'active',
-			});
-			queryClient.invalidateQueries({
-				queryKey: dashboardKeys.all,
-				refetchType: 'active',
 			});
 		},
 	});
 };
 
 /**
- * Hook to bulk delete expenses
+ * Hook to bulk delete expenses with optimistic updates
  */
 export const useBulkDeleteExpenses = () => {
 	const queryClient = useQueryClient();
@@ -454,7 +390,18 @@ export const useBulkDeleteExpenses = () => {
 				});
 			}
 		},
-		onSuccess: data => {
+		onSuccess: async data => {
+			// Force refetch all expense queries
+			await queryClient.refetchQueries({
+				queryKey: expenseKeys.lists(),
+				type: 'active',
+			});
+
+			// Invalidate dashboard
+			await queryClient.invalidateQueries({
+				queryKey: dashboardKeys.all,
+			});
+
 			const { deletedCount, requestedCount } = data;
 			if (deletedCount === 0) {
 				toast.error('No expenses deleted', {
@@ -470,17 +417,6 @@ export const useBulkDeleteExpenses = () => {
 					description: `${deletedCount} expense(s) deleted successfully.`,
 				});
 			}
-		},
-		onSettled: () => {
-			// Invalidate and refetch - use refetchType: 'active' for immediate updates
-			queryClient.invalidateQueries({
-				queryKey: expenseKeys.lists(),
-				refetchType: 'active',
-			});
-			queryClient.invalidateQueries({
-				queryKey: dashboardKeys.all,
-				refetchType: 'active',
-			});
 		},
 	});
 };

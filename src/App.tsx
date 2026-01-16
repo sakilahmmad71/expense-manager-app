@@ -56,13 +56,13 @@ const PageLoader = () => (
 	</div>
 );
 
-// Configure QueryClient with optimal defaults for large datasets
+// Configure QueryClient with real-time data validation for financial accuracy
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			// Cache Configuration
-			staleTime: 1000 * 60 * 5, // 5 minutes - data stays fresh for 5 minutes
-			gcTime: 1000 * 60 * 30, // 30 minutes - unused data cached for 30 minutes (formerly cacheTime)
+			// Cache Configuration - optimized for real-time expense tracking
+			staleTime: 0, // Always consider data stale for immediate refetches after mutations
+			gcTime: 1000 * 60 * 5, // 5 minutes - unused data cached for 5 minutes (reduced for faster updates)
 
 			// Retry Strategy for long-running operations
 			retry: (failureCount, error: unknown) => {
@@ -77,17 +77,16 @@ const queryClient = new QueryClient({
 			},
 			retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff with max 30s
 
-			// Refetch Configuration
-			refetchOnWindowFocus: false, // Disable for better performance with large datasets
+			// Refetch Configuration - optimized for real-time updates
+			refetchOnWindowFocus: true, // Enable to catch updates from other tabs/devices
 			refetchOnReconnect: true, // Refetch when reconnecting
-			refetchOnMount: true, // Refetch on component mount if data is stale
+			refetchOnMount: true, // Always refetch on component mount for fresh data
 
 			// Network Mode - continue showing cached data even when offline
 			networkMode: 'offlineFirst',
 
-			// Prefetching configuration for smoother navigation
-			// This will prefetch data in the background for better perceived performance
-			refetchInterval: false, // Disable automatic polling to save resources
+			// Performance optimization
+			refetchInterval: false, // Disable automatic polling (use manual refetch after mutations)
 			structuralSharing: true, // Enable structural sharing for better performance
 		},
 		mutations: {

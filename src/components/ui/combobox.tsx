@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import {
 	Command,
 	CommandEmpty,
-	CommandGroup,
 	CommandInput,
 	CommandItem,
 	CommandList,
@@ -16,6 +15,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ComboboxOption {
 	value: string;
@@ -112,32 +112,32 @@ export function Combobox({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="p-0 z-[200] max-h-[70vh]"
+				className="p-0 z-[200]"
 				align="start"
-				style={{ width: triggerWidth > 0 ? `${triggerWidth}px` : 'auto' }}
-				onOpenAutoFocus={e => e.preventDefault()}
-				onCloseAutoFocus={e => e.preventDefault()}
+				style={{
+					width: triggerWidth > 0 ? `${triggerWidth}px` : 'auto',
+				}}
 				sideOffset={8}
 				avoidCollisions={true}
 				collisionPadding={{ top: 16, right: 16, bottom: 16, left: 16 }}
 			>
-				<Command shouldFilter={true} className="flex flex-col max-h-[70vh]">
+				<Command shouldFilter={true}>
 					<CommandInput
+						autoFocus
 						placeholder={searchPlaceholder}
 						value={localSearch}
 						onValueChange={handleSearchChange}
-						className="sticky top-0 z-10 bg-background"
 					/>
-					<CommandList className="flex-1 overflow-y-auto overscroll-contain">
-						{isLoading && (
-							<div className="py-6 text-center text-sm text-muted-foreground">
-								Searching...
-							</div>
-						)}
-						{!isLoading && (
-							<>
-								<CommandEmpty>{emptyText}</CommandEmpty>
-								<CommandGroup>
+					<CommandEmpty>{emptyText}</CommandEmpty>
+					<CommandList>
+						<ScrollArea className="h-60">
+							{isLoading && (
+								<div className="py-6 text-center text-sm text-muted-foreground">
+									Searching...
+								</div>
+							)}
+							{!isLoading && (
+								<>
 									{options.map(option => (
 										<CommandItem
 											key={option.value}
@@ -160,9 +160,9 @@ export function Combobox({
 											</span>
 										</CommandItem>
 									))}
-								</CommandGroup>
-							</>
-						)}
+								</>
+							)}
+						</ScrollArea>
 					</CommandList>
 				</Command>
 			</PopoverContent>

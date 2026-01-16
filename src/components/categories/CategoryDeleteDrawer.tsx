@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Drawer,
@@ -28,12 +28,25 @@ export const CategoryDeleteDrawer = ({
 	const deleteCategory = useDeleteCategory();
 	const [isDeleting, setIsDeleting] = useState(false);
 
+	// Keep local copy so close animation can run even if parent clears `category`
+	const [localCategory, setLocalCategory] = useState<Category | null>(
+		category || null
+	);
+
+	useEffect(() => {
+		if (isOpen && category) setLocalCategory(category);
+		if (!isOpen) {
+			const t = window.setTimeout(() => setLocalCategory(null), 300);
+			return () => window.clearTimeout(t);
+		}
+	}, [isOpen, category]);
+
 	const handleDelete = async () => {
-		if (!category || isDeleting) return;
+		if (!localCategory || isDeleting) return;
 
 		setIsDeleting(true);
 		try {
-			await deleteCategory.mutateAsync({ id: category.id });
+			await deleteCategory.mutateAsync({ id: localCategory.id });
 			// Close dialog after successful mutation
 			onClose();
 			onSuccess();
@@ -50,6 +63,8 @@ export const CategoryDeleteDrawer = ({
 			onClose();
 		}
 	};
+
+	if (!localCategory && !isOpen) return null;
 
 	return (
 		<Drawer open={isOpen} onOpenChange={handleOpenChange}>

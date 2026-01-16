@@ -50,6 +50,7 @@ export const ExpensesPage = () => {
 		data: expensesData,
 		isLoading: isLoadingExpenses,
 		isFetching,
+		refetch: refetchExpenses,
 	} = useExpenses({
 		...filters,
 		sortBy,
@@ -269,20 +270,8 @@ export const ExpensesPage = () => {
 		});
 	};
 
-	// Memoized sorted expenses
-	const filteredAndSortedExpenses = useMemo(() => {
-		return [...expenses].sort((a, b) => {
-			const multiplier = sortOrder === 'asc' ? 1 : -1;
-			if (sortBy === 'amount') {
-				return (a.amount - b.amount) * multiplier;
-			} else if (sortBy === 'category') {
-				return a.category.name.localeCompare(b.category.name) * multiplier;
-			}
-			return (
-				(new Date(a.date).getTime() - new Date(b.date).getTime()) * multiplier
-			);
-		});
-	}, [expenses, sortBy, sortOrder]);
+	// Use expenses directly from API (already sorted server-side)
+	const filteredAndSortedExpenses = expenses;
 
 	// Calculate total of selected expenses
 	const selectedExpensesTotal = useMemo(() => {
@@ -365,6 +354,10 @@ export const ExpensesPage = () => {
 
 	const openModal = (expense?: Expense) => {
 		setEditingExpense(expense || null);
+		// Reset to page 1 when creating new expense to ensure it's visible after creation
+		if (!expense && filters.page !== 1) {
+			setFilters({ ...filters, page: 1 });
+		}
 		setIsModalOpen(true);
 	};
 
@@ -373,9 +366,10 @@ export const ExpensesPage = () => {
 		setIsModalOpen(false);
 	};
 
-	const handleDrawerSuccess = () => {
-		closeModal();
+	const handleDrawerSuccess = async () => {
 		setSelectedExpenses([]);
+		// Force refetch to ensure we get the latest data
+		await refetchExpenses();
 	};
 
 	const handleClearFilters = () => {
