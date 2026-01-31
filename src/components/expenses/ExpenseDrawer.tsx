@@ -43,6 +43,7 @@ import { format } from 'date-fns';
 import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ExpenseDrawerProps {
 	isOpen: boolean;
@@ -268,269 +269,287 @@ export const ExpenseDrawer = ({
 					onSubmit={handleSubmit}
 					className="flex flex-col flex-1 min-h-0 overflow-hidden"
 				>
-					<div className="overflow-y-auto flex-1 p-6 space-y-4 overscroll-contain pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
-						{error && (
-							<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-								{error}
-							</div>
-						)}
+					<ScrollArea className="flex-1 overscroll-contain pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+						<div className="p-6 space-y-4">
+							{error && (
+								<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+									{error}
+								</div>
+							)}
 
-						<div className="space-y-2">
-							<Label htmlFor="title">
-								Title <span className="text-red-500">*</span>
-							</Label>
-							<Input
-								id="title"
-								placeholder="e.g., Coffee at Starbucks"
-								value={formData.title}
-								onChange={e =>
-									setFormData({ ...formData, title: e.target.value })
-								}
-								maxLength={255}
-								required
-								disabled={isSubmitting}
-							/>
-							<p className="text-xs text-muted-foreground">
-								{formData.title.length}/255 characters
-							</p>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="amount" className="text-sm">
-								Amount <span className="text-red-500">*</span>
-							</Label>
-							<div className="flex gap-2">
-								<Select
-									value={selectedCurrency}
-									onValueChange={handleCurrencyChange}
-									disabled={isSubmitting}
-								>
-									<SelectTrigger id="currency" className="w-[120px]">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{currencies.map(currency => (
-											<SelectItem key={currency.code} value={currency.code}>
-												{currency.symbol} {currency.code}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+							<div className="space-y-2">
+								<Label htmlFor="title">
+									Title <span className="text-red-500">*</span>
+								</Label>
 								<Input
-									id="amount"
-									type="number"
-									step="0.01"
-									min="0"
-									max="999999999.99"
-									placeholder="0.00"
-									value={formData.amount || ''}
+									id="title"
+									placeholder="e.g., Coffee at Starbucks"
+									value={formData.title}
 									onChange={e =>
-										setFormData({
-											...formData,
-											amount: parseFloat(e.target.value),
-										})
+										setFormData({ ...formData, title: e.target.value })
 									}
+									maxLength={255}
 									required
 									disabled={isSubmitting}
-									className="flex-1"
 								/>
+								<p className="text-xs text-muted-foreground">
+									{formData.title.length}/255 characters
+								</p>
+							</div>
+
+							<div className="space-y-2">
+								<Label htmlFor="amount" className="text-sm">
+									Amount <span className="text-red-500">*</span>
+								</Label>
+								<div className="flex gap-2">
+									<Select
+										value={selectedCurrency}
+										onValueChange={handleCurrencyChange}
+										disabled={isSubmitting}
+									>
+										<SelectTrigger id="currency" className="w-[120px]">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{currencies.map(currency => (
+												<SelectItem key={currency.code} value={currency.code}>
+													{currency.symbol} {currency.code}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<Input
+										id="amount"
+										type="number"
+										step="0.01"
+										min="0"
+										max="999999999.99"
+										placeholder="0.00"
+										value={formData.amount || ''}
+										onChange={e =>
+											setFormData({
+												...formData,
+												amount: parseFloat(e.target.value),
+											})
+										}
+										required
+										disabled={isSubmitting}
+										className="flex-1"
+									/>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="category">
+										Category <span className="text-red-500">*</span>
+									</Label>
+									<Combobox
+										options={categoryOptions}
+										value={formData.categoryId}
+										onValueChange={value => {
+											setFormData({ ...formData, categoryId: value });
+										}}
+										placeholder="Select a category"
+										searchPlaceholder="Search categories..."
+										emptyText="No category found."
+										disabled={isSubmitting}
+										onSearchChange={handleCategorySearch}
+										isLoading={isLoadingCategories}
+									/>
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onClick={() => navigate('/categories')}
+										className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
+									>
+										<Plus className="h-4 w-4 mr-2" />
+										Add New Category
+									</Button>
+								</div>
+
+								<Accordion
+									type="single"
+									collapsible
+									value={accordionValue}
+									onValueChange={setAccordionValue}
+									className="w-full"
+								>
+									<AccordionItem
+										value="additional-details"
+										className="border-none"
+									>
+										<AccordionTrigger className="hover:no-underline py-3">
+											<span className="text-sm font-medium">
+												Additional Details (Date, Time, Description)
+											</span>
+										</AccordionTrigger>
+										<AccordionContent className="space-y-4 pt-2">
+											<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+												<div className="space-y-2">
+													<Label htmlFor="date" className="text-sm font-medium">
+														Date (Optional)
+													</Label>
+													<Popover>
+														<PopoverTrigger asChild>
+															<Button
+																id="date"
+																variant="outline"
+																className={cn(
+																	'w-full justify-start text-left font-normal',
+																	!selectedDate && 'text-muted-foreground'
+																)}
+																disabled={isSubmitting}
+															>
+																<Calendar className="mr-2 h-4 w-4" />
+																{selectedDate ? (
+																	format(selectedDate, 'PPP')
+																) : (
+																	<span>Pick a date</span>
+																)}
+															</Button>
+														</PopoverTrigger>
+														<PopoverContent
+															className="w-auto p-0"
+															align="start"
+														>
+															<CalendarComponent
+																mode="single"
+																selected={selectedDate}
+																onSelect={setSelectedDate}
+																initialFocus
+															/>
+														</PopoverContent>
+													</Popover>
+													<p className="text-xs text-muted-foreground">
+														Defaults to current date if not provided
+													</p>
+												</div>
+
+												<div className="space-y-2">
+													<Label htmlFor="time" className="text-sm font-medium">
+														Time (Optional)
+													</Label>
+													<Popover>
+														<PopoverTrigger asChild>
+															<Button
+																id="time"
+																variant="outline"
+																className={cn(
+																	'w-full justify-start text-left font-normal',
+																	!time && 'text-muted-foreground'
+																)}
+																disabled={isSubmitting}
+															>
+																<Clock className="mr-2 h-4 w-4" />
+																{time || 'Pick a time'}
+															</Button>
+														</PopoverTrigger>
+														<PopoverContent
+															className="w-auto p-4"
+															align="start"
+														>
+															<div className="space-y-4">
+																<div className="space-y-2">
+																	<Label
+																		htmlFor="time-input"
+																		className="text-sm"
+																	>
+																		Select Time
+																	</Label>
+																	<Input
+																		id="time-input"
+																		type="time"
+																		value={time}
+																		onChange={e => setTime(e.target.value)}
+																		className="w-full"
+																	/>
+																</div>
+															</div>
+														</PopoverContent>
+													</Popover>
+													<p className="text-xs text-muted-foreground">
+														Defaults to current time if not provided
+													</p>
+												</div>
+											</div>
+
+											<div className="space-y-2">
+												<Label htmlFor="description">
+													Description (Optional)
+												</Label>
+												<Textarea
+													id="description"
+													placeholder="Add any additional details..."
+													value={formData.description}
+													onChange={(
+														e: React.ChangeEvent<HTMLTextAreaElement>
+													) =>
+														setFormData({
+															...formData,
+															description: e.target.value,
+														})
+													}
+													maxLength={1000}
+													rows={3}
+													disabled={isSubmitting}
+												/>
+												<p className="text-xs text-muted-foreground">
+													{formData.description?.length || 0}/1000 characters
+												</p>
+											</div>
+										</AccordionContent>
+									</AccordionItem>
+								</Accordion>
+
+								{/* Action Buttons */}
+								<div className="flex justify-between items-center pt-6 mt-2 border-t">
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="button"
+													onClick={onClose}
+													className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+													disabled={isSubmitting}
+												>
+													<X
+														className="h-10 w-10 sm:h-11 sm:w-11"
+														strokeWidth={3}
+													/>
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Cancel</p>
+											</TooltipContent>
+										</Tooltip>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="submit"
+													className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+													disabled={isSubmitting}
+												>
+													<Check
+														className="h-10 w-10 sm:h-11 sm:w-11"
+														strokeWidth={3}
+													/>
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>
+													{isSubmitting
+														? 'Saving...'
+														: expense
+															? 'Update Expense'
+															: 'Add Expense'}
+												</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+								</div>
 							</div>
 						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="category">
-								Category <span className="text-red-500">*</span>
-							</Label>
-							<Combobox
-								options={categoryOptions}
-								value={formData.categoryId}
-								onValueChange={value => {
-									setFormData({ ...formData, categoryId: value });
-								}}
-								placeholder="Select a category"
-								searchPlaceholder="Search categories..."
-								emptyText="No category found."
-								disabled={isSubmitting}
-								onSearchChange={handleCategorySearch}
-								isLoading={isLoadingCategories}
-							/>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								onClick={() => navigate('/categories')}
-								className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
-							>
-								<Plus className="h-4 w-4 mr-2" />
-								Add New Category
-							</Button>
-						</div>
-
-						<Accordion
-							type="single"
-							collapsible
-							value={accordionValue}
-							onValueChange={setAccordionValue}
-							className="w-full"
-						>
-							<AccordionItem value="additional-details" className="border-none">
-								<AccordionTrigger className="hover:no-underline py-3">
-									<span className="text-sm font-medium">
-										Additional Details (Date, Time, Description)
-									</span>
-								</AccordionTrigger>
-								<AccordionContent className="space-y-4 pt-2">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div className="space-y-2">
-											<Label htmlFor="date" className="text-sm font-medium">
-												Date (Optional)
-											</Label>
-											<Popover>
-												<PopoverTrigger asChild>
-													<Button
-														id="date"
-														variant="outline"
-														className={cn(
-															'w-full justify-start text-left font-normal',
-															!selectedDate && 'text-muted-foreground'
-														)}
-														disabled={isSubmitting}
-													>
-														<Calendar className="mr-2 h-4 w-4" />
-														{selectedDate ? (
-															format(selectedDate, 'PPP')
-														) : (
-															<span>Pick a date</span>
-														)}
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-auto p-0" align="start">
-													<CalendarComponent
-														mode="single"
-														selected={selectedDate}
-														onSelect={setSelectedDate}
-														initialFocus
-													/>
-												</PopoverContent>
-											</Popover>
-											<p className="text-xs text-muted-foreground">
-												Defaults to current date if not provided
-											</p>
-										</div>
-
-										<div className="space-y-2">
-											<Label htmlFor="time" className="text-sm font-medium">
-												Time (Optional)
-											</Label>
-											<Popover>
-												<PopoverTrigger asChild>
-													<Button
-														id="time"
-														variant="outline"
-														className={cn(
-															'w-full justify-start text-left font-normal',
-															!time && 'text-muted-foreground'
-														)}
-														disabled={isSubmitting}
-													>
-														<Clock className="mr-2 h-4 w-4" />
-														{time || 'Pick a time'}
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-auto p-4" align="start">
-													<div className="space-y-4">
-														<div className="space-y-2">
-															<Label htmlFor="time-input" className="text-sm">
-																Select Time
-															</Label>
-															<Input
-																id="time-input"
-																type="time"
-																value={time}
-																onChange={e => setTime(e.target.value)}
-																className="w-full"
-															/>
-														</div>
-													</div>
-												</PopoverContent>
-											</Popover>
-											<p className="text-xs text-muted-foreground">
-												Defaults to current time if not provided
-											</p>
-										</div>
-									</div>
-
-									<div className="space-y-2">
-										<Label htmlFor="description">Description (Optional)</Label>
-										<Textarea
-											id="description"
-											placeholder="Add any additional details..."
-											value={formData.description}
-											onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-												setFormData({
-													...formData,
-													description: e.target.value,
-												})
-											}
-											maxLength={1000}
-											rows={3}
-											disabled={isSubmitting}
-										/>
-										<p className="text-xs text-muted-foreground">
-											{formData.description?.length || 0}/1000 characters
-										</p>
-									</div>
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
-
-						{/* Action Buttons */}
-						<div className="flex justify-between items-center pt-6 mt-2 border-t">
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											type="button"
-											onClick={onClose}
-											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-											disabled={isSubmitting}
-										>
-											<X
-												className="h-10 w-10 sm:h-11 sm:w-11"
-												strokeWidth={3}
-											/>
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>Cancel</p>
-									</TooltipContent>
-								</Tooltip>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											type="submit"
-											className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
-											disabled={isSubmitting}
-										>
-											<Check
-												className="h-10 w-10 sm:h-11 sm:w-11"
-												strokeWidth={3}
-											/>
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>
-											{isSubmitting
-												? 'Saving...'
-												: expense
-													? 'Update Expense'
-													: 'Add Expense'}
-										</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						</div>
-					</div>
+					</ScrollArea>
 				</form>
 			</DrawerContent>
 		</Drawer>
