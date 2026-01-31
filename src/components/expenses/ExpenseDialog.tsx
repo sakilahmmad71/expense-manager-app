@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { CategorySelect } from '@/components/ui/category-select';
 import {
-	Drawer,
-	DrawerContent,
-	DrawerHeader,
-	DrawerTitle,
-} from '@/components/ui/drawer';
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -45,19 +45,19 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface ExpenseDrawerProps {
+interface ExpenseDialogProps {
 	isOpen: boolean;
 	expense: Expense | null;
 	onClose: () => void;
 	onSuccess: () => void;
 }
 
-export const ExpenseDrawer = ({
+export const ExpenseDialog = ({
 	isOpen,
 	expense,
 	onClose,
 	onSuccess,
-}: ExpenseDrawerProps) => {
+}: ExpenseDialogProps) => {
 	const navigate = useNavigate();
 	const createExpense = useCreateExpense();
 	const updateExpense = useUpdateExpense();
@@ -173,6 +173,16 @@ export const ExpenseDrawer = ({
 		}
 	}, [isOpen, expense]);
 
+	// Ensure body scroll is restored when dialog closes (mobile fix)
+	useEffect(() => {
+		if (!isOpen) {
+			// Force restore scroll on mobile browsers
+			document.body.style.overflow = 'auto';
+			document.body.style.position = 'relative';
+			document.documentElement.style.overflow = 'auto';
+		}
+	}, [isOpen]);
+
 	// Load last selected category from localStorage when opening for new expense
 	useEffect(() => {
 		if (isOpen && !expense) {
@@ -221,11 +231,8 @@ export const ExpenseDrawer = ({
 	}, [isOpen, expense, selectedCurrency]);
 
 	// Accordion state for mobile/desktop default behavior
-	// On desktop, expand by default; on mobile, collapsed
-	const [accordionValue, setAccordionValue] = useState<string>(() => {
-		const mobile = window.innerWidth < 768; // md breakpoint
-		return mobile ? '' : 'additional-details';
-	});
+	// On mobile, collapsed by default
+	const [accordionValue, setAccordionValue] = useState<string>('');
 
 	const categoryOptions = categories.map(category => ({
 		value: category.id,
@@ -286,7 +293,7 @@ export const ExpenseDrawer = ({
 			// Wait for parent to refetch data (this now waits for actual refetch to complete)
 			await onSuccess();
 
-			// Close drawer after data is fully refreshed
+			// Close dialog after data is fully refreshed
 			onClose();
 		} catch (err: unknown) {
 			// Error handling is done in the mutation hooks
@@ -313,20 +320,17 @@ export const ExpenseDrawer = ({
 	};
 
 	return (
-		<Drawer open={isOpen} onOpenChange={handleOpenChange}>
-			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto max-h-[95vh] overflow-hidden flex flex-col">
-				<DrawerHeader className="border-b flex-shrink-0 sticky top-0 bg-background z-10">
-					<DrawerTitle className="text-2xl font-bold">
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+			<DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col p-0">
+				<DialogHeader className="border-b flex-shrink-0 px-6 pt-6 pb-4">
+					<DialogTitle className="text-2xl font-bold">
 						{localExpense ? 'Edit Expense' : 'Add New Expense'}
-					</DrawerTitle>
-				</DrawerHeader>
+					</DialogTitle>
+				</DialogHeader>
 
-				<form
-					onSubmit={handleSubmit}
-					className="flex flex-col flex-1 min-h-0 overflow-hidden"
-				>
-					<ScrollArea className="flex-1 overscroll-contain pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
-						<div className="p-6 space-y-4">
+				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+					<ScrollArea className="flex-1 px-6 overflow-y-auto">
+						<div className="py-6 space-y-4 pb-4">
 							{error && (
 								<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
 									{error}
@@ -547,7 +551,7 @@ export const ExpenseDrawer = ({
 								</Accordion>
 
 								{/* Action Buttons */}
-								<div className="flex justify-between items-center pt-6 mt-2 border-t">
+								<div className="flex justify-between items-center pt-6 mt-2 border-t pb-2">
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -596,7 +600,7 @@ export const ExpenseDrawer = ({
 						</div>
 					</ScrollArea>
 				</form>
-			</DrawerContent>
-		</Drawer>
+			</DialogContent>
+		</Dialog>
 	);
 };

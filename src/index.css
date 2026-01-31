@@ -67,6 +67,39 @@
 		scrollbar-gutter: stable;
 	}
 
+	/* Ensure body can scroll on mobile */
+	html,
+	body {
+		overflow-x: hidden;
+		overflow-y: auto !important; /* Force scroll to always be enabled */
+		-webkit-overflow-scrolling: touch;
+		height: 100%;
+		position: relative; /* Prevent fixed positioning issues */
+	}
+
+	/* Override Radix Dialog scroll lock on mobile */
+	@media (max-width: 768px) {
+		body[data-scroll-locked] {
+			overflow: auto !important;
+			overflow-y: auto !important;
+			position: relative !important;
+			width: auto !important;
+			padding-right: 0 !important;
+			margin-right: 0 !important;
+		}
+
+		/* Ensure main content area is scrollable */
+		html {
+			overflow-y: scroll !important;
+		}
+	}
+
+	#root {
+		min-height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
 	/* Fix vaul drawer height issue */
 	[data-vaul-drawer][data-vaul-drawer-direction='bottom']::after {
 		height: auto !important;

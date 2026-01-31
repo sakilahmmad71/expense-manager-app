@@ -15,7 +15,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// Note: avoid wrapping cmdk children in custom wrappers that alter
+// the expected DOM structure (cmdk manipulates child nodes).
 
 interface ComboboxOption {
 	value: string;
@@ -128,41 +129,34 @@ export function Combobox({
 						value={localSearch}
 						onValueChange={handleSearchChange}
 					/>
-					<CommandEmpty>{emptyText}</CommandEmpty>
-					<CommandList>
-						<ScrollArea className="h-60">
-							{isLoading && (
-								<div className="py-6 text-center text-sm text-muted-foreground">
-									Searching...
-								</div>
-							)}
-							{!isLoading && (
-								<>
-									{options.map(option => (
-										<CommandItem
-											key={option.value}
-											value={option.label}
-											keywords={[option.label, option.value]}
-											onSelect={() => {
-												onValueChange?.(option.value);
-												setOpen(false);
-											}}
-										>
-											<Check
-												className={cn(
-													'mr-2 h-4 w-4',
-													value === option.value ? 'opacity-100' : 'opacity-0'
-												)}
-											/>
-											<span className="flex items-center gap-2">
-												{option.icon && <span>{option.icon}</span>}
-												{option.label}
-											</span>
-										</CommandItem>
-									))}
-								</>
-							)}
-						</ScrollArea>
+					<CommandEmpty>{isLoading ? 'Searching...' : emptyText}</CommandEmpty>
+					<CommandList
+						className="max-h-60 overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin"
+						style={{ WebkitOverflowScrolling: 'touch' }}
+					>
+						{!isLoading &&
+							options.map(option => (
+								<CommandItem
+									key={option.value}
+									value={option.label}
+									keywords={[option.label, option.value]}
+									onSelect={() => {
+										onValueChange?.(option.value);
+										setOpen(false);
+									}}
+								>
+									<Check
+										className={cn(
+											'mr-2 h-4 w-4',
+											value === option.value ? 'opacity-100' : 'opacity-0'
+										)}
+									/>
+									<span className="flex items-center gap-2">
+										{option.icon && <span>{option.icon}</span>}
+										{option.label}
+									</span>
+								</CommandItem>
+							))}
 					</CommandList>
 				</Command>
 			</PopoverContent>
