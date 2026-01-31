@@ -7,6 +7,7 @@ import {
 	StatCard,
 } from '@/components/dashboard';
 import { ExpenseDrawer } from '@/components/expenses';
+import { ExpenseDialog } from '@/components/expenses/ExpenseDialog';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { Button } from '@/components/ui/button';
 import { DashboardSummary, Expense } from '@/lib/services';
@@ -24,6 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 // Lazy load chart components to reduce initial bundle size
 const MonthlyTrendsChart = lazy(() =>
@@ -73,6 +75,9 @@ export const DashboardPage = () => {
 	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
+
+	// Detect mobile vs desktop (md breakpoint = 768px)
+	const isDesktop = useMediaQuery('(min-width: 768px)');
 
 	// Set document title and meta description
 	useEffect(() => {
@@ -424,7 +429,7 @@ export const DashboardPage = () => {
 				</div>
 
 				{/* Expense Modal */}
-				{isModalOpen && (
+				{isModalOpen && isDesktop && (
 					<ExpenseDrawer
 						isOpen={isModalOpen}
 						expense={null}
@@ -436,7 +441,17 @@ export const DashboardPage = () => {
 					/>
 				)}
 
-				{/* Floating Action Button - Mobile Only */}
+				{isModalOpen && !isDesktop && (
+					<ExpenseDialog
+						isOpen={isModalOpen}
+						expense={null}
+						onClose={() => setIsModalOpen(false)}
+						onSuccess={() => {
+							setIsModalOpen(false);
+							navigate('/expenses');
+						}}
+					/>
+				)}
 				<button
 					onClick={() => setIsModalOpen(true)}
 					className="md:hidden fixed bottom-20 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"

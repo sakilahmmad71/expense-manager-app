@@ -6,6 +6,7 @@ import {
 	ExpenseDrawer,
 	ExpenseSearch,
 } from '@/components/expenses';
+import { ExpenseDialog } from '@/components/expenses/ExpenseDialog';
 import { ExpenseCardSkeleton } from '@/components/Skeletons';
 import { PageBreadcrumb } from '@/components/PageBreadcrumb';
 import { toast } from 'sonner';
@@ -20,6 +21,7 @@ import {
 	ExpensesData,
 } from '@/hooks/useExpenses';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export const ExpensesPage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +46,9 @@ export const ExpensesPage = () => {
 		startMonth: '',
 		endMonth: '',
 	});
+
+	// Detect mobile vs desktop (md breakpoint = 768px)
+	const isDesktop = useMediaQuery('(min-width: 768px)');
 
 	// Fetch expenses with React Query
 	const {
@@ -531,8 +536,17 @@ export const ExpensesPage = () => {
 				</div>
 			)}
 
-			{isModalOpen && (
+			{isModalOpen && isDesktop && (
 				<ExpenseDrawer
+					isOpen={isModalOpen}
+					expense={editingExpense}
+					onClose={closeModal}
+					onSuccess={handleDrawerSuccess}
+				/>
+			)}
+
+			{isModalOpen && !isDesktop && (
+				<ExpenseDialog
 					isOpen={isModalOpen}
 					expense={editingExpense}
 					onClose={closeModal}

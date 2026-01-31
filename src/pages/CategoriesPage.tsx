@@ -20,9 +20,11 @@ import {
 	CategoryDeleteDrawer,
 	CategoryDetailDrawer,
 } from '@/components/categories';
+import { CategoryDialog } from '@/components/categories/CategoryDialog';
 import type { Category, Expense } from '@/lib/services';
 import { useCategories, CategoriesData } from '@/hooks/useCategories';
 import { useExpenses } from '@/hooks/useExpenses';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export function CategoriesPage() {
 	const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +46,9 @@ export function CategoriesPage() {
 
 	// Currency state
 	const [primaryCurrency, setPrimaryCurrency] = useState('USD');
+
+	// Detect mobile vs desktop (md breakpoint = 768px)
+	const isDesktop = useMediaQuery('(min-width: 768px)');
 
 	// Fetch categories with React Query
 	const {
@@ -400,12 +405,23 @@ export function CategoriesPage() {
 			)}
 
 			{/* Category Modal */}
-			<CategoryDrawer
-				isOpen={isModalOpen}
-				category={selectedCategory}
-				onClose={handleModalClose}
-				onSuccess={handleModalSuccess}
-			/>
+			{isDesktop && (
+				<CategoryDrawer
+					isOpen={isModalOpen}
+					category={selectedCategory}
+					onClose={handleModalClose}
+					onSuccess={handleModalSuccess}
+				/>
+			)}
+
+			{!isDesktop && (
+				<CategoryDialog
+					isOpen={isModalOpen}
+					category={selectedCategory}
+					onClose={handleModalClose}
+					onSuccess={handleModalSuccess}
+				/>
+			)}
 
 			{/* Delete Dialog */}
 			<CategoryDeleteDrawer
