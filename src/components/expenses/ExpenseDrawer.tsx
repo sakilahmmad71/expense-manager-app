@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Combobox } from '@/components/ui/combobox';
+import { CategorySelect } from '@/components/ui/category-select';
 import {
 	Drawer,
 	DrawerContent,
@@ -40,7 +40,7 @@ import { useCategories, CategoriesData } from '@/hooks/useCategories';
 import { Expense, ExpenseInput } from '@/lib/services';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar, Check, Clock, Plus, X } from 'lucide-react';
+import { Calendar, Check, Clock, X } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -182,6 +182,43 @@ export const ExpenseDrawer = ({
 			}
 		}
 	}, [isOpen, expense]);
+
+	// Reset form data when editing an existing expense
+	useEffect(() => {
+		if (isOpen && expense) {
+			// const now = new Date();
+			let dateValue = '';
+
+			if (expense?.date) {
+				const expenseDate = new Date(expense.date);
+				const year = expenseDate.getFullYear();
+				const month = String(expenseDate.getMonth() + 1).padStart(2, '0');
+				const day = String(expenseDate.getDate()).padStart(2, '0');
+				dateValue = `${year}-${month}-${day}`;
+			}
+
+			setFormData({
+				title: expense?.title || '',
+				amount: expense?.amount || 0,
+				currency: expense?.currency || selectedCurrency,
+				categoryId: expense?.category
+					? typeof expense.category === 'string'
+						? expense.category
+						: expense.category.id
+					: '',
+				description: expense?.description || '',
+				date: dateValue,
+			});
+
+			if (expense?.date) {
+				const date = new Date(expense.date);
+				const hours = String(date.getHours()).padStart(2, '0');
+				const minutes = String(date.getMinutes()).padStart(2, '0');
+				setTime(`${hours}:${minutes}`);
+				setSelectedDate(new Date(expense.date));
+			}
+		}
+	}, [isOpen, expense, selectedCurrency]);
 
 	// Accordion state for mobile/desktop default behavior
 	// On desktop, expand by default; on mobile, collapsed
@@ -361,29 +398,18 @@ export const ExpenseDrawer = ({
 									<Label htmlFor="category">
 										Category <span className="text-red-500">*</span>
 									</Label>
-									<Combobox
+									<CategorySelect
 										options={categoryOptions}
 										value={formData.categoryId}
-										onValueChange={value => {
+										onValueChange={(value: string) => {
 											setFormData({ ...formData, categoryId: value });
 										}}
 										placeholder="Select a category"
-										searchPlaceholder="Search categories..."
-										emptyText="No category found."
 										disabled={isSubmitting}
 										onSearchChange={handleCategorySearch}
 										isLoading={isLoadingCategories}
+										onAddNew={() => navigate('/categories')}
 									/>
-									<Button
-										type="button"
-										variant="ghost"
-										size="sm"
-										onClick={() => navigate('/categories')}
-										className="w-full justify-start text-sm font-normal text-primary hover:text-primary hover:bg-primary/10 mt-1"
-									>
-										<Plus className="h-4 w-4 mr-2" />
-										Add New Category
-									</Button>
 								</div>
 
 								<Accordion
