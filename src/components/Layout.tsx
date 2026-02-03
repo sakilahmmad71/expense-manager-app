@@ -81,7 +81,7 @@ export const Layout = () => {
 			{/* Global Loading Bar */}
 			<GlobalLoadingBar />
 			{/* Header */}
-			<header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
+			<header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm safe-area-inset-top">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex justify-between items-center h-16">
 						{/* Logo */}
@@ -362,8 +362,8 @@ export const Layout = () => {
 			</footer>
 			{/* Mobile Bottom Navigation */}
 			<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 z-50 shadow-2xl">
-				<div className="safe-area-inset-bottom pb-2">
-					<div className="grid grid-cols-4 gap-1 px-1.5 py-1">
+				<div className="pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+					<div className="grid grid-cols-4 gap-1 px-1.5">
 						{navItems.map(item => (
 							<Link key={item.path} to={item.path}>
 								<button
