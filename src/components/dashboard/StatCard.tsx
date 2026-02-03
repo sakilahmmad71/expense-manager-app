@@ -34,7 +34,7 @@ export const StatCard = ({
 	const hasTooltip = fullValue && fullValue !== displayValue;
 
 	const valueElement = (
-		<div className="text-xl sm:text-2xl font-bold text-gray-900 truncate max-w-full">
+		<div className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 truncate max-w-full">
 			{displayValue}
 		</div>
 	);
@@ -48,7 +48,7 @@ export const StatCard = ({
 			}}
 		>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-				<CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
+				<CardTitle className="text-[10px] md:text-xs font-medium text-gray-600">
 					{title}
 				</CardTitle>
 				<div className={`p-2 sm:p-3 rounded-xl ${iconBg} shadow-sm`}>
@@ -69,7 +69,9 @@ export const StatCard = ({
 					valueElement
 				)}
 				{trend && (
-					<p className={`text-xs sm:text-sm font-medium mt-1 ${trendColor}`}>
+					<p
+						className={`text-[10px] md:text-xs font-medium mt-1 ${trendColor}`}
+					>
 						{trend} vs last month
 					</p>
 				)}

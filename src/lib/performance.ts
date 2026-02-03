@@ -46,7 +46,7 @@ export async function measureAsyncPerformance<T>(
 
 /**
  * Report Web Vitals metrics
- * Measures Core Web Vitals: LCP, FID, CLS
+ * Measures Core Web Vitals: LCP, INP, CLS
  * Note: Requires 'web-vitals' package to be installed
  * Run: pnpm add web-vitals
  */
@@ -55,12 +55,12 @@ export function reportWebVitals(onPerfEntry?: (metric: unknown) => void) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore - web-vitals is optional
 		import('web-vitals')
-			.then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-				getCLS(onPerfEntry);
-				getFID(onPerfEntry);
-				getFCP(onPerfEntry);
-				getLCP(onPerfEntry);
-				getTTFB(onPerfEntry);
+			.then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
+				onCLS(onPerfEntry);
+				onINP(onPerfEntry); // Replaced FID with INP in web-vitals v4+
+				onFCP(onPerfEntry);
+				onLCP(onPerfEntry);
+				onTTFB(onPerfEntry);
 			})
 			.catch(() => {
 				console.warn('web-vitals not installed. Run: pnpm add web-vitals');

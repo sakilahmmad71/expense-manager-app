@@ -18,7 +18,7 @@ export const RecentExpensesList = ({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-base sm:text-lg">Recent Expenses</CardTitle>
+				<CardTitle className="text-sm md:text-base">Recent Expenses</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-3">
@@ -45,12 +45,12 @@ export const RecentExpensesList = ({
 										style={{}}
 									/>
 									<div className="flex-1 min-w-0">
-										<h3 className="font-semibold text-base sm:text-lg truncate">
+										<h3 className="font-semibold text-sm md:text-base truncate">
 											{expense.title}
 										</h3>
-										<div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-1">
+										<div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[10px] md:text-xs text-gray-500 mt-1">
 											<span
-												className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+												className="inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-medium"
 												style={{
 													backgroundColor: expense.category.color
 														? `${expense.category.color}20`
@@ -64,12 +64,12 @@ export const RecentExpensesList = ({
 												{expense.category.name}
 											</span>
 											<span className="hidden sm:inline">•</span>
-											<span className="text-xs">
+											<span className="text-[10px] md:text-xs">
 												{formatDate(expense.date)}
 											</span>
 										</div>
 										{expense.description && (
-											<p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
+											<p className="text-[10px] md:text-xs text-gray-600 mt-1 line-clamp-2">
 												{expense.description}
 											</p>
 										)}
@@ -79,11 +79,11 @@ export const RecentExpensesList = ({
 								{/* Amount Display */}
 								<div className="text-left sm:text-right pl-4 sm:pl-0">
 									{/* Desktop: Full currency format */}
-									<p className="hidden sm:block text-lg sm:text-xl font-bold whitespace-nowrap">
+									<p className="hidden sm:block text-base md:text-lg font-bold whitespace-nowrap">
 										{formatCurrency(expense.amount, expense.currency)}
 									</p>
 									{/* Mobile: Symbol with amount */}
-									<p className="sm:hidden text-lg font-bold whitespace-nowrap">
+									<p className="sm:hidden text-sm font-bold whitespace-nowrap">
 										{formatCurrencySymbol(expense.currency)}
 										{expense.amount.toLocaleString('en-US', {
 											minimumFractionDigits: 2,

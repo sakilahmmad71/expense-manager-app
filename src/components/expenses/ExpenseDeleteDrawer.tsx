@@ -52,18 +52,18 @@ export const ExpenseDeleteDrawer = ({
 	return (
 		<Drawer open={open} onOpenChange={handleOpenChange}>
 			<DrawerContent className="sm:max-w-lg md:max-w-xl mx-auto">
-				<DrawerHeader className="border-b">
+				<DrawerHeader className="border-b px-4 md:px-6 pt-3 md:pt-4 pb-2 md:pb-3">
 					<div className="flex items-center gap-2">
-						<div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-							<AlertTriangle className="h-5 w-5 text-red-600" />
+						<div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-red-100 flex items-center justify-center">
+							<AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
 						</div>
-						<DrawerTitle className="text-red-600">
+						<DrawerTitle className="text-red-600 text-lg md:text-xl">
 							{isBulkDelete && expenseCount > 1
 								? 'Delete Multiple Expenses'
 								: 'Delete Expense'}
 						</DrawerTitle>
 					</div>
-					<DrawerDescription className="pt-2">
+					<DrawerDescription className="pt-2 text-xs md:text-sm">
 						{isBulkDelete ? (
 							<>
 								Are you sure you want to delete{' '}
@@ -84,13 +84,13 @@ export const ExpenseDeleteDrawer = ({
 						)}
 					</DrawerDescription>
 				</DrawerHeader>
-				<DrawerFooter className="px-4 sm:px-6 pb-6">
-					<div className="grid grid-cols-2 gap-4 w-full">
+				<DrawerFooter className="px-4 md:px-6 pb-4 md:pb-6">
+					<div className="grid grid-cols-2 gap-3 md:gap-4 w-full">
 						{/* Delete Button - Left */}
 						<Button
 							variant="destructive"
 							onClick={onConfirm}
-							className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+							className="w-full h-10 md:h-12 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
 						>
 							Delete {isBulkDelete && `(${expenseCount})`}
 						</Button>
@@ -98,7 +98,7 @@ export const ExpenseDeleteDrawer = ({
 						<Button
 							variant="outline"
 							onClick={onClose}
-							className="w-full h-12 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 bg-white"
+							className="w-full h-10 md:h-12 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 bg-white"
 						>
 							Cancel
 						</Button>
