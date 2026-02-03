@@ -1,6 +1,6 @@
 {
 	"name": "expense-manager-app",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A modern, fully responsive expense tracking application built with React, TypeScript, and TailwindCSS",
 	"type": "module",
 	"keywords": [
@@ -42,7 +42,10 @@
 		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
 		"clean": "rm -rf dist node_modules/.cache",
 		"test": "echo \"No tests specified\" && exit 0",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"version:major": "pnpm --no-git-tag-version version major",
+		"version:minor": "pnpm --no-git-tag-version version minor",
+		"version:patch": "pnpm --no-git-tag-version version patch"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
