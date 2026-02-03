@@ -19,7 +19,7 @@ import {
 	Receipt,
 	LogOut,
 	Tag,
-	Wallet,
+	WalletMinimal,
 	User,
 	ChevronDown,
 	Github,
@@ -90,7 +90,7 @@ export const Layout = () => {
 							className="flex items-center gap-3 group transition-all duration-200"
 						>
 							<div className="h-10 w-10 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
-								<Wallet className="h-6 w-6 text-white" />
+								<WalletMinimal className="h-6 w-6 text-white" />
 							</div>
 							<div className="hidden sm:block">
 								<h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
