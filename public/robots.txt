@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow authentication pages
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /auth/
+
+# Disallow user-specific pages
+Disallow: /dashboard
+Disallow: /expenses
+Disallow: /categories
+Disallow: /profile
+
+Sitemap: https://app.expenser.site/sitemap.xml

@@ -329,7 +329,7 @@ export const DashboardPage = () => {
 				>
 					{isFetching && (
 						<div className="absolute top-2 right-2 z-10">
-							<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+							<div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
 								<svg
 									className="animate-spin h-4 w-4"
 									xmlns="http://www.w3.org/2000/svg"

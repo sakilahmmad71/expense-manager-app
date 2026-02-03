@@ -443,7 +443,7 @@ export const ExpensesPage = () => {
 				<div id="expenses-filters" className="relative">
 					{isFetching && (
 						<div className="absolute top-2 right-2 z-10">
-							<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+							<div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
 								<svg
 									className="animate-spin h-4 w-4"
 									xmlns="http://www.w3.org/2000/svg"
@@ -519,12 +519,12 @@ export const ExpensesPage = () => {
 				>
 					<div className="bg-white text-gray-900 px-5 py-3 rounded-full shadow-lg border-2 border-gray-200">
 						<div className="flex items-center gap-3">
-							<span className="text-sm font-medium text-gray-700">
+							<span className="text-xs md:text-sm font-medium text-gray-700">
 								{selectedExpenses.length}{' '}
 								{selectedExpenses.length === 1 ? 'item' : 'items'} selected
 							</span>
 							<div className="h-4 w-px bg-gray-300" />
-							<span className="text-base font-bold text-gray-900">
+							<span className="text-sm md:text-base font-bold text-gray-900">
 								{getCurrencySymbol(selectedCurrency)}
 								{selectedExpensesTotal.toLocaleString('en-US', {
 									minimumFractionDigits: 2,

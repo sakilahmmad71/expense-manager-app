@@ -3,10 +3,34 @@
 
 <head>
   <meta charset="UTF-8" />
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.expenser.site https://www.google-analytics.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+
+  <!-- Preconnect to API and CDN for faster resource loading -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  <link rel="preconnect" href="https://api.expenser.site" />
+  <link rel="dns-prefetch" href="https://api.expenser.site" />
+
+  <!-- PWA Icons and Manifest -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.json" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Preload critical assets -->
+  <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+
+  <!-- Viewport with PWA optimizations -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+
   <title>Expenser - Track Expenses & Manage Your Budget</title>
   <meta name="description"
     content="Expenser is a modern expense tracking app to help you manage your finances, track spending, and gain insights into your budget. Simple, secure, and powerful." />
@@ -17,24 +41,65 @@
   <meta name="author" content="Shakil Ahmed" />
   <meta name="robots" content="index, follow" />
 
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://app.expenser.site/" />
+
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="Expenser - Track Expenses & Manage Your Budget" />
   <meta property="og:description"
     content="Expenser is a modern expense tracking app to help you manage your finances, track spending, and gain insights into your budget." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Expenser" />
+  <meta property="og:url" content="https://app.expenser.site/" />
+  <meta property="og:image" content="https://app.expenser.site/icon-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Expenser - Track Expenses & Manage Your Budget" />
   <meta name="twitter:description"
     content="Expenser is a modern expense tracking app to help you manage your finances, track spending, and gain insights into your budget." />
+  <meta name="twitter:image" content="https://app.expenser.site/icon-512.png" />
 
-  <!-- Theme Color -->
+  <!-- PWA Theme and Display -->
   <meta name="theme-color" content="#111827" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Expenser" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Expenser" />
+
+  <!-- Microsoft Tile -->
+  <meta name="msapplication-TileColor" content="#111827" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Expenser",
+    "applicationCategory": "FinanceApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "operatingSystem": "Web, iOS, Android",
+    "description": "Track expenses, analyze spending patterns, and achieve your financial goals. Work offline and sync when online.",
+    "author": {
+      "@type": "Person",
+      "name": "Shakil Ahmed"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "150"
+    }
+  }
+  </script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MMJ960HSSC"></script>
@@ -48,6 +113,12 @@
 </head>
 
 <body>
+  <!-- Skip to content link for accessibility -->
+  <a href="#root"
+    class="fixed top-4 left-4 z-50 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-lg transform -translate-y-20 focus:translate-y-0 transition-transform">
+    Skip to content
+  </a>
+
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

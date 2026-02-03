@@ -48,10 +48,10 @@ export const ExpenseCard = memo(
 						onClick={() => onView(expense)}
 						title="Click to view details"
 					>
-						<h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
+						<h3 className="font-semibold text-xs md:text-sm text-gray-900 truncate">
 							{expense.title}
 						</h3>
-						<div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mt-0.5">
+						<div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-500 mt-0.5">
 							<span className="truncate">
 								{expense.category?.name || 'Uncategorized'}
 							</span>
@@ -61,11 +61,11 @@ export const ExpenseCard = memo(
 					{/* Amount */}
 					<div className="flex-shrink-0 text-right">
 						{/* Desktop: Full currency format */}
-						<p className="hidden sm:block text-lg font-bold text-gray-900">
+						<p className="hidden sm:block text-base md:text-lg font-bold text-gray-900">
 							{formatCurrency(expense.amount, expense.currency)}
 						</p>
 						{/* Mobile: Symbol with amount */}
-						<p className="sm:hidden text-base font-bold text-gray-900">
+						<p className="sm:hidden text-sm font-bold text-gray-900">
 							{formatCurrencySymbol(expense.currency)}
 							{expense.amount.toLocaleString('en-US', {
 								minimumFractionDigits: 2,

@@ -33,7 +33,12 @@ export default defineConfig(({ mode }) => ({
 							id.includes('react-dom') ||
 							id.includes('react-router')
 						) {
-							return 'vendor';
+							return 'vendor-react';
+						}
+
+						// React Query
+						if (id.includes('@tanstack/react-query')) {
+							return 'vendor-query';
 						}
 
 						// ECharts - split into separate chunk for lazy loading
@@ -44,6 +49,11 @@ export default defineConfig(({ mode }) => ({
 						// Radix UI and Lucide icons
 						if (id.includes('@radix-ui') || id.includes('lucide-react')) {
 							return 'ui';
+						}
+
+						// Date libraries
+						if (id.includes('date-fns')) {
+							return 'vendor-dates';
 						}
 
 						// Other dependencies
@@ -57,18 +67,34 @@ export default defineConfig(({ mode }) => ({
 						if (id.includes('CategoryBreakdownChart')) return 'chart-breakdown';
 						if (id.includes('TopCategoriesChart')) return 'chart-top';
 					}
+
+					// Split pages into individual chunks (already lazy loaded)
+					if (id.includes('/pages/')) {
+						const pageName = id.match(/pages\/(.+?)\.tsx?/)?.[1];
+						if (pageName) return `page-${pageName.toLowerCase()}`;
+					}
 				},
 
 				// Optimize chunk naming for caching
-				chunkFileNames: 'assets/[name]-[hash].js',
+				chunkFileNames: 'assets/js/[name]-[hash].js',
+				entryFileNames: 'assets/js/[name]-[hash].js',
 
 				// Optimize asset naming
-				assetFileNames: 'assets/[name]-[hash].[ext]',
+				assetFileNames: assetInfo => {
+					const info = assetInfo.name?.split('.');
+					const ext = info?.[info.length - 1];
+					if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
+						return `assets/images/[name]-[hash][extname]`;
+					} else if (/woff2?|ttf|otf|eot/i.test(ext || '')) {
+						return `assets/fonts/[name]-[hash][extname]`;
+					}
+					return `assets/[name]-[hash][extname]`;
+				},
 			},
 		},
 
 		// Chunk size warning threshold
-		chunkSizeWarningLimit: 1000,
+		chunkSizeWarningLimit: 500,
 
 		// Enable source maps for better debugging in development
 		sourcemap: mode === 'development',
@@ -87,7 +113,10 @@ export default defineConfig(({ mode }) => ({
 		cssCodeSplit: true,
 
 		// Target modern browsers for smaller bundles
-		target: 'esnext',
+		target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+
+		// Enable compression
+		reportCompressedSize: true,
 	},
 
 	// Development optimizations

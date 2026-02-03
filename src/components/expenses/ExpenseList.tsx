@@ -165,11 +165,11 @@ export const ExpenseList = ({
 									/>
 									<label
 										htmlFor="select-all"
-										className="text-xs font-medium text-gray-700 cursor-pointer select-none whitespace-nowrap"
+										className="text-[10px] md:text-xs font-medium text-gray-700 cursor-pointer select-none whitespace-nowrap"
 									>
 										Select All
 										{selectedExpenses.length > 0 && (
-											<span className="ml-1 text-xs text-gray-500">
+											<span className="ml-1 text-[10px] md:text-xs text-gray-500">
 												({selectedExpenses.length})
 											</span>
 										)}
@@ -218,8 +218,10 @@ export const ExpenseList = ({
 					{expenses.length === 0 ? (
 						<div className="text-center py-12">
 							<Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-							<p className="text-gray-500 text-lg">No expenses found</p>
-							<p className="text-gray-400 text-sm mt-1">
+							<p className="text-gray-500 text-base md:text-lg">
+								No expenses found
+							</p>
+							<p className="text-gray-400 text-xs md:text-sm mt-1">
 								Try adjusting your filters or add a new expense
 							</p>
 						</div>
@@ -237,12 +239,11 @@ export const ExpenseList = ({
 										<div key={monthYear} className="space-y-3 sm:space-y-5">
 											{/* Month Header */}
 											<div className="flex items-center gap-2 pb-1 sm:pb-2">
-												<h3 className="text-sm font-semibold text-gray-700">
+												<h3 className="text-xs md:text-sm font-semibold text-gray-700">
 													{monthYear}
 												</h3>
 												<div className="flex-1 h-px bg-gray-200"></div>
-												<span className="text-xs text-gray-500">
-													{totalMonthExpenses} expense
+												<span className="text-[10px] md:text-xs text-gray-500">
 													{totalMonthExpenses !== 1 ? 's' : ''}
 												</span>
 											</div>
@@ -253,13 +254,11 @@ export const ExpenseList = ({
 													<div key={dateKey} className="space-y-2 sm:space-y-3">
 														{/* Date Header */}
 														<div className="flex items-center gap-2 pl-1 sm:pl-2">
-															<h4 className="text-xs font-medium text-gray-600">
+															<h4 className="text-[10px] md:text-xs font-medium text-gray-600">
 																{dateKey}
 															</h4>
 															<div className="flex-1 h-px bg-gray-100"></div>
-															<span className="text-xs text-gray-400">
-																{dateExpenses.length}
-															</span>
+															<span className="text-[10px] md:text-xs text-gray-400"></span>
 														</div>
 
 														{/* Expenses for this Date */}

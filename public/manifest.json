@@ -1,12 +1,14 @@
 {
 	"name": "Expenser - Expense Tracker",
 	"short_name": "Expenser",
-	"description": "Track expenses, analyze spending patterns, and achieve your financial goals",
+	"description": "Track expenses, analyze spending patterns, and achieve your financial goals. Work offline and sync when online.",
 	"start_url": "/",
+	"scope": "/",
 	"display": "standalone",
 	"background_color": "#ffffff",
 	"theme_color": "#111827",
 	"orientation": "portrait-primary",
+	"prefer_related_applications": false,
 	"icons": [
 		{
 			"src": "/icon-192.png",
@@ -28,6 +30,14 @@
 		}
 	],
 	"categories": ["finance", "productivity", "business"],
+	"screenshots": [
+		{
+			"src": "/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"form_factor": "narrow"
+		}
+	],
 	"shortcuts": [
 		{
 			"name": "Add Expense",
@@ -55,5 +65,6 @@
 				}
 			]
 		}
-	]
+	],
+	"related_applications": []
 }

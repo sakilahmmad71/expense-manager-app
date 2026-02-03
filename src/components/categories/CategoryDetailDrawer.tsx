@@ -100,10 +100,10 @@ export const CategoryDetailDrawer = ({
 								background: `linear-gradient(135deg, ${localCategory?.color || '#3b82f6'} 0%, ${localCategory?.color || '#3b82f6'}dd 100%)`,
 							}}
 						/>
-						<div className="relative px-4 sm:px-6 py-6 sm:py-8">
-							<div className="flex items-start justify-between mb-3 sm:mb-4">
+						<div className="relative px-4 md:px-6 py-4 md:py-6 lg:py-8">
+							<div className="flex items-start justify-between mb-2 md:mb-3 lg:mb-4">
 								<div
-									className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-lg"
+									className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 rounded-xl md:rounded-2xl flex items-center justify-center text-lg md:text-xl lg:text-2xl shadow-lg"
 									style={{
 										backgroundColor: localCategory?.color
 											? `${localCategory?.color}30`
@@ -113,7 +113,7 @@ export const CategoryDetailDrawer = ({
 									{localCategory?.icon || '📁'}
 								</div>
 								<div
-									className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm"
+									className="px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 lg:py-1.5 rounded-full text-[10px] md:text-xs font-semibold shadow-sm"
 									style={{
 										backgroundColor: localCategory?.color
 											? `${localCategory?.color}20`
@@ -124,14 +124,14 @@ export const CategoryDetailDrawer = ({
 									Category
 								</div>
 							</div>
-							<h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">
+							<h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-2 break-words">
 								{localCategory?.name}
 							</h2>
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl sm:text-4xl font-bold text-gray-900">
+								<span className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
 									{expenseCount}
 								</span>
-								<span className="text-sm text-gray-600">
+								<span className="text-xs md:text-sm text-gray-600">
 									{expenseCount === 1 ? 'expense' : 'expenses'}
 								</span>
 							</div>
@@ -139,7 +139,7 @@ export const CategoryDetailDrawer = ({
 					</div>
 
 					{/* Content */}
-					<div className="p-4 sm:p-6 space-y-3 sm:space-y-4 bg-gray-50">
+					<div className="p-3 md:p-4 lg:p-6 space-y-2 md:space-y-3 lg:space-y-4 bg-gray-50">
 						{/* Color Card */}
 						<CategoryInfoCard
 							icon={Package}
@@ -213,7 +213,7 @@ export const CategoryDetailDrawer = ({
 				</div>
 
 				{/* Footer with Actions */}
-				<DrawerFooter className="px-4 sm:px-6 pb-3 sm:pb-4 border-t flex-shrink-0 bg-background">
+				<DrawerFooter className="px-4 md:px-6 pb-2 md:pb-3 lg:pb-4 border-t flex-shrink-0 bg-background">
 					<TooltipProvider>
 						<div className="flex justify-between items-center">
 							{/* Delete Button - Left */}
@@ -222,9 +222,12 @@ export const CategoryDetailDrawer = ({
 									<Button
 										type="button"
 										onClick={() => localCategory && onDelete(localCategory)}
-										className="h-16 w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
+										className="h-12 w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border-2 border-red-500/30 hover:border-red-500/50 shadow-xl transition-all hover:scale-110"
 									>
-										<Trash2 className="h-11 w-11" strokeWidth={3} />
+										<Trash2
+											className="h-8 w-8 md:h-10 md:w-10 lg:h-11 lg:w-11"
+											strokeWidth={3}
+										/>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
@@ -238,9 +241,12 @@ export const CategoryDetailDrawer = ({
 									<Button
 										type="button"
 										onClick={() => localCategory && onEdit(localCategory)}
-										className="h-16 w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
+										className="h-12 w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-xl transition-all hover:scale-110"
 									>
-										<Edit className="h-11 w-11" strokeWidth={3} />
+										<Edit
+											className="h-8 w-8 md:h-10 md:w-10 lg:h-11 lg:w-11"
+											strokeWidth={3}
+										/>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
@@ -254,9 +260,12 @@ export const CategoryDetailDrawer = ({
 									<Button
 										type="button"
 										onClick={onClose}
-										className="h-16 w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 shadow-xl transition-all hover:scale-110"
+										className="h-12 w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 shadow-xl transition-all hover:scale-110"
 									>
-										<X className="h-11 w-11" strokeWidth={3} />
+										<X
+											className="h-8 w-8 md:h-10 md:w-10 lg:h-11 lg:w-11"
+											strokeWidth={3}
+										/>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>

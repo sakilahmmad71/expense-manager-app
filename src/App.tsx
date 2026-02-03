@@ -3,6 +3,8 @@ import { ProtectedRoute } from '@components/ProtectedRoute';
 import { ErrorBoundary } from '@components/ErrorBoundary';
 import { Toaster } from '@components/ui/sonner';
 import { NetworkStatusIndicator } from '@components/NetworkStatusIndicator';
+import { PWAInstallPrompt } from '@components/PWAInstallPrompt';
+import { PWAUpdatePrompt } from '@components/PWAUpdatePrompt';
 import { AuthProvider } from '@context/AuthContext';
 import { LoginPage } from '@pages/LoginPage';
 import { RegisterPage } from '@pages/RegisterPage';
@@ -103,6 +105,8 @@ function App() {
 				<AuthProvider>
 					<BrowserRouter>
 						<NetworkStatusIndicator />
+						<PWAUpdatePrompt />
+						<PWAInstallPrompt />
 						<Routes>
 							<Route path="/login" element={<LoginPage />} />
 							<Route path="/register" element={<RegisterPage />} />

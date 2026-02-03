@@ -255,7 +255,7 @@ export function CategoriesPage() {
 					<div className="flex flex-col sm:flex-row gap-3">
 						{isFetching && (
 							<div className="absolute top-2 right-2 z-10">
-								<div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
+								<div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-md border">
 									<svg
 										className="animate-spin h-4 w-4"
 										xmlns="http://www.w3.org/2000/svg"
@@ -288,7 +288,7 @@ export function CategoriesPage() {
 								placeholder="Search categories..."
 								value={searchTerm}
 								onChange={handleSearchChange}
-								className="pl-10 pr-10 h-10 text-sm"
+								className="pl-10 pr-10 h-10 text-xs md:text-sm"
 							/>
 							{searchTerm && (
 								<button
@@ -332,7 +332,7 @@ export function CategoriesPage() {
 			{/* Results count */}
 			{!loading && categories && (
 				<div className="mt-4 mb-4">
-					<p className="text-sm text-gray-600 dark:text-gray-400">
+					<p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
 						{searchTerm && filteredCategories.length !== categories.length
 							? `Showing ${filteredCategories.length} of ${categories.length} categories`
 							: `Showing ${categories.length} of ${totalCount} categories`}

@@ -39,12 +39,12 @@ export const CategoryCard = ({
 			</div>
 
 			{/* Category Name */}
-			<h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3 truncate">
+			<h3 className="text-xs md:text-sm font-semibold text-gray-900 mb-2 sm:mb-3 truncate">
 				{category.name}
 			</h3>
 
 			{/* Total Amount */}
-			<p className="text-lg sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+			<p className="text-base md:text-lg lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
 				{/* Desktop */}
 				<span className="hidden sm:inline">
 					{formatCurrency(category.totalAmount ?? 0, primaryCurrency)}
@@ -60,7 +60,7 @@ export const CategoryCard = ({
 			</p>
 
 			{/* Footer: Expense Count & Growth */}
-			<div className="flex items-center justify-between text-xs sm:text-sm mt-auto">
+			<div className="flex items-center justify-between text-[10px] md:text-xs mt-auto">
 				{/* Expense Count */}
 				<div className="flex items-center gap-1 sm:gap-1.5 text-gray-600">
 					<HandCoins className="h-3 w-3 sm:h-4 sm:w-4" />

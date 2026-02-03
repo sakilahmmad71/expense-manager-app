@@ -362,7 +362,7 @@ export const Layout = () => {
 			</footer>
 			{/* Mobile Bottom Navigation */}
 			<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 z-50 shadow-2xl">
-				<div className="safe-area-inset-bottom">
+				<div className="safe-area-inset-bottom pb-2">
 					<div className="grid grid-cols-4 gap-1 px-1.5 py-1">
 						{navItems.map(item => (
 							<Link key={item.path} to={item.path}>

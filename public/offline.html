@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Expenser</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+    }
+
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .icon svg {
+      width: 60px;
+      height: 60px;
+      stroke: white;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .icon {
+        width: 100px;
+        height: 100px;
+      }
+
+      .icon svg {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M1 1h15M1 7h15M1 13h15" />
+        <path d="M16 4l3 3l-3 3" />
+        <circle cx="12" cy="19" r="3" />
+      </svg>
+    </div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Some features may not be available until you're back online.
+    </p>
+    <a href="/" class="btn" onclick="window.location.reload(); return false;">Try Again</a>
+  </div>
+</body>
+
+</html>

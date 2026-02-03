@@ -192,22 +192,22 @@ export const CategoryDialog = ({
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col p-0">
-				<DialogHeader className="border-b flex-shrink-0 px-6 pt-6 pb-4">
-					<DialogTitle className="text-2xl font-bold">
+				<DialogHeader className="border-b flex-shrink-0 px-4 md:px-6 pt-3 md:pt-6 pb-2 md:pb-4">
+					<DialogTitle className="text-xl md:text-2xl font-bold">
 						{localCategory ? 'Edit Category' : 'Add New Category'}
 					</DialogTitle>
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-					<ScrollArea className="flex-1 px-6 overflow-y-auto">
-						<div className="py-6 space-y-4 pb-4">
+					<ScrollArea className="flex-1 px-4 md:px-6 overflow-y-auto">
+						<div className="py-3 md:py-6 space-y-3 md:space-y-4 pb-3 md:pb-4">
 							{error && (
 								<div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
 									{error}
 								</div>
 							)}
 
-							<div className="space-y-2">
+							<div className="space-y-1.5">
 								<Label htmlFor="name">
 									Category Name <span className="text-red-500">*</span>
 								</Label>
@@ -222,12 +222,12 @@ export const CategoryDialog = ({
 									required
 									disabled={isSubmitting}
 								/>
-								<p className="text-xs text-muted-foreground">
+								<p className="text-[10px] md:text-xs text-muted-foreground">
 									{formData.name.length}/100 characters
 								</p>
 							</div>
 
-							<div className="space-y-2">
+							<div className="space-y-1.5">
 								<Label htmlFor="color">
 									Color <span className="text-red-500">*</span>
 								</Label>
@@ -245,7 +245,7 @@ export const CategoryDialog = ({
 								</div>
 							</div>
 
-							<div className="space-y-2">
+							<div className="space-y-1.5">
 								<Label htmlFor="icon">Icon (Emoji)</Label>
 								<Input
 									id="icon"
@@ -258,13 +258,13 @@ export const CategoryDialog = ({
 									maxLength={2}
 									disabled={isSubmitting}
 								/>
-								<div className="grid grid-cols-8 gap-2 p-3 bg-gray-50 rounded-md max-h-48 overflow-y-auto">
+								<div className="grid grid-cols-8 gap-1.5 md:gap-2 p-2 md:p-3 bg-gray-50 rounded-md max-h-40 md:max-h-48 overflow-y-auto">
 									{commonEmojis.map(emoji => (
 										<button
 											key={emoji}
 											type="button"
 											onClick={() => setFormData({ ...formData, icon: emoji })}
-											className="text-2xl hover:bg-gray-200 rounded-md p-2 transition-colors"
+											className="text-xl md:text-2xl hover:bg-gray-200 rounded-md p-1.5 md:p-2 transition-colors"
 											disabled={isSubmitting}
 										>
 											{emoji}
@@ -274,18 +274,18 @@ export const CategoryDialog = ({
 							</div>
 
 							{/* Action Buttons */}
-							<div className="flex justify-between items-center pt-6 mt-2 border-t pb-2">
+							<div className="flex justify-between items-center pt-3 md:pt-6 mt-1 md:mt-2 border-t pb-1 md:pb-2">
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
 											<Button
 												type="button"
 												onClick={onClose}
-												className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+												className="h-12 w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 border-2 border-gray-500/30 hover:border-gray-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 												disabled={isSubmitting}
 											>
 												<X
-													className="h-10 w-10 sm:h-11 sm:w-11"
+													className="h-8 w-8 md:h-10 md:w-10 lg:h-11 lg:w-11"
 													strokeWidth={3}
 												/>
 											</Button>
@@ -298,11 +298,11 @@ export const CategoryDialog = ({
 										<TooltipTrigger asChild>
 											<Button
 												type="submit"
-												className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
+												className="h-12 w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 border-2 border-green-500/30 hover:border-green-500/50 backdrop-blur-sm shadow-xl transition-all hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
 												disabled={isSubmitting}
 											>
 												<Check
-													className="h-10 w-10 sm:h-11 sm:w-11"
+													className="h-8 w-8 md:h-10 md:w-10 lg:h-11 lg:w-11"
 													strokeWidth={3}
 												/>
 											</Button>
