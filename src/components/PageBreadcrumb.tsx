@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
 	Breadcrumb,
@@ -34,9 +35,9 @@ export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 					</BreadcrumbLink>
 				</BreadcrumbItem>
 				{items.map((item, index) => (
-					<>
-						<BreadcrumbSeparator key={`sep-${index}`} />
-						<BreadcrumbItem key={index}>
+					<React.Fragment key={index}>
+						<BreadcrumbSeparator />
+						<BreadcrumbItem>
 							{item.href ? (
 								<BreadcrumbLink asChild>
 									<Link
@@ -52,7 +53,7 @@ export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 								</BreadcrumbPage>
 							)}
 						</BreadcrumbItem>
-					</>
+					</React.Fragment>
 				))}
 			</BreadcrumbList>
 		</Breadcrumb>

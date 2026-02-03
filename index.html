@@ -6,11 +6,10 @@
 
   <!-- Security Headers -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.expenser.site https://www.google-analytics.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+  <!-- <meta http-equiv="Content-Security-Policy" -->
+  <!-- content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:* http://192.168.0.81:3000 https://api.expenser.site https://www.google-analytics.com; base-uri 'self'; form-action 'self';"> -->
 
   <!-- Preconnect to API and CDN for faster resource loading -->
   <link rel="preconnect" href="https://www.googletagmanager.com" />
