@@ -1,7 +1,7 @@
 // Service Worker for Expenser PWA
-// Version 1.0.0
+// Version 2.0.0 - Updated icons with new wallet design
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `expenser-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `expenser-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `expenser-images-${CACHE_VERSION}`;
