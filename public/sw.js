@@ -1,7 +1,7 @@
 // Service Worker for Expenser PWA
-// Version 2.0.0 - Updated icons with new wallet design
+// Version 2.1.0 - Updated icon configuration and optimized caching
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v2.1';
 const CACHE_NAME = `expenser-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `expenser-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `expenser-images-${CACHE_VERSION}`;
@@ -12,7 +12,8 @@ const PRECACHE_ASSETS = [
 	'/index.html',
 	'/offline.html',
 	'/favicon.svg',
-	'/apple-touch-icon.png',
+	'/favicon-32x32.png',
+	'/favicon-16x16.png',
 	'/icon-192.png',
 	'/icon-512.png',
 	'/manifest.json',
