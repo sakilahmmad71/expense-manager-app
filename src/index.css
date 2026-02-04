@@ -142,14 +142,4 @@
 	.safe-header {
 		padding-top: max(1rem, env(safe-area-inset-top));
 	}
-
-	/* For fixed bottom navigation - ensure proper spacing above home indicator */
-	.safe-bottom-nav {
-		padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-	}
-
-	/* iOS-specific bottom navigation - no safe area padding */
-	.safe-bottom-nav-ios {
-		padding-bottom: 0;
-	}
 }

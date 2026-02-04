@@ -267,7 +267,7 @@ export const Layout = () => {
 				</div>
 			</header>
 			{/* Main Content */}
-			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-[72px] md:pb-8">
+			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pb-8">
 				<Outlet />
 			</main>
 			{/* Footer - Hidden on mobile (bottom nav takes precedence) */}
@@ -361,8 +361,8 @@ export const Layout = () => {
 				</div>
 			</footer>
 			{/* Mobile Bottom Navigation */}
-			<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 z-50 shadow-2xl safe-bottom-nav-ios">
-				<div className="pt-1">
+			<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 z-50 shadow-2xl">
+				<div className="pt-1 pb-1">
 					<div className="grid grid-cols-4 gap-1 px-1.5">
 						{navItems.map(item => (
 							<Link key={item.path} to={item.path}>
