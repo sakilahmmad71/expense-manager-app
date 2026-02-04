@@ -75,6 +75,9 @@
 		-webkit-overflow-scrolling: touch;
 		height: 100%;
 		position: relative; /* Prevent fixed positioning issues */
+		/* Prevent iOS from adding extra padding at bottom */
+		-webkit-user-select: none;
+		user-select: none;
 	}
 
 	/* Override Radix Dialog scroll lock on mobile */
@@ -143,5 +146,10 @@
 	/* For fixed bottom navigation - ensure proper spacing above home indicator */
 	.safe-bottom-nav {
 		padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+	}
+
+	/* iOS-specific bottom navigation - no safe area padding */
+	.safe-bottom-nav-ios {
+		padding-bottom: 0;
 	}
 }
