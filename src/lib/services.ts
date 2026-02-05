@@ -74,6 +74,45 @@ export interface DashboardSummary {
 	_links?: HateoasLink[];
 }
 
+export interface Budget {
+	id: string;
+	amount: number;
+	currency: string;
+	period: 'monthly' | 'yearly';
+	month?: number;
+	year: number;
+	name?: string;
+	userId: string;
+	alertAt80: boolean;
+	alertAt100: boolean;
+	notes?: string;
+	createdAt: string;
+	updatedAt: string;
+	categories?: {
+		id: string;
+		budgetId: string;
+		categoryId: string;
+		category: Category;
+	}[];
+	spent?: number;
+	percentage?: number;
+	remaining?: number;
+	_links?: HateoasLink[];
+}
+
+export interface BudgetInput {
+	amount: number;
+	currency: string;
+	period: 'monthly' | 'yearly';
+	month?: number;
+	year: number;
+	categoryIds?: string[];
+	name?: string;
+	alertAt80: boolean;
+	alertAt100: boolean;
+	notes?: string;
+}
+
 // Auth API
 export const authAPI = {
 	register: (data: RegisterData) => api.post('/auth/register', data),
@@ -145,4 +184,28 @@ export const dashboardAPI = {
 		startDate?: string;
 		endDate?: string;
 	}) => api.get('/dashboard/recent-expenses', { params }),
+};
+
+// Budget API
+export const budgetAPI = {
+	getAll: (params?: {
+		page?: number;
+		limit?: number;
+		period?: 'monthly' | 'yearly';
+		year?: number;
+		month?: number;
+		categoryId?: string;
+		sortBy?: string;
+		sortOrder?: 'asc' | 'desc';
+	}) => api.get('/budgets', { params }),
+	getById: (id: string) => api.get(`/budgets/${id}`),
+	getStatus: (params?: {
+		year?: number;
+		month?: number;
+		categoryId?: string;
+	}) => api.get('/budgets/status', { params }),
+	create: (data: BudgetInput) => api.post('/budgets', data),
+	update: (id: string, data: Partial<BudgetInput>) =>
+		api.put(`/budgets/${id}`, data),
+	delete: (id: string) => api.delete(`/budgets/${id}`),
 };

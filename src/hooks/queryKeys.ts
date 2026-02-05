@@ -30,3 +30,14 @@ export const userKeys = {
 	all: ['user'] as const,
 	profile: () => [...userKeys.all, 'profile'] as const,
 };
+
+export const budgetKeys = {
+	all: ['budgets'] as const,
+	lists: () => [...budgetKeys.all, 'list'] as const,
+	list: (filters: Record<string, unknown>) =>
+		[...budgetKeys.lists(), filters] as const,
+	details: () => [...budgetKeys.all, 'detail'] as const,
+	detail: (id: string) => [...budgetKeys.details(), id] as const,
+	status: (filters: Record<string, unknown>) =>
+		[...budgetKeys.all, 'status', filters] as const,
+};
