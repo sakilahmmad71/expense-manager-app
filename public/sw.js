@@ -29,7 +29,7 @@ self.addEventListener('install', event => {
 				console.log('[SW] Precaching app shell');
 				return cache.addAll(PRECACHE_ASSETS);
 			})
-			.then(() => self.skipWaiting())
+		// Don't auto-skip waiting - let the user decide via the update prompt
 	);
 });
 
