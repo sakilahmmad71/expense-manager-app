@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Global flag to prevent multiple reloads (using sessionStorage to persist across page loads)
+const RELOAD_KEY = 'sw-reload-in-progress';
+const CONTROLLER_CHANGE_LISTENER_ADDED = 'sw-controller-listener-added';
+
 export const PWAUpdatePrompt = () => {
 	const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 	const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(
@@ -14,8 +18,15 @@ export const PWAUpdatePrompt = () => {
 			return;
 		}
 
-		// Listen for service worker updates
+		// Check if there's already a waiting service worker
 		navigator.serviceWorker.ready.then(registration => {
+			if (registration.waiting && navigator.serviceWorker.controller) {
+				// There's already a waiting worker
+				setWaitingWorker(registration.waiting);
+				setShowUpdatePrompt(true);
+			}
+
+			// Listen for new service worker updates
 			registration.addEventListener('updatefound', () => {
 				const newWorker = registration.installing;
 
@@ -34,14 +45,24 @@ export const PWAUpdatePrompt = () => {
 			});
 		});
 
-		// Listen for controlling service worker changes
-		let refreshing = false;
-		navigator.serviceWorker.addEventListener('controllerchange', () => {
-			if (!refreshing) {
-				refreshing = true;
+		// Only add controllerchange listener once globally
+		if (!sessionStorage.getItem(CONTROLLER_CHANGE_LISTENER_ADDED)) {
+			sessionStorage.setItem(CONTROLLER_CHANGE_LISTENER_ADDED, 'true');
+
+			navigator.serviceWorker.addEventListener('controllerchange', () => {
+				// Check if reload is already in progress
+				if (sessionStorage.getItem(RELOAD_KEY)) {
+					return;
+				}
+
+				// Set flag and reload
+				sessionStorage.setItem(RELOAD_KEY, 'true');
 				window.location.reload();
-			}
-		});
+			});
+		}
+
+		// Clear reload flag on successful mount
+		sessionStorage.removeItem(RELOAD_KEY);
 	}, []);
 
 	const handleUpdate = () => {

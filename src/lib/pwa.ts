@@ -18,15 +18,21 @@ export const registerServiceWorker = async () => {
 
 		// Service worker registered successfully
 
-		// Check for updates on page load
-		registration.update();
+		// Only check for updates on page load if it's been more than 5 minutes since last check
+		const lastUpdateCheck = sessionStorage.getItem('sw-last-update-check');
+		const now = Date.now();
+		if (!lastUpdateCheck || now - parseInt(lastUpdateCheck) > 5 * 60 * 1000) {
+			registration.update();
+			sessionStorage.setItem('sw-last-update-check', now.toString());
+		}
 
-		// Check for updates periodically (every hour)
+		// Check for updates periodically (every 4 hours instead of every hour)
 		setInterval(
 			() => {
 				registration.update();
+				sessionStorage.setItem('sw-last-update-check', Date.now().toString());
 			},
-			60 * 60 * 1000
+			4 * 60 * 60 * 1000
 		);
 
 		// Listen for waiting service worker
