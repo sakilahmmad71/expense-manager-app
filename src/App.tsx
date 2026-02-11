@@ -33,11 +33,11 @@ const CategoriesPage = lazy(() =>
 		default: module.CategoriesPage,
 	}))
 );
-const BudgetsPage = lazy(() =>
-	import('@pages/BudgetsPage').then(module => ({
-		default: module.BudgetsPage,
-	}))
-);
+// const BudgetsPage = lazy(() =>
+// 	import('@pages/BudgetsPage').then(module => ({
+// 		default: module.BudgetsPage,
+// 	}))
+// );
 const ProfilePage = lazy(() =>
 	import('@pages/ProfilePage').then(module => ({ default: module.ProfilePage }))
 );
@@ -176,14 +176,14 @@ function App() {
 										</Suspense>
 									}
 								/>
-								<Route
+								{/* <Route
 									path="budgets"
 									element={
 										<Suspense fallback={<PageLoader />}>
 											<BudgetsPage />
 										</Suspense>
 									}
-								/>
+								/> */}
 								<Route
 									path="profile"
 									element={

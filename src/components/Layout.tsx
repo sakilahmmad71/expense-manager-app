@@ -27,7 +27,7 @@ import {
 	Facebook,
 	Heart,
 	Code,
-	TrendingDown,
+	// TrendingDown,
 } from 'lucide-react';
 
 export const Layout = () => {
@@ -70,11 +70,11 @@ export const Layout = () => {
 			label: 'Categories',
 			prefetch: prefetchCategories,
 		},
-		{
-			path: '/budgets',
-			icon: TrendingDown,
-			label: 'Budgets',
-		},
+		// {
+		// 	path: '/budgets',
+		// 	icon: TrendingDown,
+		// 	label: 'Budgets',
+		// },
 		{
 			path: '/profile',
 			icon: User,
