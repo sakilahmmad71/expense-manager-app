@@ -138,7 +138,7 @@ Handles the OAuth callback after successful Google authentication.
 Required environment variable in `.env`:
 
 ```env
-VITE_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3001/api/v1
 ```
 
 ## Backend Dependencies

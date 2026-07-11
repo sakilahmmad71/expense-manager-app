@@ -222,7 +222,7 @@ export const BudgetDialog = ({
 			<DialogContent className="max-h-[95vh] max-w-md overflow-hidden flex flex-col">
 				<DialogHeader className="border-b pb-3">
 					<DialogTitle className="text-xl font-bold">
-						{isEditing ? 'Edit Budget' : 'Create New Budget'}
+						{isEditing ? 'Edit Budget' : 'Add New Budget'}
 					</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">

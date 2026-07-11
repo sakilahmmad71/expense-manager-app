@@ -317,7 +317,7 @@ Environment-specific settings:
 
 ```bash
 # Development
-VITE_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3001/api/v1
 
 # Production
 VITE_API_URL=https://api.production.com/api/v1

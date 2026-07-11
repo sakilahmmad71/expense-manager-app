@@ -306,19 +306,14 @@ export function BudgetsPage() {
 				className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 mt-6"
 			>
 				<div>
-					<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-						Budgets
-					</h1>
-					<p className="text-sm text-gray-600">
+					<h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
+					<p className="text-muted-foreground mt-1">
 						Track and manage your spending limits
 					</p>
 				</div>
-				<Button
-					onClick={handleCreateBudget}
-					className="w-full sm:w-auto bg-primary hover:bg-primary/90 shadow-md"
-				>
+				<Button onClick={handleCreateBudget} className="w-full sm:w-auto">
 					<Plus className="h-4 w-4 mr-2" />
-					Create Budget
+					Add Budget
 				</Button>
 			</div>
 
@@ -597,10 +592,6 @@ export function BudgetsPage() {
 					</div>
 				</div>
 			)}
-
-			{/* TODO: Add Budget Drawer/Dialog components */}
-			{/* TODO: Add Budget Delete Drawer component */}
-			{/* TODO: Add Budget Detail Drawer component */}
 
 			{/* Budget Create/Edit Modal */}
 			{isDesktop ? (

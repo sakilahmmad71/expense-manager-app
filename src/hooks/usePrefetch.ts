@@ -3,7 +3,13 @@ import { useEffect } from 'react';
 import { expenseKeys } from './useExpenses';
 import { categoryKeys } from './useCategories';
 import { dashboardKeys } from './useDashboard';
-import { expenseAPI, categoryAPI, dashboardAPI } from '@/lib/services';
+import { budgetKeys } from './queryKeys';
+import {
+	expenseAPI,
+	categoryAPI,
+	dashboardAPI,
+	budgetAPI,
+} from '@/lib/services';
 
 export const usePrefetchData = () => {
 	const queryClient = useQueryClient();
@@ -38,12 +44,23 @@ export const usePrefetchData = () => {
 			});
 		};
 
+		// Prefetch budgets for faster budget page load
+		const prefetchBudgets = () => {
+			queryClient.prefetchQuery({
+				queryKey: budgetKeys.list({ page: 1, limit: 20 }),
+				queryFn: () =>
+					budgetAPI.getAll({ page: 1, limit: 20 }).then(res => res.data),
+				staleTime: 1000 * 60 * 2, // 2 minutes
+			});
+		};
+
 		// Prefetch after a short delay to avoid blocking initial render
 		const timeoutId = setTimeout(() => {
 			if (localStorage.getItem('token')) {
 				prefetchDashboard();
 				prefetchCategories();
 				prefetchExpenses();
+				prefetchBudgets();
 			}
 		}, 1000); // 1 second delay
 
@@ -78,9 +95,18 @@ export const usePrefetchOnHover = () => {
 		});
 	};
 
+	const prefetchBudgets = () => {
+		queryClient.prefetchQuery({
+			queryKey: budgetKeys.list({ page: 1, limit: 20 }),
+			queryFn: () =>
+				budgetAPI.getAll({ page: 1, limit: 20 }).then(res => res.data),
+		});
+	};
+
 	return {
 		prefetchDashboard,
 		prefetchExpenses,
 		prefetchCategories,
+		prefetchBudgets,
 	};
 };
