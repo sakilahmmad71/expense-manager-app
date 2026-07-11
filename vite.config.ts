@@ -134,7 +134,7 @@ export default defineConfig(({ mode }) => ({
 
 	// Server configuration for development
 	server: {
-		port: 5173,
+		port: 5174,
 		host: true,
 		hmr: {
 			overlay: true, // Show error overlay for development

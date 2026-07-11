@@ -26,7 +26,7 @@ expense-manager-app/
 ### .env (Development)
 
 ```env
-VITE_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3001/api/v1
 ```
 
 ### .env.production (Production)
@@ -46,7 +46,7 @@ VITE_ENABLE_ANALYTICS=false
 
 - Hot reload enabled
 - Vite dev server
-- Port 5173
+- Port 5174
 - Volume mounted for live code changes
 
 ### Production Image

@@ -27,7 +27,7 @@ import {
 	Facebook,
 	Heart,
 	Code,
-	// TrendingDown,
+	TrendingDown,
 } from 'lucide-react';
 
 export const Layout = () => {
@@ -35,8 +35,12 @@ export const Layout = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [commandOpen, setCommandOpen] = useState(false);
-	const { prefetchDashboard, prefetchExpenses, prefetchCategories } =
-		usePrefetchOnHover();
+	const {
+		prefetchDashboard,
+		prefetchExpenses,
+		prefetchCategories,
+		prefetchBudgets,
+	} = usePrefetchOnHover();
 
 	// Monitor network status
 	useNetworkStatus();
@@ -65,16 +69,17 @@ export const Layout = () => {
 			prefetch: prefetchExpenses,
 		},
 		{
+			path: '/budgets',
+			icon: TrendingDown,
+			label: 'Budgets',
+			prefetch: prefetchBudgets,
+		},
+		{
 			path: '/categories',
 			icon: Tag,
 			label: 'Categories',
 			prefetch: prefetchCategories,
 		},
-		// {
-		// 	path: '/budgets',
-		// 	icon: TrendingDown,
-		// 	label: 'Budgets',
-		// },
 		{
 			path: '/profile',
 			icon: User,

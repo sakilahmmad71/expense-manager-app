@@ -7,7 +7,7 @@ This document describes the API endpoints used by the Expenser App frontend.
 The API base URL is configured via environment variable:
 
 ```env
-VITE_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3001/api/v1
 ```
 
 ## Authentication

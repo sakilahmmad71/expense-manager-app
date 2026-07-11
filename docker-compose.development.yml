@@ -8,10 +8,10 @@ services:
       - .env
     restart: unless-stopped
     ports:
-      - "${PORT:-5173}:5173"
+      - "${PORT:-5174}:5174"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:3000/api/v1}
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3001/api/v1}
     volumes:
       - ./src:/app/src
       - ./public:/app/public

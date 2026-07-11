@@ -7,7 +7,6 @@ This guide will help you set up the Expenser App for local development.
 ### Required Software
 
 - **Node.js 18+** (recommended: 20 LTS)
-
   - Download from [nodejs.org](https://nodejs.org/)
   - Verify: `node --version`
 
@@ -58,7 +57,7 @@ nano .env  # or use your preferred editor
 Configure the following variables:
 
 ```env
-VITE_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3001/api/v1
 ```
 
 ### 4. Start Development Server
@@ -67,11 +66,11 @@ VITE_API_URL=http://localhost:3000/api/v1
 pnpm dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5174`
 
 ### 5. Verify Setup
 
-1. Open `http://localhost:5173` in your browser
+1. Open `http://localhost:5174` in your browser
 2. You should see the login page
 3. Try creating an account (requires backend API running)
 
@@ -90,7 +89,7 @@ The frontend requires the backend API to function properly.
 
 2. Follow the backend setup instructions in that repository
 
-3. Ensure the backend is running on `http://localhost:3000`
+3. Ensure the backend is running on `http://localhost:3001`
 
 ### Option 2: Docker Compose (All Services)
 
@@ -167,11 +166,11 @@ make dev-rebuild
 #### Port Already in Use
 
 ```bash
-# Kill process on port 5173
-npx kill-port 5173
+# Kill process on port 5174
+npx kill-port 5174
 
 # Or use a different port
-pnpm dev --port 3001
+pnpm dev --port 3002
 ```
 
 #### Node Version Issues
